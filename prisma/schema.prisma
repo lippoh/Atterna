@@ -1,0 +1,162 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String       @id @default(cuid())
+  email         String       @unique
+  emailVerified DateTime?
+  passwordHash  String?
+  locale        String       @default("EL")
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  memberships   Membership[]
+  auditLogs     AuditLog[]   @relation("actor")
+}
+
+model Organization {
+  id               String       @id @default(cuid())
+  name             String
+  stripeCustomerId String?      @unique
+  subscription     Subscription?
+  memberships      Membership[]
+  businesses       Business[]
+  auditLogs        AuditLog[]
+}
+
+model Membership {
+  id             String       @id @default(cuid())
+  userId         String
+  organizationId String
+  role           String       @default("OWNER")
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
+}
+
+model Business {
+  id               String           @id @default(cuid())
+  organizationId   String
+  organization     Organization     @relation(fields: [organizationId], references: [id])
+  name             String
+  category         String
+  city             String
+  region           String?
+  countryCode      String           @default("GR")
+  phone            String?
+  website          String?
+  locale           String           @default("EL")
+  timezone         String           @default("Europe/Athens")
+  currency         String           @default("EUR")
+  gbpConnection    GbpConnection?
+  reviews          Review[]
+  feedbackRequests FeedbackRequest[]
+  aiSettings       Json?
+  deletedAt        DateTime?
+  createdAt        DateTime         @default(now())
+
+  @@index([organizationId])
+}
+
+model GbpConnection {
+  id              String   @id @default(cuid())
+  businessId      String   @unique
+  business        Business @relation(fields: [businessId], references: [id])
+  accountName     String
+  locationName    String
+  locationId      String
+  accessTokenEnc  String
+  refreshTokenEnc String
+  tokenExpiresAt  DateTime
+  scope           String
+  status          String   @default("ACTIVE")
+  lastSyncAt      DateTime?
+  lastSyncError   String?
+}
+
+model Review {
+  id                String          @id @default(cuid())
+  organizationId    String
+  businessId        String
+  business          Business        @relation(fields: [businessId], references: [id])
+  source            String
+  externalId        String?
+  rating            Int
+  text              String?
+  language          String?
+  reviewerName      String?
+  createdOnPlatform DateTime?
+  receivedAt        DateTime        @default(now())
+  analysis          ReviewAnalysis?
+  drafts            ResponseDraft[]
+
+  @@unique([businessId, source, externalId])
+  @@index([businessId, receivedAt])
+  @@index([organizationId, receivedAt])
+}
+
+model ReviewAnalysis {
+  id            String   @id @default(cuid())
+  reviewId      String   @unique
+  review        Review   @relation(fields: [reviewId], references: [id])
+  sentiment     String
+  urgency       String   @default("LOW")
+  language      String
+  topics        String[] @default([])
+  complaints    Json
+  compliments   Json
+  actionable    Boolean  @default(false)
+  promptVersion String
+  model         String
+  tokensIn      Int      @default(0)
+  tokensOut     Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  @@index([reviewId, createdAt])
+}
+
+model AuditLog {
+  id             String        @id @default(cuid())
+  actorId        String?
+  organizationId String?
+  action         String
+  details        Json?
+  createdAt      DateTime      @default(now())
+  actor          User?         @relation("actor", fields: [actorId], references: [id])
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+}
+
+model Subscription {
+  id                   String       @id @default(cuid())
+  organizationId       String       @unique
+  organization         Organization @relation(fields: [organizationId], references: [id])
+  status               String       @default("TRIALING")
+  plan                 String
+  currentPeriodEnd     DateTime?
+  stripeSubscriptionId String?
+}
+
+model FeedbackRequest {
+  id            String   @id @default(cuid())
+  businessId    String
+  business      Business @relation(fields: [businessId], references: [id])
+  customerEmail String
+  status        String   @default("PENDING")
+  createdAt     DateTime @default(now())
+}
+
+model ResponseDraft {
+  id        String      @id @default(cuid())
+  reviewId  String
+  review    Review      @relation(fields: [reviewId], references: [id])
+  content   String
+  status    String      @default("DRAFT")
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
