@@ -1,6 +1,6 @@
 // tests/integration/tenant-isolation.test.ts — the loud fence
 import { describe, it, expect, beforeAll } from "vitest";
-import { prisma, resetTestDb } from "./helpers";
+import { prisma, resetTestDb, requireOrgWithBusiness, seedTwoOrgs } from "./helpers";
 import { getDashboardMetrics } from "@/lib/metrics";
 beforeAll(resetTestDb); // migrates a fresh Neon branch
 describe("tenant isolation", () => {

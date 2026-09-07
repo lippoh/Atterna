@@ -85,8 +85,8 @@ export async function completeObject<T>(opts: {
       );
       return {
         data: object,
-        tokensIn: usage?.promptTokens ?? 0,
-        tokensOut: usage?.completionTokens ?? 0,
+        tokensIn: usage?.inputTokens ?? 0,
+        tokensOut: usage?.outputTokens ?? 0,
         model: response.modelId,
       };
     } catch (err) {

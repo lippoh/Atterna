@@ -2,6 +2,12 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum Sentiment {
+  POSITIVE
+  NEUTRAL
+  NEGATIVE
+}
+
 datasource db {
   provider = "postgresql"
 }
@@ -12,6 +18,8 @@ model User {
   emailVerified DateTime?
   passwordHash  String?
   locale        String       @default("EL")
+  isAdmin       Boolean      @default(false)
+  passwordChangedAt DateTime?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   memberships   Membership[]
@@ -57,6 +65,7 @@ model Business {
   gbpConnection    GbpConnection?
   reviews          Review[]
   feedbackRequests FeedbackRequest[]
+  feedbackSubmissions FeedbackSubmission[]
   aiSettings       Json?
   deletedAt        DateTime?
   createdAt        DateTime         @default(now())
@@ -93,6 +102,9 @@ model Review {
   reviewerName      String?
   createdOnPlatform DateTime?
   receivedAt        DateTime        @default(now())
+  createdAt         DateTime        @default(now())
+  repliedAt         DateTime?
+  deletedAt         DateTime?
   analysis          ReviewAnalysis?
   drafts            ResponseDraft[]
 
@@ -105,7 +117,7 @@ model ReviewAnalysis {
   id            String   @id @default(cuid())
   reviewId      String   @unique
   review        Review   @relation(fields: [reviewId], references: [id])
-  sentiment     String
+  sentiment     Sentiment
   urgency       String   @default("LOW")
   language      String
   topics        String[] @default([])
@@ -124,6 +136,10 @@ model ReviewAnalysis {
 model AuditLog {
   id             String        @id @default(cuid())
   actorId        String?
+  actorUserId    String?
+  entity         String?
+  entityId       String?
+  ip             String?
   organizationId String?
   action         String
   details        Json?
@@ -137,26 +153,124 @@ model Subscription {
   organizationId       String       @unique
   organization         Organization @relation(fields: [organizationId], references: [id])
   status               String       @default("TRIALING")
-  plan                 String
+  plan                 String @default("STARTER")
+  planKey              String       @default("STARTER")
   currentPeriodEnd     DateTime?
-  stripeSubscriptionId String?
+  stripeSubscriptionId String? @unique
+  canceledAt           DateTime?
+  cancelAtPeriodEnd    Boolean @default(false)
+  accessEndsAt         DateTime?
 }
 
 model FeedbackRequest {
   id            String   @id @default(cuid())
   businessId    String
   business      Business @relation(fields: [businessId], references: [id])
-  customerEmail String
+  token         String   @unique
+  label         String?
+  active        Boolean  @default(true)
+  customerEmail String   @default("")
   status        String   @default("PENDING")
   createdAt     DateTime @default(now())
+  submissions   FeedbackSubmission[]
+}
+
+model FeedbackSubmission {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id])
+  requestId  String?
+  feedbackRequestId String
+  feedbackRequest FeedbackRequest @relation(fields: [feedbackRequestId], references: [id])
+  organizationId String
+  rating     Int
+  comment    String?
+  ipHash     String?
+  createdAt  DateTime @default(now())
 }
 
 model ResponseDraft {
   id        String      @id @default(cuid())
   reviewId  String
   review    Review      @relation(fields: [reviewId], references: [id])
-  content   String
+  content   String @default("")
+  text      String?
+  editedText String?
+  language String?
+  model     String?
+  promptVersion String?
+  externalReplyId String?
+  approvedAt DateTime?
+  approvedBy String?
   status    String      @default("DRAFT")
+  publishedAt DateTime?
+  failureReason String?
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
+}
+
+model AiUsageLog {
+  id             String   @id @default(cuid())
+  organizationId String
+  task           String
+  model          String
+  tokensIn       Int
+  tokensOut      Int
+  costMicros     Int
+  createdAt      DateTime @default(now())
+}
+
+model Job {
+  id         String   @id @default(cuid())
+  type       String
+  payload    Json
+  dedupeKey  String?  @unique
+  state      String   @default("QUEUED")
+  attempts   Int      @default(0)
+  runAt      DateTime @default(now())
+  startedAt  DateTime?
+  finishedAt DateTime?
+  lastError  String?
+  createdAt  DateTime @default(now())
+}
+
+model ReportLog {
+  id             String   @id @default(cuid())
+  organizationId String
+  businessId     String?
+  kind           String
+  periodStart    DateTime @default(now())
+  metrics        Json?
+  createdAt      DateTime @default(now())
+}
+
+model WebhookEvent {
+  id        String   @id
+  type      String
+  payload   Json?
+  createdAt DateTime @default(now())
+}
+
+model Invoice {
+  id             String   @id @default(cuid())
+  organizationId String
+  stripeInvoiceId String  @unique
+  amount         Int @default(0)
+  totalCents     Int?
+  currency       String?
+  vatCents       Int?
+  hostedUrl      String?
+  status         String @default("PAID")
+  createdAt      DateTime @default(now())
+}
+
+model ImpersonationSession {
+  id          String   @id @default(cuid())
+  adminId     String
+  targetUserId String
+  token       String   @unique @default(cuid())
+  expiresAt   DateTime
+  endedAt     DateTime?
+  reason      String?
+  createdAt   DateTime @default(now())
 }

@@ -49,9 +49,9 @@ export async function monthlyUsage(organizationId: string): Promise<{
     select: { tokensIn: true, tokensOut: true, costMicros: true },
   });
   return {
-    tokensIn: logs.reduce((s, l) => s + l.tokensIn, 0),
-    tokensOut: logs.reduce((s, l) => s + l.tokensOut, 0),
-    costEur: logs.reduce((s, l) => s + l.costMicros, 0) / 1_000_000,
+    tokensIn: logs.reduce((sum, log) => sum + log.tokensIn, 0),
+    tokensOut: logs.reduce((sum, log) => sum + log.tokensOut, 0),
+    costEur: logs.reduce((sum, log) => sum + log.costMicros, 0) / 1_000_000,
     calls: logs.length,
   };
 }

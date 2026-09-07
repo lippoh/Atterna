@@ -72,7 +72,7 @@ export async function publishReply(draftId: string): Promise<void> {
   const accessToken = await refreshIfNeeded(conn);
   const text = draft.editedText ?? draft.text;
   const reviewName = `${conn.locationId}/reviews/${draft.review.externalId}`;
-  const result = await gbpClient.updateReply({ accessToken, reviewName, text });
+  const result = await gbpClient.updateReply({ accessToken, reviewName, text: text ?? "" });
   await prisma.responseDraft.update({
     where: { id: draftId },
     data: {

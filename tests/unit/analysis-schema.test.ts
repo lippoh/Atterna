@@ -2,6 +2,16 @@
 import { describe, it, expect } from "vitest";
 import { analysisSchema } from "@/ai/schemas";
 import { readFixtures } from "../fixtures/loader";
+
+const validSample = {
+  sentiment: "POSITIVE",
+  urgency: "LOW",
+  language: "en",
+  topics: [],
+  complaints: [],
+  compliments: [],
+  actionable: false,
+};
 describe("analysis contract", () => {
   it("accepts every recorded valid fixture (el/en/de samples)", () => {
     for (const f of readFixtures("analysis/valid")) {
