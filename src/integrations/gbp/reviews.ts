@@ -5,6 +5,11 @@
 // unused decrypt import is gone (refreshIfNeeded owns decryption);
 // publishReply implements the Section 25 reply flow (draft → API →
 // PUBLISHED with external id, review.repliedAt set).
+// V2.1 fix: the fresh-row counter. createdAt and receivedAt both DB
+// default to the same instant at INSERT, so comparing them counted
+// every existing row on every sync. The counter now anchors on an
+// existence check before the upsert (clock-independent, race-safe
+// because the upsert itself stays idempotent).
 import { prisma } from "@/lib/db";
 import { refreshIfNeeded, gbpClient } from "./client";
 import { mapReview } from "./mapper";
@@ -23,8 +28,18 @@ export async function syncBusinessReviews(businessId: string) {
   });
   let created = 0;
   for (const r of reviews) {
-    const row = mapReview(r, conn);
-    const res = await prisma.review.upsert({
+    const row = mapReview(r);
+    const existing = await prisma.review.findUnique({
+      where: {
+        businessId_source_externalId: {
+          businessId,
+          source: "GOOGLE",
+          externalId: row.externalId,
+        },
+      },
+      select: { id: true },
+    });
+    await prisma.review.upsert({
       where: {
         businessId_source_externalId: {
           businessId,
@@ -40,7 +55,7 @@ export async function syncBusinessReviews(businessId: string) {
       },
       update: { rating: row.rating, text: row.text }, // editable at source
     });
-    if (res.createdAt.getTime() === res.receivedAt.getTime()) created++;
+    if (!existing) created++; // genuinely new at the source
   }
   await prisma.gbpConnection.update({
     where: { businessId },
@@ -70,9 +85,10 @@ export async function publishReply(draftId: string): Promise<void> {
   const conn = draft.review.business.gbpConnection;
   if (!conn) throw new Error("NO_GBP_CONNECTION");
   const accessToken = await refreshIfNeeded(conn);
-  const text = draft.editedText ?? draft.text;
+  const text = (draft.editedText ?? draft.text ?? "").trim();
+  if (!text) throw new Error("EMPTY_REPLY_TEXT");
   const reviewName = `${conn.locationId}/reviews/${draft.review.externalId}`;
-  const result = await gbpClient.updateReply({ accessToken, reviewName, text: text ?? "" });
+  const result = await gbpClient.updateReply({ accessToken, reviewName, text });
   await prisma.responseDraft.update({
     where: { id: draftId },
     data: {

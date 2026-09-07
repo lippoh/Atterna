@@ -63,5 +63,18 @@ export async function GET(req: NextRequest) {
       lastSyncError: null,
     },
   });
+  // V2.1: capture the write-review deep link while the location metadata
+  // is in hand — it powers the QR feedback page's public invitation (the
+  // growth loop's final step). placeId is the Maps id, not the numeric
+  // GBP location id, so it cannot be derived from locationId later.
+  const placeId = location.metadata?.placeId;
+  if (placeId) {
+    await prisma.business.update({
+      where: { id: business.id },
+      data: {
+        reviewUrl: `https://search.google.com/local/writereview?placeid=${placeId}`,
+      },
+    });
+  }
   return NextResponse.redirect(new URL("/onboarding?step=import", req.url));
 }

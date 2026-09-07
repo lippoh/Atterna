@@ -2,6 +2,11 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum Locale {
+  EL
+  EN
+}
+
 enum Sentiment {
   POSITIVE
   NEUTRAL
@@ -17,7 +22,7 @@ model User {
   email         String       @unique
   emailVerified DateTime?
   passwordHash  String?
-  locale        String       @default("EL")
+  locale        Locale       @default(EL)
   isAdmin       Boolean      @default(false)
   passwordChangedAt DateTime?
   createdAt     DateTime     @default(now())
@@ -34,6 +39,7 @@ model Organization {
   memberships      Membership[]
   businesses       Business[]
   auditLogs        AuditLog[]
+  reportLogs       ReportLog[]
 }
 
 model Membership {
@@ -49,27 +55,28 @@ model Membership {
 }
 
 model Business {
-  id               String           @id @default(cuid())
-  organizationId   String
-  organization     Organization     @relation(fields: [organizationId], references: [id])
-  name             String
-  category         String
-  city             String
-  region           String?
-  countryCode      String           @default("GR")
-  phone            String?
-  website          String?
-  locale           String           @default("EL")
-  timezone         String           @default("Europe/Athens")
-  currency         String           @default("EUR")
-  gbpConnection    GbpConnection?
-  reviews          Review[]
-  feedbackRequests FeedbackRequest[]
+  id                 String           @id @default(cuid())
+  organizationId     String
+  organization       Organization     @relation(fields: [organizationId], references: [id])
+  name               String
+  category           String
+  city               String
+  region             String?
+  countryCode        String           @default("GR")
+  phone              String?
+  website            String?
+  reviewUrl          String? // Google write-review deep link (from GBP placeId)
+  locale             Locale           @default(EL)
+  timezone           String           @default("Europe/Athens")
+  currency           String           @default("EUR")
+  gbpConnection      GbpConnection?
+  reviews            Review[]
+  feedbackRequests   FeedbackRequest[]
   feedbackSubmissions FeedbackSubmission[]
-  aiSettings       Json?
-  deletedAt        DateTime?
-  createdAt        DateTime         @default(now())
-
+  reportLogs         ReportLog[]
+  aiSettings         Json? // tone, formality, signature, forbidden phrases
+  deletedAt          DateTime?
+  createdAt          DateTime         @default(now())
   @@index([organizationId])
 }
 
@@ -176,17 +183,17 @@ model FeedbackRequest {
 }
 
 model FeedbackSubmission {
-  id         String   @id @default(cuid())
-  businessId String
-  business   Business @relation(fields: [businessId], references: [id])
-  requestId  String?
+  id                String            @id @default(cuid())
+  businessId        String
+  business          Business          @relation(fields: [businessId], references: [id])
+  requestId         String?
   feedbackRequestId String
-  feedbackRequest FeedbackRequest @relation(fields: [feedbackRequestId], references: [id])
-  organizationId String
-  rating     Int
-  comment    String?
-  ipHash     String?
-  createdAt  DateTime @default(now())
+  feedbackRequest   FeedbackRequest   @relation(fields: [feedbackRequestId], references: [id])
+  organizationId    String
+  rating            Int
+  comment           String?
+  ipHash            String?
+  createdAt         DateTime          @default(now())
 }
 
 model ResponseDraft {
@@ -235,13 +242,15 @@ model Job {
 }
 
 model ReportLog {
-  id             String   @id @default(cuid())
+  id             String        @id @default(cuid())
   organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id])
   businessId     String?
+  business       Business?     @relation(fields: [businessId], references: [id])
   kind           String
-  periodStart    DateTime @default(now())
+  periodStart    DateTime      @default(now())
   metrics        Json?
-  createdAt      DateTime @default(now())
+  createdAt      DateTime      @default(now())
 }
 
 model WebhookEvent {

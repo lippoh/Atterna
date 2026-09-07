@@ -56,7 +56,7 @@ const currentOrg2 = await prisma.organization.findUnique({
 where: { id: currentOrg },
 select: { stripeCustomerId: true },
 });
-if (!currentOrg2?.stripeCustomerId) redirect(`/${locale}/billing?error=no-customer`);
+if (!currentOrg2?.stripeCustomerId) redirect(`/${locale}/billing?error=no-customer` as Parameters<typeof redirect>[0]);
 const { url } = await createPortalSession({
 customerId: currentOrg2.stripeCustomerId,
 locale,

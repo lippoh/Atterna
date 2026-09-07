@@ -2,6 +2,7 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { requireOrg, requireUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
+import { Link } from "@/i18n/navigation";
 import { updateLocaleAction } from "../actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -117,12 +118,12 @@ defaultValue={(aiSettings.forbiddenPhrases ?? []).join(", ")}
 : t("gbpNotConnected")}
 </p>
 {!business?.gbpConnection && (
-<a
+<Link
 href="/api/gbp/callback"
 className="mt-2 inline-block text-sm font-medium text-blue-700 underline"
 >
 {t("connect")} — /onboarding
-</a>
+</Link>
 )}
 </section>
 </main>

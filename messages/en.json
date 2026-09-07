@@ -1,209 +1,32 @@
 {
-"nav": {
-"dashboard": "Dashboard",
-"reviews": "Reviews",
-"feedback": "Private feedback",
-"settings": "Settings",
-"billing": "Subscription",
-"signOut": "Sign out"
-},
-"landing": {
-"kicker": "Greece first · Greece first",
-"title": "The AI that doesn't write reviews — it listens to your customers",
-"subtitle": "Review analysis in Greek and English, AI-drafted replies you approve, and
-private QR feedback.",
-"cta": "Start free",
-"ctaSecondary": "Tell me more",
-"howItWorks": "How it works",
-"steps": {
-"connect": "Connect your Google Business Profile",
-"analyze": "The AI reads every review",
-"understand": "See what to fix first",
-"respond": "Reply in a minute, in any language"
-},
-"pricing": {
-"title": "VAT-inclusive pricing",
-"starter": { "name": "Starter", "price": "€19/month", "desc": "150 analyses/month,
-dashboard, QR, weekly email" },
-"growth": { "name": "Growth", "price": "€39/month", "desc": "600 analyses/month, trends,
-alerts, reply publishing" },
-"pro": { "name": "Pro", "price": "€79/month", "desc": "2,000 analyses/month, up to 3
-businesses, priority support" }
-},
-"trustedBy": "Built for Greek local businesses"
-},
-"auth": {
-"login": {
-"title": "Sign in",
-"email": "Email",
-"password": "Password",
-"submit": "Sign in",
-"submitting": "Signing in...",
-"noAccount": "No account yet?",
-"register": "Create one",
-"forgot": "Forgot your password?",
-"invalid": "Wrong email or password.",
-"rateLimited": "Too many attempts. Try again in an hour."
-},
-"register": {
-"title": "Create your account",
-"email": "Email",
-"password": "Password (at least 10 characters)",
-"locale": "Language",
-"submit": "Sign up",
-"submitting": "Sending...",
-"exists": "An account with this email already exists.",
-"weak": "The password needs at least 10 characters.",
-"done": "We sent a verification link to your email."
-},
-"verify": {
-"title": "Confirm your email",
-"body": "We sent a confirmation link. If it doesn't arrive in a few minutes, check spam.",
-"tokenLabel": "Or paste the confirmation code here:",
-"submit": "Confirm",
-"ok": "Email confirmed! You can sign in now.",
-"bad": "The code is invalid or has expired."
-},
-"reset": {
-"requestTitle": "Reset your password",
-"requestBody": "We'll email you a reset link.",
-"requestSubmit": "Send the link",
-"sent": "If an account exists, the link has been sent.",
-"newTitle": "New password",
-"newSubmit": "Save",
-"ok": "Password changed. Sign in again.",
-"bad": "The link is invalid or was already used.",
-"mismatch": "The passwords don't match."
-}
-},
-"dashboard": {
-"title": "Dashboard",
-"rating": "Current rating",
-"ratingHint": "Average across all reviews",
-"unanswered": {
-"label": "Reviews waiting for a reply",
-"hint": "{count, plural, =1{1 review} other{# reviews}}"
-},
-"topComplaint": "Top complaint",
-"topCompliment": "Top compliment",
-"trend": "Average rating (30 days)",
-"insights": "What to do",
-"noInsights": "Not enough data for insights yet — usually ~10 reviews are needed.",
-"connectFirst": "Connect your Google Business Profile first to see data."
-},
-"reviews": {
-"title": "Reviews",
-"filter": {
-"all": "All",
-"unanswered": "Unanswered",
-"negative": "Negative",
-"published": "Answered"
-},
-"analysis": "AI analysis",
-"topics": "Topics",
-"complaints": "Complaints",
-"compliments": "Highlights",
-"urgency": "Urgency",
-"draft": {
-"aiSuggestion": "AI suggestion",
-"generate": "Generate draft",
-"save": "Save",
-"approve": "Approve & send",
-"published": "Published",
-"failed": "Failed — try again",
-"generating": "Generating...",
-"emptyHint": "No draft yet — press \"Generate draft\"."
-},
-"empty": "No reviews yet."
-},
-"feedback": {
-"title": "Private feedback",
-"subtitle": "What customers say before they go to Google.",
-"generate": "New QR code",
-"tokens": "Active codes",
-"url": "Link",
-"copy": "Copy",
-"copied": "Copied!",
-"submissions": "Recent submissions",
-"empty": "No submissions yet.",
-"invalid": "Code not found or no longer active."
-},
-"settings": {
-"title": "Settings",
-"profile": "Profile",
-"name": "Name",
-"locale": "Language",
-"save": "Save",
-"saved": "Saved.",
-"business": "Business",
-"tone": "Reply tone",
-"toneFriendly": "Friendly",
-"toneFormal": "Formal",
-"signature": "Signature",
-"gbp": "Google Business Profile",
-"gbpConnected": "Connected",
-"gbpNotConnected": "Not connected",
-"connect": "Connect"
-},
-"billing": {
-"title": "Subscription",
-"currentPlan": "Current plan",
-"trialEnds": "Trial ends on {date}",
-"status": { "TRIALING": "Trialing", "ACTIVE": "Active", "PAST_DUE": "Past due", "CANCELED":
-"Canceled", "INCOMPLETE": "Incomplete" },
-"choose": "Choose a plan",
-"checkout": "Continue to secure checkout",
-"portal": "Manage subscription & invoices",
-"usage": "AI usage this month",
-"usageCalls": "{calls} calls · {tokens} tokens",
-"success": "Subscription activated!",
-"canceled": "Payment canceled.",
-"impersonationBlocked": "Not available in support mode."
-},
-"onboarding": {
-"title": "Welcome!",
-"step1": "Your business",
-"orgName": "Organization name",
-"businessName": "Business name",
-"category": "Category",
-"city": "City",
-"submit": "Continue",
-"step2": "Google Business Profile",
-"connectGbp": "Connect with Google",
-"connectHint": "You'll grant read access to your reviews. Takes under 5 minutes.",
-"importing": "Importing reviews...",
-"goDashboard": "Go to the dashboard",
-"done": "All set!"
-},
-"f": {
-"question": "How was your experience?",
-"low": "Poor",
-"high": "Excellent",
-"negativePrompt": "What could we improve? (optional, private)",
-"positivePrompt": "Thank you! Would you like to share it publicly?",
-"invitation": "Your opinion helps other guests — and us.",
-"invitationCta": "Write a Google review",
-"submit": "Send",
-"submitting": "Sending...",
-"thanks": "Thank you!",
-"error": "Something went wrong — please try again.",
-"notFound": "Code not found or deactivated."
-},
-"admin": {
-"title": "Admin",
-"businesses": "Businesses",
-"jobs": "Jobs",
-"subscriptions": "Subscriptions",
-"requeue": "Requeue",
-"impersonate": "Support as customer",
-"impersonateEmail": "Customer email",
-"back": "Back"
-},
-"common": {
-"loading": "Loading...",
-"error": "Something went wrong.",
-"forbidden": "You don't have access to this.",
-"cancel": "Cancel",
-"language": "Ελληνικά"
-}
+  "nav": { "dashboard": "Dashboard", "reviews": "Reviews", "feedback": "Private feedback", "settings": "Settings", "billing": "Subscription", "signOut": "Sign out" },
+  "landing": {
+    "kicker": "Greece first · Greece first",
+    "title": "The AI that doesn't write reviews — it listens to your customers",
+    "subtitle": "Review analysis in Greek and English, AI-drafted replies you approve, and private QR feedback.",
+    "cta": "Start free", "ctaSecondary": "Tell me more", "howItWorks": "How it works",
+    "steps": { "connect": "Connect your Google Business Profile", "analyze": "The AI reads every review", "understand": "See what to fix first", "respond": "Reply in a minute, in any language" },
+    "pricing": {
+      "title": "VAT-inclusive pricing",
+      "starter": { "name": "Starter", "price": "€19/month", "desc": "150 analyses/month, dashboard, QR, weekly email" },
+      "growth": { "name": "Growth", "price": "€39/month", "desc": "600 analyses/month, trends, alerts, reply publishing" },
+      "pro": { "name": "Pro", "price": "€79/month", "desc": "2,000 analyses/month, up to 3 businesses, priority support" }
+    },
+    "trustedBy": "Built for Greek local businesses"
+  },
+  "auth": {
+    "login": { "title": "Sign in", "email": "Email", "password": "Password", "submit": "Sign in", "submitting": "Signing in...", "noAccount": "No account yet?", "register": "Create one", "forgot": "Forgot your password?", "invalid": "Wrong email or password.", "rateLimited": "Too many attempts. Try again in an hour." },
+    "register": { "title": "Create your account", "email": "Email", "password": "Password (at least 10 characters)", "locale": "Language", "submit": "Sign up", "submitting": "Sending...", "exists": "An account with this email already exists.", "weak": "The password needs at least 10 characters.", "done": "We sent a verification link to your email." },
+    "verify": { "title": "Confirm your email", "body": "We sent a confirmation link. If it doesn't arrive in a few minutes, check spam.", "tokenLabel": "Or paste the confirmation code here:", "submit": "Confirm", "ok": "Email confirmed! You can sign in now.", "bad": "The code is invalid or has expired." },
+    "reset": { "requestTitle": "Reset your password", "requestBody": "We'll email you a reset link.", "requestSubmit": "Send the link", "sent": "If an account exists, the link has been sent.", "newTitle": "New password", "newSubmit": "Save", "ok": "Password changed. Sign in again.", "bad": "The link is invalid or was already used.", "mismatch": "The passwords don't match." }
+  },
+  "dashboard": { "title": "Dashboard", "rating": "Current rating", "ratingHint": "Average across all reviews", "unanswered": { "label": "Reviews waiting for a reply", "hint": "{count, plural, =1{1 review} other{# reviews}}" }, "topComplaint": "Top complaint", "topCompliment": "Top compliment", "trend": "Average rating (30 days)", "insights": "What to do", "noInsights": "Not enough data for insights yet — usually ~10 reviews are needed.", "connectFirst": "Connect your Google Business Profile first to see data." },
+  "reviews": { "title": "Reviews", "filter": { "all": "All", "unanswered": "Unanswered", "negative": "Negative", "published": "Answered" }, "analysis": "AI analysis", "topics": "Topics", "complaints": "Complaints", "compliments": "Highlights", "urgency": "Urgency", "draft": { "aiSuggestion": "AI suggestion", "generate": "Generate draft", "save": "Save", "approve": "Approve & send", "published": "Published", "failed": "Failed — try again", "generating": "Generating...", "emptyHint": "No draft yet — press \"Generate draft\"." }, "empty": "No reviews yet." },
+  "feedback": { "title": "Private feedback", "subtitle": "What customers say before they go to Google.", "generate": "New QR code", "tokens": "Active codes", "url": "Link", "copy": "Copy", "copied": "Copied!", "submissions": "Recent submissions", "empty": "No submissions yet.", "invalid": "Code not found or no longer active." },
+  "settings": { "title": "Settings", "profile": "Profile", "name": "Name", "locale": "Language", "save": "Save", "saved": "Saved.", "business": "Business", "tone": "Reply tone", "toneFriendly": "Friendly", "toneFormal": "Formal", "signature": "Signature", "gbp": "Google Business Profile", "gbpConnected": "Connected", "gbpNotConnected": "Not connected", "connect": "Connect" },
+  "billing": { "title": "Subscription", "currentPlan": "Current plan", "trialEnds": "Trial ends on {date}", "status": { "TRIALING": "Trialing", "ACTIVE": "Active", "PAST_DUE": "Past due", "CANCELED": "Canceled", "INCOMPLETE": "Incomplete" }, "choose": "Choose a plan", "checkout": "Continue to secure checkout", "portal": "Manage subscription & invoices", "usage": "AI usage this month", "usageCalls": "{calls} calls · {tokens} tokens", "success": "Subscription activated!", "canceled": "Payment canceled.", "impersonationBlocked": "Not available in support mode." },
+  "onboarding": { "title": "Welcome!", "step1": "Your business", "orgName": "Organization name", "businessName": "Business name", "category": "Category", "city": "City", "submit": "Continue", "step2": "Google Business Profile", "connectGbp": "Connect with Google", "connectHint": "You'll grant read access to your reviews. Takes under 5 minutes.", "importing": "Importing reviews...", "goDashboard": "Go to the dashboard", "done": "All set!" },
+  "f": { "question": "How was your experience?", "low": "Poor", "high": "Excellent", "negativePrompt": "What could we improve? (optional, private)", "positivePrompt": "Thank you! Would you like to share it publicly?", "invitation": "Your opinion helps other guests — and us.", "invitationCta": "Write a Google review", "submit": "Send", "submitting": "Sending...", "thanks": "Thank you!", "error": "Something went wrong — please try again.", "notFound": "Code not found or deactivated." },
+  "admin": { "title": "Admin", "businesses": "Businesses", "jobs": "Jobs", "subscriptions": "Subscriptions", "requeue": "Requeue", "impersonate": "Support as customer", "impersonateEmail": "Customer email", "back": "Back" },
+  "common": { "loading": "Loading...", "error": "Something went wrong.", "forbidden": "You don't have access to this.", "cancel": "Cancel", "language": "Ελληνικά" }
 }

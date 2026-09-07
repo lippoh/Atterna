@@ -6,7 +6,6 @@
 import { AuthError } from "next-auth";
 import argon2 from "argon2";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { signIn, signOut, unstable_update } from "@/lib/auth";

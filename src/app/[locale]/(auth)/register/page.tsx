@@ -7,11 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { registerAction, type ActionState } from "../actions";
-export default function RegisterPage({
-params,
-}: {
-params: Promise<{ locale: string }>;
-}) {
+export default function RegisterPage() {
 const [locale, setLocale] = useState("el");
 const t = useTranslations("auth.register");
 const [state, formAction, pending] = useActionState<ActionState, FormData>(

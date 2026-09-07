@@ -1,0 +1,23 @@
+{
+  "language": "el",
+  "sentiment": "NEGATIVE",
+  "urgency": "HIGH",
+  "topics": ["waiting_time", "service"],
+  "complaints": [
+    {
+      "category": "waiting_time",
+      "severity": 4,
+      "summary": "Περάσαμε 55 λεπτά μέχρι να έρθει το φαγητό."
+    },
+    {
+      "category": "service",
+      "severity": 3,
+      "summary": "Το προσωπικό ήταν απρόσεκτο στις παραγγελίες."
+    }
+  ],
+  "compliments": [
+    { "category": "food_quality", "summary": "Το ψάρι ήταν εξαιρετικό." }
+  ],
+  "actionable": true,
+  "requiresResponse": true
+}

@@ -1,0 +1,14 @@
+{
+  "language": "en",
+  "sentiment": "POSITIVE",
+  "urgency": "LOW",
+  "topics": ["food_quality", "atmosphere", "value"],
+  "complaints": [],
+  "compliments": [
+    { "category": "food_quality", "summary": "Best moussaka we had on the island." },
+    { "category": "atmosphere", "summary": "Lovely terrace right by the water." },
+    { "category": "value", "summary": "Great portions for the price." }
+  ],
+  "actionable": false,
+  "requiresResponse": false
+}

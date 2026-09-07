@@ -41,7 +41,7 @@ const orgName = String(formData.get("orgName") ?? "").slice(0, 120);
 const businessName = String(formData.get("businessName") ?? "").slice(0, 120);
 const category = String(formData.get("category") ?? "").slice(0, 60);
 const city = String(formData.get("city") ?? "").slice(0, 60);
-if (!orgName || !businessName || !city) redirect(`/${locale}/onboarding?error=missing`);
+if (!orgName || !businessName || !city) redirect(`/${locale}/onboarding?error=missing` as Parameters<typeof redirect>[0]);
 const org = await prisma.organization.create({
 data: {
 name: orgName,
@@ -55,7 +55,7 @@ await audit("onboarding.organization_created", {
 userId: currentUser.id,
 organizationId: org.id,
 });
-redirect(`/${locale}/onboarding?step=import`);
+redirect(`/${locale}/onboarding?step=import` as Parameters<typeof redirect>[0]);
 }
 async function connectGbp() {
 "use server";
@@ -64,7 +64,7 @@ const url = buildGbpAuthUrl(orgId, `${env.APP_URL}/api/gbp/callback`);
 redirect(url);
 }
 if (business?.gbpConnection && step !== "import") {
-redirect(`/${locale}/dashboard`);
+redirect(`/${locale}/dashboard` as Parameters<typeof redirect>[0]);
 }
 const hasOrg = Boolean(membership);
 return (

@@ -3,8 +3,9 @@
 // rule: email HTML built from templates, never raw interpolation of
 // user content — react-email escapes text children by design).
 import {
-Html, Head, Body, Container, Section, Heading, Text, Link, Button, Preview,
+  Html, Head, Body, Container, Section, Heading, Text, Button, Preview,
 } from "@react-email/components";
+
 import { render } from "@react-email/components";
 export interface AlertEmailProps {
 locale: string;

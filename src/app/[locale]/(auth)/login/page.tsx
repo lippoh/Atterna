@@ -7,11 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { requestResetAction, signInAction, type ActionState } from "../actions";
-export default function LoginPage({
-params,
-}: {
-params: Promise<{ locale: string }>;
-}) {
+export default function LoginPage() {
 const [locale, setLocale] = useState("el");
 const t = useTranslations("auth.login");
 const tReset = useTranslations("auth.reset");

@@ -1,0 +1,18 @@
+{
+  "language": "de",
+  "sentiment": "NEUTRAL",
+  "urgency": "MEDIUM",
+  "topics": ["rooms", "cleanliness"],
+  "complaints": [
+    {
+      "category": "rooms",
+      "severity": 2,
+      "summary": "Das Zimmer war etwas klein, aber funktional."
+    }
+  ],
+  "compliments": [
+    { "category": "cleanliness", "summary": "Sehr sauber und ordentlich." }
+  ],
+  "actionable": true,
+  "requiresResponse": false
+}

@@ -108,15 +108,6 @@ export function bucketByDay(
   return points;
 }
 // ── Typed view over the JSON columns written by ai/analyze.ts ────────────
-interface ComplaintItem {
-  category: string;
-  severity: number;
-  summary: string;
-}
-interface ComplimentItem {
-  category: string;
-  summary: string;
-}
 interface AnalysisView {
   sentiment: Sentiment;
   complaints: Prisma.JsonValue;
@@ -177,11 +168,10 @@ export async function getDashboardMetrics(
   const complaintItems = analysisViews.flatMap((a) =>
     asItems(a.complaints).map((c) => ({ ...c, receivedAt: a.review.receivedAt }))
   );
-  const complaintTrend = complaintItems.filter((c) => c.receivedAt >= new Date(Date.now() - 7 *
-    DAY_MS)).length 
+  const complaintTrend =
+    complaintItems.filter((c) => c.receivedAt >= new Date(Date.now() - 7 * DAY_MS)).length -
     complaintItems.filter(
-      (c) => c.receivedAt >= new Date(Date.now() - 14 * DAY_MS) && c.receivedAt < new Date
-    (Date.now() - 7 * DAY_MS)
+      (c) => c.receivedAt >= new Date(Date.now() - 14 * DAY_MS) && c.receivedAt < new Date(Date.now() - 7 * DAY_MS)
     ).length;
   const topComplaint = topCategory(analysisViews.flatMap((a) => asItems(a.complaints)));
   const topCompliment = topCategory(analysisViews.flatMap((a) => asItems(a.compliments)));

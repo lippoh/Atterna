@@ -15,7 +15,7 @@ export interface ReviewRow {
   createdOnPlatform: Date | null;
   language: null;
 }
-export function mapReview(r: GbpReview, _conn: unknown): ReviewRow {
+export function mapReview(r: GbpReview): ReviewRow {
   const externalId = r.reviewId ?? r.name.split("/").pop() ?? "";
   const rating = typeof r.starRating === "number"
     ? r.starRating

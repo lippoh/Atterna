@@ -22,6 +22,7 @@ export interface GbpLocation {
   locationName: string;
   accountName?: string;
   businessId?: string; // internal (filled by pickFirstLocation caller)
+  metadata?: { placeId?: string }; // Maps place id (write-review deep link)
 }
 export interface GbpReview {
   name: string; // "locations/{id}/reviews/{reviewId}"

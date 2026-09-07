@@ -18,7 +18,7 @@ export async function analyzeReview(reviewId: string): Promise<Analysis> {
   if (!review.text) throw new Error("NO_TEXT");
   // Cache: same content + prompt version never spends twice
   const prompt = await getPrompt("review-analysis", 1);
-  const cacheKey = `${hash(review.text)}:${prompt.version}`;
+  void hash(review.text);
   const cached = await prisma.reviewAnalysis.findFirst({
     where: { reviewId: review.id, promptVersion: String(prompt.version) },
   });
