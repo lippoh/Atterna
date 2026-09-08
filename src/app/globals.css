@@ -527,19 +527,6 @@ body {
     transform: none;
   }
 }
-.demo-slide {
-  animation: demo-slide 420ms var(--ease-out-soft) both;
-}
-@keyframes demo-slide {
-  from {
-    opacity: 0;
-    transform: translateX(-14px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
 
 /* ── How-it-works: the terracotta line draws itself across the hairline ── */
 .how-line {
@@ -667,9 +654,13 @@ details[open] > .faq-panel {
   .dot-flash,
   .price-swap,
   .demo-in,
-  .demo-slide,
   .scroll-cue {
     animation: none !important;
+  }
+  /* the live-demo crossfades collapse to instant swaps */
+  .demo-region,
+  .demo-region * {
+    transition: none !important;
   }
   .type-caret::after {
     animation: none !important;

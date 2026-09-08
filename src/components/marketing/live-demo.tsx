@@ -5,6 +5,13 @@
 // through three scripted reviews — including one in English, showing the
 // bilingual promise. Pauses when scrolled off-screen; reduced motion skips
 // straight to the ready state.
+//
+// Flicker-free transitions: every region that changes content (review card,
+// chips, typed draft, dots/draft swap, publish receipt) is a grid-stacked
+// crossfade — all variants share one grid cell, so the panel's height is
+// the TALLEST variant at all times and NEVER changes mid-loop. The typed
+// reply writes on top of invisible "ghost" lines of every scripted reply,
+// so typing never grows the box and the page below never moves.
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -123,8 +130,7 @@ export function LiveDemo() {
 
   if (!review) return null;
 
-  const doneTyping = typed >= review.reply.length;
-  const analysisChips = review.analysis.split("·").map((c) => c.trim());
+  const analyzing = phase === "arriving" || phase === "analyzing";
 
   return (
     <section id="demo" className="relative border-t border-line">
@@ -151,7 +157,7 @@ export function LiveDemo() {
         <Reveal delay={120} className="mt-12">
           <div
             ref={stageRef}
-            className="demo-in overflow-hidden rounded-xl border border-line bg-surface shadow-lg"
+            className="demo-region demo-in overflow-hidden rounded-xl border border-line bg-surface shadow-lg"
             aria-label={t("title")}
           >
             {/* window chrome */}
@@ -167,35 +173,51 @@ export function LiveDemo() {
             </div>
 
             <div className="grid grid-cols-1 gap-0 lg:grid-cols-[5fr_7fr]">
-              {/* ── Review column ─────────────────────────────────── */}
-              <div
-                key={idx}
-                className="demo-slide border-b border-line p-5 sm:p-6 lg:border-b-0 lg:border-r"
-              >
+              {/* ── Review column — all scripted reviews share one grid cell
+               *    and crossfade: the column height is the tallest review
+               *    (constant), and swapping examples dissolves smoothly
+               *    instead of remounting with a fade-from-blank. ──────── */}
+              <div className="border-b border-line p-5 sm:p-6 lg:border-b-0 lg:border-r">
                 <p className="font-mono text-[10px] font-semibold tracking-[0.08em] text-ink-300">
                   {t("inboxLabel")}
                 </p>
-                <div className="mt-3 flex items-center gap-2">
-                  <span className="flex text-star-400" aria-label={`${review.stars}/5`}>
-                    {Array.from({ length: 5 }).map((_, i) =>
-                      i < review.stars ? (
-                        <IconStarFilled key={i} className="size-3.5" />
-                      ) : (
-                        <IconStar key={i} className="size-3.5 text-ink-300" />
-                      )
-                    )}
-                  </span>
-                  <span className="text-[13px] font-semibold text-ink-900">
-                    {review.name}
-                  </span>
+                <div className="grid">
+                  {reviews.map((r, i) => (
+                    <div
+                      key={i}
+                      aria-hidden={i !== idx}
+                      className={cn(
+                        "col-start-1 row-start-1 transition-opacity duration-300",
+                        i === idx ? "opacity-100" : "pointer-events-none opacity-0"
+                      )}
+                    >
+                      <div className="mt-3 flex items-center gap-2">
+                        <span className="flex text-star-400" aria-label={`${r.stars}/5`}>
+                          {Array.from({ length: 5 }).map((_, s) =>
+                            s < r.stars ? (
+                              <IconStarFilled key={s} className="size-3.5" />
+                            ) : (
+                              <IconStar key={s} className="size-3.5 text-ink-300" />
+                            )
+                          )}
+                        </span>
+                        <span className="text-[13px] font-semibold text-ink-900">
+                          {r.name}
+                        </span>
+                      </div>
+                      <p className="mt-1 font-mono text-[11px] text-ink-300">{r.meta}</p>
+                      <blockquote className="lh-body mt-3 text-[15px] leading-relaxed text-ink-700">
+                        «{r.text}»
+                      </blockquote>
+                    </div>
+                  ))}
                 </div>
-                <p className="mt-1 font-mono text-[11px] text-ink-300">{review.meta}</p>
-                <blockquote className="lh-body mt-3 text-[15px] leading-relaxed text-ink-700">
-                  «{review.text}»
-                </blockquote>
               </div>
 
-              {/* ── AI column ─────────────────────────────────────── */}
+              {/* ── AI column — the "analyzing" dots and the draft share one
+               *    grid cell and crossfade (no conditional unmount); the
+               *    draft reserves the tallest scripted reply's height via
+               *    invisible ghost lines, so the panel height is constant. */}
               <div className="p-5 sm:p-6">
                 <div className="flex items-center gap-2">
                   <span className="flex size-7 items-center justify-center rounded-md bg-aegean-100 text-aegean-600">
@@ -204,8 +226,15 @@ export function LiveDemo() {
                   <p className="text-[13px] font-semibold text-ink-900">{t("aiLabel")}</p>
                 </div>
 
-                {phase === "analyzing" || phase === "arriving" ? (
-                  <div className="mt-5 flex items-center gap-2 text-[13px] text-ink-500">
+                <div className="grid">
+                  {/* analyzing dots */}
+                  <div
+                    aria-hidden={!analyzing}
+                    className={cn(
+                      "col-start-1 row-start-1 mt-5 flex items-center gap-2 text-[13px] text-ink-500 transition-opacity duration-300",
+                      analyzing ? "opacity-100" : "pointer-events-none opacity-0"
+                    )}
+                  >
                     <span className="flex gap-1" aria-hidden="true">
                       <span className="dot-flash size-1.5 rounded-full bg-aegean-600" />
                       <span className="dot-flash size-1.5 rounded-full bg-aegean-600" />
@@ -213,49 +242,88 @@ export function LiveDemo() {
                     </span>
                     {t("analyzing")}
                   </div>
-                ) : (
-                  <>
-                    <div className="mt-4 flex flex-wrap gap-1.5">
-                      {analysisChips.map((chip) => (
-                        <span
-                          key={chip}
-                          className="rounded-full bg-sunken px-2.5 py-1 font-mono text-[10px] font-medium text-ink-700"
+
+                  {/* draft */}
+                  <div
+                    aria-hidden={analyzing}
+                    className={cn(
+                      "col-start-1 row-start-1 transition-opacity duration-300",
+                      analyzing ? "pointer-events-none opacity-0" : "opacity-100"
+                    )}
+                  >
+                    <div className="mt-4 grid">
+                      {reviews.map((r, i) => (
+                        <div
+                          key={i}
+                          aria-hidden={i !== idx}
+                          className={cn(
+                            "col-start-1 row-start-1 flex flex-wrap gap-1.5 transition-opacity duration-300",
+                            i === idx ? "opacity-100" : "pointer-events-none opacity-0"
+                          )}
                         >
-                          {chip}
-                        </span>
+                          {r.analysis.split("·").map((chip) => (
+                            <span
+                              key={chip.trim()}
+                              className="rounded-full bg-sunken px-2.5 py-1 font-mono text-[10px] font-medium text-ink-700"
+                            >
+                              {chip.trim()}
+                            </span>
+                          ))}
+                        </div>
                       ))}
                     </div>
                     <p className="mt-5 font-mono text-[10px] font-semibold tracking-[0.08em] text-aegean-600">
                       {t("draftLabel")}
                     </p>
-                    <p className="lh-body mt-2 min-h-[96px] text-[15px] leading-relaxed text-ink-700">
-                      {review.reply.slice(0, typed)}
-                      {phase === "typing" && (
-                        <span className="type-caret" aria-hidden="true" />
-                      )}
-                    </p>
-                  </>
-                )}
+                    <div className="mt-2 grid">
+                      {/* ghost lines of every reply reserve the tallest
+                       * height — the typed overlay writes on top of that */}
+                      {reviews.map((r, i) => (
+                        <p
+                          key={i}
+                          aria-hidden="true"
+                          className="lh-body invisible col-start-1 row-start-1 min-h-[96px] text-[15px] leading-relaxed"
+                        >
+                          {r.reply}
+                        </p>
+                      ))}
+                      <p className="lh-body col-start-1 row-start-1 min-h-[96px] text-[15px] leading-relaxed text-ink-700">
+                        {review.reply.slice(0, typed)}
+                        {phase === "typing" && (
+                          <span className="type-caret" aria-hidden="true" />
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* ── Action bar ─────────────────────────────────────── */}
+            {/* ── Action bar — the published receipt and the publish button
+             *    crossfade inside one fixed 40px slot, so the bar height is
+             *    constant through every phase. ─────────────────────────── */}
             <div className="flex flex-wrap items-center gap-4 border-t border-line bg-sunken px-5 py-4">
-              {phase === "published" ? (
-                <p className="flex items-center gap-2 text-[13px] font-semibold text-success-600">
+              <div className="grid">
+                <p
+                  aria-hidden={phase !== "published"}
+                  className={cn(
+                    "col-start-1 row-start-1 flex h-10 items-center gap-2 text-[13px] font-semibold text-success-600 transition-opacity duration-300",
+                    phase === "published" ? "opacity-100" : "pointer-events-none opacity-0"
+                  )}
+                >
                   <IconCheck className="size-4" />
                   {t("published")}
                 </p>
-              ) : (
                 <button
                   type="button"
                   onClick={publish}
                   disabled={phase !== "ready"}
                   className={cn(
-                    "inline-flex h-10 min-w-[14.5rem] items-center justify-center gap-2 whitespace-nowrap rounded-md px-5 text-sm font-semibold transition-[background-color,transform,box-shadow,opacity] duration-200",
+                    "col-start-1 row-start-1 inline-flex h-10 min-w-[14.5rem] items-center justify-center gap-2 whitespace-nowrap rounded-md px-5 text-sm font-semibold transition-[background-color,transform,box-shadow,opacity] duration-300",
                     phase === "ready"
                       ? "bg-aegean-600 text-white shadow-sm hover:-translate-y-px hover:bg-aegean-700 hover:shadow-md active:translate-y-0"
-                      : "cursor-default bg-ink-300/40 text-ink-300"
+                      : "cursor-default bg-ink-300/40 text-ink-300",
+                    phase === "published" && "pointer-events-none opacity-0"
                   )}
                 >
                   {phase === "publishing" || phase === "typing" || phase === "analyzing" ? (
@@ -265,7 +333,7 @@ export function LiveDemo() {
                   )}
                   {phase === "publishing" ? t("publishing") : t("publish")}
                 </button>
-              )}
+              </div>
 
               <p className="hidden text-[12px] text-ink-300 sm:block">{t("autoHint")}</p>
 
