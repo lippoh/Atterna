@@ -72,7 +72,7 @@ export default async function BillingPage({
   }
 
   const sub = org.subscription;
-  const trialEnds = sub?.currentPeriodEnd.toLocaleDateString(
+  const trialEnds = sub?.currentPeriodEnd?.toLocaleDateString(
     locale === "en" ? "en-GB" : "el-GR"
   );
   const numberFmt = new Intl.NumberFormat(locale === "en" ? "en-GB" : "el-GR");
