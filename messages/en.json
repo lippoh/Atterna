@@ -21,6 +21,8 @@
     "hero": {
       "eyebrow": "FOR GREEK LOCAL BUSINESSES",
       "title": "Every review, answered. Every customer, back.",
+      "titleTop": "Every review, answered.",
+      "titleAccent": "Every customer, back.",
       "subtitle": "Atterna reads your Google reviews, drafts replies in your own voice in Greek and English, and sends your happy customers off to leave five-star reviews — while you take care of business.",
       "cta": "Start free",
       "ctaSecondary": "See how it works",
@@ -58,6 +60,47 @@
         { "title": "Connect Google", "body": "With a secure, reviews-read-only permission — nothing else is touched." },
         { "title": "Atterna analyzes and writes", "body": "Every review is analyzed and a reply draft is prepared in your voice, in Greek or English." },
         { "title": "You approve in one click", "body": "Nothing is ever published without your approval." }
+      ]
+    },
+    "demo": {
+      "eyebrow": "LIVE DEMO",
+      "title": "Watch the reply write itself",
+      "subtitle": "A review arrives, Atterna analyzes it and drafts the reply in your voice. You press publish.",
+      "liveLabel": "LIVE",
+      "inboxLabel": "Review from Google",
+      "aiLabel": "Atterna AI",
+      "analyzing": "Analyzing review",
+      "draftLabel": "Suggested reply",
+      "publish": "Publish reply",
+      "publishing": "Publishing",
+      "published": "Published to Google",
+      "autoHint": "Or wait a moment and it publishes on its own",
+      "replay": "Replay",
+      "reviews": [
+        {
+          "name": "Maria K.",
+          "stars": 5,
+          "meta": "2 minutes ago · Greek",
+          "text": "Fantastic food and wonderful service — we will definitely be back!",
+          "analysis": "Positive · Greek · Warm tone",
+          "reply": "Thank you so much, Maria! We are delighted you had a lovely evening — our Sunday gemista is waiting for your next visit."
+        },
+        {
+          "name": "Dimitris P.",
+          "stars": 2,
+          "meta": "14 minutes ago · Greek",
+          "text": "We waited 40 minutes for a table, even though we had booked.",
+          "analysis": "Negative · Waiting time · Needs apology",
+          "reply": "Please accept our sincere apologies for the wait. That is not the experience we want to offer — we would love to make it right on your next visit."
+        },
+        {
+          "name": "Sarah W.",
+          "stars": 4,
+          "meta": "1 hour ago · English",
+          "text": "Lovely courtyard and honest food. The moussaka was the best we had in Greece!",
+          "analysis": "Positive · English · Warm tone",
+          "reply": "Thank you so much, Sarah! The courtyard is our favourite spot too — we would be delighted to welcome you back for the moussaka, and the Sunday roast."
+        }
       ]
     },
     "features": {
@@ -275,7 +318,8 @@
       "register": "Create an account",
       "forgot": "Forgot your password?",
       "invalid": "Wrong email or password.",
-      "rateLimited": "Too many attempts. Try again in an hour."
+      "rateLimited": "Too many attempts. Try again in an hour.",
+      "serverError": "Something went wrong on our side. Please try again — if it persists, let us know."
     },
     "register": {
       "title": "Create an account",
@@ -288,6 +332,7 @@
       "submitting": "Sending…",
       "exists": "An account with this email already exists.",
       "weak": "The password needs at least 10 characters.",
+      "serverError": "Something went wrong on our side. Please try again — if it persists, let us know.",
       "done": "We sent a confirmation link to your email.",
       "checkInbox": "Check your inbox",
       "terms": "By signing up you accept the terms of use.",
@@ -305,7 +350,8 @@
       "okTitle": "Confirmed!",
       "goLogin": "Log in",
       "pasteFallback": "Paste the code from the email and try again.",
-      "bad": "The code is invalid or has expired."
+      "bad": "The code is invalid or has expired.",
+      "serverError": "Something went wrong on our side. Please try again — if it persists, let us know."
     },
     "reset": {
       "requestTitle": "Reset password",
@@ -321,7 +367,8 @@
       "okTitle": "Done!",
       "goLogin": "Log in",
       "bad": "The link is invalid or was already used.",
-      "mismatch": "The passwords don't match."
+      "mismatch": "The passwords don't match.",
+      "serverError": "Something went wrong on our side. Please try again — if it persists, let us know."
     }
   },
   "dashboard": {

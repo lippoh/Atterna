@@ -7,6 +7,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { MarketingNav } from "@/components/marketing/nav";
 import { Hero } from "@/components/marketing/hero";
+import { LiveDemo } from "@/components/marketing/live-demo";
 import {
   TrustStrip,
   Problem,
@@ -35,6 +36,7 @@ export default async function LandingPage({
         <Hero />
         <TrustStrip />
         <Problem />
+        <LiveDemo />
         <HowItWorks />
         <Features />
         <StatsBand />

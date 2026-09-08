@@ -1,12 +1,15 @@
 // src/lib/env.ts — validated environment (server-only surface)
 // One typed, validated source for every other module.
 //
-// V2.2: validation is LAZY. Next's production build evaluates route modules
-// while collecting route configuration; a module-scope safeParse + throw
-// fails the build on machines without runtime secrets (Vercel, CI). The
-// proxy below validates exactly once — on the first property access, i.e.
-// at actual runtime use — then caches the parsed result. Importing this
-// module is always side-effect free.
+// V2.3: validation is LAZY and PER-KEY. Next's production build evaluates
+// route modules while collecting route configuration; any module-scope
+// validation fails the build on machines without runtime secrets (Vercel,
+// CI). The proxy below validates a variable only when that exact variable
+// is first read at runtime — so a partially configured deployment (e.g.
+// only DATABASE_URL + AUTH_SECRET + TOKEN_ENC_KEY set) still boots, and
+// only the features that read a missing variable report it, with an
+// actionable message naming the variable. Importing this module is always
+// side-effect free.
 import { z } from "zod";
 
 const serverSchema = z.object({
@@ -46,22 +49,38 @@ type ServerEnv = z.infer<typeof serverSchema>;
 type PublicEnv = z.infer<typeof publicSchema>;
 export type Env = ServerEnv & { NEXT_PUBLIC: PublicEnv };
 
-let cached: ServerEnv | null = null;
+// Minimal structural type for a per-key validator — version-agnostic
+// (works on zod 3 and 4): all we need is safeParse and the first issue.
+interface KeyValidator {
+  safeParse(
+    data: unknown
+  ): { success: true; data: unknown } | { success: false; error: { issues: { message: string }[] } };
+}
 
-function loadServerEnv(): ServerEnv {
-  if (cached) return cached;
-  const parsed = serverSchema.safeParse(process.env);
+const shape = serverSchema.shape as unknown as Record<string, KeyValidator>;
+
+// Per-key result cache — a variable is parsed at most once per process.
+const keyCache = new Map<string, unknown>();
+
+function loadKey(key: string): unknown {
+  if (keyCache.has(key)) return keyCache.get(key);
+  const validator = shape[key];
+  if (!validator) return undefined;
+  const raw = (process.env as Record<string, string | undefined>)[key];
+  const parsed = validator.safeParse(raw);
   if (!parsed.success) {
+    const issue = parsed.error.issues[0];
     console.error(
-      "Invalid environment:\n" +
-        parsed.error.issues
-          .map((i) => `  ${i.path.join(".")}: ${i.message}`)
-          .join("\n")
+      `Invalid environment: ${key}: ${issue?.message ?? "invalid"} ` +
+        `(current value: ${raw === undefined ? "not set" : "set"})`
     );
-    throw new Error("Invalid environment variables");
+    throw new Error(
+      `Missing or invalid environment variable: ${key}. ` +
+        `Set it in your deployment environment (e.g. Vercel → Settings → Environment Variables).`
+    );
   }
-  cached = parsed.data;
-  return cached;
+  keyCache.set(key, parsed.data);
+  return parsed.data;
 }
 
 function loadPublicEnv(): PublicEnv {
@@ -73,6 +92,7 @@ function loadPublicEnv(): PublicEnv {
 export const env: Env = new Proxy({} as Env, {
   get(_target: Env, prop: string | symbol) {
     if (prop === "NEXT_PUBLIC") return loadPublicEnv();
-    return Reflect.get(loadServerEnv() as object, prop);
+    if (typeof prop !== "string" || !(prop in shape)) return undefined;
+    return loadKey(prop);
   },
 });

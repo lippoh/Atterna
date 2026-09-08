@@ -9,6 +9,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Logo } from "@/components/ui/logo";
 import { IconMenu, IconX } from "@/components/ui/icons";
+import { ScrollProgress } from "@/components/ui/scroll-progress";
 import { cn } from "@/lib/utils";
 
 export function MarketingNav() {
@@ -53,6 +54,9 @@ export function MarketingNav() {
         scrolled ? "border-b border-line shadow-xs" : "border-b border-transparent"
       )}
     >
+      {/* reading progress — aegean→terracotta gradient along the nav's
+       * bottom edge, scaled by scroll fraction */}
+      <ScrollProgress />
       <nav className="mx-auto flex h-16 max-w-[1120px] items-center justify-between px-6">
         <Link href="/" aria-label="Atterna" className="shrink-0">
           <Logo size="md" />

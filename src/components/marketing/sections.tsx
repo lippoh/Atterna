@@ -1,12 +1,15 @@
 // src/components/marketing/sections.tsx — landing body sections (§9.1)
-// Trust strip → problem (3 serif stat blocks) → how-it-works (numbered
-// serif circles on a connecting hairline) → four feature sections
-// (alternating 6/6, check bullets, terracotta-underline CTA links, each
-// with a small authored proof mockup) → stats band (ink-900) →
-// testimonials. All copy from messages; arrays via t.raw().
+// Trust strip → problem (tilt stat cards) → how-it-works (numbered serif
+// circles on a hairline that draws itself across when the section enters)
+// → four feature sections (alternating 6/6, check bullets, terracotta
+// underline CTA links, each proof mockup on a pointer-tilt card) → stats
+// band (ink-900, tilt cards) → testimonials as an infinite CSS marquee.
+// All copy from messages; arrays via t.raw().
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Reveal } from "@/components/ui/reveal";
+import { Tilt } from "@/components/ui/tilt";
+import { Marquee } from "@/components/ui/marquee";
 import {
   IconCheck,
   IconStarFilled,
@@ -53,15 +56,19 @@ export async function Problem() {
           {t("body")}
         </p>
       </Reveal>
-      <div className="mt-12 grid grid-cols-1 gap-10 sm:grid-cols-3 sm:gap-8">
+      <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-8">
         {stats.map((s, i) => (
           <Reveal key={s.label} delay={i * 60}>
-            <p className="font-display text-[clamp(2.1rem,1.5rem+2vw,3.25rem)] font-semibold leading-none text-terracotta-500">
-              {s.value}
-            </p>
-            <p className="mt-3 max-w-[24ch] text-[13px] leading-relaxed text-ink-500">
-              {s.label}
-            </p>
+            <Tilt max={4} className="h-full">
+              <div className="h-full rounded-xl border border-line bg-surface p-6 shadow-xs transition-[box-shadow] duration-200 hover:shadow-md">
+                <p className="font-display text-[clamp(2.1rem,1.5rem+2vw,3.25rem)] font-semibold leading-none text-terracotta-500">
+                  {s.value}
+                </p>
+                <p className="mt-3 max-w-[24ch] text-[13px] leading-relaxed text-ink-500">
+                  {s.label}
+                </p>
+              </div>
+            </Tilt>
           </Reveal>
         ))}
       </div>
@@ -83,26 +90,33 @@ export async function HowItWorks() {
             {t("title")}
           </h2>
         </Reveal>
-        <div className="relative mt-14 grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-8">
-          {/* connecting hairline on desktop */}
-          <div
-            aria-hidden="true"
-            className="absolute left-0 right-0 top-7 hidden border-t border-line md:block"
-          />
-          {steps.map((step, i) => (
-            <Reveal key={step.title} delay={i * 60} className="relative">
-              <span className="relative z-10 flex size-14 items-center justify-center rounded-full border border-line-strong bg-surface font-display text-lg font-semibold text-ink-900 shadow-xs">
-                {`0${i + 1}`}
-              </span>
-              <h3 className="mt-5 font-display text-xl font-semibold text-ink-900">
-                {step.title}
-              </h3>
-              <p className="lh-body mt-2 max-w-[34ch] text-sm text-ink-700">
-                {step.body}
-              </p>
-            </Reveal>
-          ))}
-        </div>
+        <Reveal className="relative mt-14">
+          <div className="relative grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-8">
+            {/* connecting hairline on desktop; a terracotta line draws
+             * itself across it when the section becomes visible */}
+            <div
+              aria-hidden="true"
+              className="absolute left-0 right-0 top-7 hidden border-t border-line md:block"
+            />
+            <div
+              aria-hidden="true"
+              className="how-line absolute left-0 right-0 top-7 hidden h-px md:block"
+            />
+            {steps.map((step, i) => (
+              <Reveal key={step.title} delay={300 + i * 120} className="relative">
+                <span className="step-circle relative z-10 flex size-14 items-center justify-center rounded-full border border-line-strong bg-surface font-display text-lg font-semibold text-ink-900 shadow-xs">
+                  {`0${i + 1}`}
+                </span>
+                <h3 className="mt-5 font-display text-xl font-semibold text-ink-900">
+                  {step.title}
+                </h3>
+                <p className="lh-body mt-2 max-w-[34ch] text-sm text-ink-700">
+                  {step.body}
+                </p>
+              </Reveal>
+            ))}
+          </div>
+        </Reveal>
       </div>
     </section>
   );
@@ -253,8 +267,12 @@ export async function Features() {
                     {feature.body}
                   </p>
                   <ul className="mt-6 space-y-3">
-                    {feature.bullets.map((bullet) => (
-                      <li key={bullet} className="flex items-start gap-3 text-sm text-ink-700">
+                    {feature.bullets.map((bullet, b) => (
+                      <li
+                        key={bullet}
+                        className="bullet-in flex items-start gap-3 text-sm text-ink-700"
+                        style={{ transitionDelay: `${b * 70}ms` }}
+                      >
                         <IconCheck className="mt-0.5 size-4 shrink-0 text-aegean-600" />
                         {bullet}
                       </li>
@@ -269,15 +287,17 @@ export async function Features() {
                   </Link>
                 </Reveal>
                 <Reveal delay={80} className={i % 2 === 1 ? "md:order-1" : undefined}>
-                  <div className="relative">
-                    <div
-                      aria-hidden="true"
-                      className="mb-4 inline-flex size-9 items-center justify-center rounded-md border border-line bg-surface text-ink-500 shadow-xs"
-                    >
-                      <Icon className="size-5" />
+                  <Tilt max={5} className="relative">
+                    <div className="relative">
+                      <div
+                        aria-hidden="true"
+                        className="mb-4 inline-flex size-9 items-center justify-center rounded-md border border-line bg-surface text-ink-500 shadow-xs"
+                      >
+                        <Icon className="size-5" />
+                      </div>
+                      <Proof />
                     </div>
-                    <Proof />
-                  </div>
+                  </Tilt>
                 </Reveal>
               </div>
             );
@@ -293,16 +313,18 @@ export async function StatsBand() {
   // Placeholder metrics — replace with real customer aggregates pre-launch.
   const items = t.raw("items") as StatItem[];
   return (
-    <section className="bg-ink-900">
+    <section className="border-t border-line bg-ink-900">
       <div className="mx-auto grid max-w-[1120px] grid-cols-2 gap-x-6 gap-y-10 px-6 py-14 md:grid-cols-4 md:py-16">
         {items.map((s, i) => (
           <Reveal key={s.label} delay={i * 60}>
-            <p className="font-display text-[clamp(2rem,1.4rem+1.5vw,3rem)] font-semibold leading-none text-white">
-              {s.value}
-            </p>
-            <p className="mt-3 max-w-[20ch] text-[13px] leading-relaxed text-white/60">
-              {s.label}
-            </p>
+            <div className="group rounded-xl border border-white/10 bg-white/[0.04] p-5 transition-[transform,border-color,background-color] duration-200 hover:-translate-y-1 hover:border-white/25 hover:bg-white/[0.07]">
+              <p className="font-display text-[clamp(2rem,1.4rem+1.5vw,3rem)] font-semibold leading-none text-white">
+                {s.value}
+              </p>
+              <p className="mt-3 max-w-[20ch] text-[13px] leading-relaxed text-white/60">
+                {s.label}
+              </p>
+            </div>
           </Reveal>
         ))}
       </div>
@@ -314,16 +336,22 @@ export async function Testimonials() {
   const t = await getTranslations("landing.testimonials");
   const items = t.raw("items") as TestimonialItem[];
   return (
-    <section className="mx-auto max-w-[1120px] px-6 py-16 md:py-24">
-      <Reveal>
-        <h2 className="font-display text-[clamp(2.1rem,1.5rem+2vw,3.25rem)] font-semibold leading-[1.12] text-ink-900">
-          {t("title")}
-        </h2>
-      </Reveal>
-      <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
-        {items.map((item, i) => (
-          <Reveal key={item.name} delay={i * 60}>
-            <figure className="flex h-full flex-col rounded-xl border border-line bg-surface p-6 shadow-xs">
+    <section className="overflow-hidden py-16 md:py-24">
+      <div className="mx-auto max-w-[1120px] px-6">
+        <Reveal>
+          <h2 className="text-center font-display text-[clamp(2.1rem,1.5rem+2vw,3.25rem)] font-semibold leading-[1.12] text-ink-900">
+            {t("title")}
+          </h2>
+        </Reveal>
+      </div>
+      {/* Infinite marquee — hover pauses it; edges fade out */}
+      <Reveal delay={100} className="mt-12">
+        <Marquee duration={38} itemClassName="gap-6 pr-6">
+          {items.map((item) => (
+            <figure
+              key={item.name}
+              className="flex w-[300px] shrink-0 flex-col rounded-xl border border-line bg-surface p-6 shadow-xs transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-md sm:w-[340px]"
+            >
               <div className="flex text-star-400" aria-label="5/5">
                 {Array.from({ length: 5 }).map((_, s) => (
                   <IconStarFilled key={s} className="size-3.5" />
@@ -344,9 +372,9 @@ export async function Testimonials() {
                 </div>
               </figcaption>
             </figure>
-          </Reveal>
-        ))}
-      </div>
+          ))}
+        </Marquee>
+      </Reveal>
     </section>
   );
 }

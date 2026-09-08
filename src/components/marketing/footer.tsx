@@ -5,6 +5,7 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Reveal } from "@/components/ui/reveal";
+import { Magnetic } from "@/components/ui/magnetic";
 import { Logo } from "@/components/ui/logo";
 import { IconArrowRight } from "@/components/ui/icons";
 
@@ -13,8 +14,14 @@ type Column = { title: string; links: { label: string; href: string }[] };
 export async function FinalCta() {
   const t = await getTranslations("landing.cta");
   return (
-    <section className="bg-ink-900">
-      <div className="mx-auto max-w-[1120px] px-6 py-20 text-center md:py-28">
+    <section className="relative overflow-hidden bg-ink-900">
+      {/* a quiet aegean aurora breathes on the ink band */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+        <div className="aurora aurora-aegean aurora-drift-a absolute -top-32 left-1/2 size-[420px] opacity-40" />
+        <div className="aurora aurora-terracotta aurora-drift-b absolute -bottom-40 right-[12%] size-[320px] opacity-25" />
+      </div>
+      <div className="meander-strip-light" aria-hidden="true" />
+      <div className="relative mx-auto max-w-[1120px] px-6 py-20 text-center md:py-28">
         <Reveal>
           <h2 className="mx-auto max-w-[22ch] font-display text-[clamp(2.1rem,1.5rem+2vw,3.25rem)] font-semibold leading-[1.12] text-white">
             {t("title")}
@@ -23,13 +30,15 @@ export async function FinalCta() {
             {t("subtitle")}
           </p>
           <div className="mt-8 flex justify-center">
-            <Link
-              href="/register"
-              className="inline-flex h-12 items-center gap-2 rounded-md bg-surface px-7 text-base font-semibold text-ink-900 shadow-md transition-[transform,box-shadow] duration-150 hover:-translate-y-px hover:shadow-lg active:translate-y-0"
-            >
-              {t("button")}
-              <IconArrowRight className="size-4" />
-            </Link>
+            <Magnetic strength={0.35} distance={10}>
+              <Link
+                href="/register"
+                className="btn-shine inline-flex h-12 items-center gap-2 rounded-md bg-surface px-7 text-base font-semibold text-ink-900 shadow-md transition-[transform,box-shadow] duration-150 hover:-translate-y-px hover:shadow-lg active:translate-y-0"
+              >
+                {t("button")}
+                <IconArrowRight className="size-4" />
+              </Link>
+            </Magnetic>
           </div>
           <p className="mt-5 text-[13px] text-white/50">{t("micro")}</p>
         </Reveal>

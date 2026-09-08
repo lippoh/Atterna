@@ -1,14 +1,16 @@
 // src/components/marketing/pricing.tsx — pricing + FAQ (§9.1)
 // Three tiers with the product's real plan names/prices (from
-// PLAN_LIMITS parity). The middle tier is highlighted. Monthly/annual
-// toggle (annual = -20%) is this file's only client state. FAQ uses
-// native <details>/<summary> — zero JavaScript.
+// PLAN_LIMITS parity). Monthly/annual toggle: a pill slides between the
+// two options and every price re-animates (price-swap). The popular card
+// carries a hover shine sweep. FAQ keeps native <details> (zero JS for
+// open/close) but the answer panel expands with a grid-rows animation.
 "use client";
 
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Reveal } from "@/components/ui/reveal";
+import { Tilt } from "@/components/ui/tilt";
 import { IconCheck, IconChevronDown } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 
@@ -56,8 +58,21 @@ export function Pricing() {
             {t("subtitle")}
           </p>
 
-          {/* monthly / annual toggle */}
-          <div className="mt-8 inline-flex items-center rounded-full border border-line-strong bg-surface p-1">
+          {/* monthly / annual toggle — the pill slides, prices re-animate */}
+          <div
+            role="group"
+            aria-label={t("title")}
+            className="relative mt-8 inline-grid grid-cols-2 rounded-full border border-line-strong bg-surface p-1"
+          >
+            {/* the sliding pill — width equals its travel distance, so
+             * translate-x-full lands it exactly on the second option */}
+            <span
+              aria-hidden="true"
+              className={cn(
+                "absolute inset-y-1 left-1 w-[calc(50%_-_4px)] rounded-full bg-ink-900 shadow-sm transition-transform duration-[280ms] ease-out",
+                annual && "translate-x-full"
+              )}
+            />
             {(
               [
                 { key: false, label: t("monthly") },
@@ -70,15 +85,18 @@ export function Pricing() {
                 onClick={() => setAnnual(opt.key)}
                 aria-pressed={annual === opt.key}
                 className={cn(
-                  "flex h-9 items-center rounded-full px-4 text-[13px] font-semibold transition-colors duration-150",
-                  annual === opt.key
-                    ? "bg-ink-900 text-white"
-                    : "text-ink-500 hover:text-ink-700"
+                  "relative z-10 flex h-9 items-center justify-center gap-2 rounded-full px-5 text-[13px] font-semibold transition-colors duration-200",
+                  annual === opt.key ? "text-white" : "text-ink-500 hover:text-ink-700"
                 )}
               >
                 {opt.label}
                 {opt.key && (
-                  <span className="ml-2 rounded-full bg-terracotta-100 px-2 py-0.5 text-[10px] font-semibold text-terracotta-500">
+                  <span
+                    className={cn(
+                      "rounded-full px-2 py-0.5 text-[10px] font-semibold transition-colors duration-200",
+                      annual ? "bg-terracotta-500 text-white" : "bg-terracotta-100 text-terracotta-500"
+                    )}
+                  >
                     −20%
                   </span>
                 )}
@@ -94,60 +112,65 @@ export function Pricing() {
             const monthly = annual ? Math.round(plan.priceMonthly * 0.8) : plan.priceMonthly;
             return (
               <Reveal key={plan.name} delay={i * 60} className="h-full">
-                <div
-                  className={cn(
-                    "relative flex h-full flex-col rounded-xl border bg-surface p-6 shadow-xs transition-[transform,box-shadow] duration-[220ms] ease-out md:p-8",
-                    popular
-                      ? "border-aegean-600 shadow-md md:scale-[1.02]"
-                      : "border-line hover:-translate-y-0.5 hover:shadow-md"
-                  )}
-                >
-                  {popular && (
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-aegean-600 px-3 py-1 text-[11px] font-semibold text-white shadow-sm">
-                      {t("popular")}
-                    </span>
-                  )}
-                  <h3 className="font-display text-xl font-semibold text-ink-900">
-                    {plan.name}
-                  </h3>
-                  <p className="mt-1.5 min-h-[40px] text-[13px] leading-relaxed text-ink-500">
-                    {plan.desc}
-                  </p>
-                  <p className="mt-5 flex items-baseline gap-1.5">
-                    <span className="font-display text-4xl font-semibold tabular-nums text-ink-900">
-                      {priceFmt.format(monthly)}
-                    </span>
-                    <span className="text-[13px] text-ink-500">/{t("perMonth")}</span>
-                  </p>
-                  <p className="mt-1 text-[12px] text-ink-300">
-                    {annual ? t("billedAnnual", { months: monthlyFmt.format(Math.round(plan.priceMonthly * 0.8 * 12)) }) : t("billedMonthly")}
-                  </p>
-                  {limits && (
-                    <p className="mt-4 rounded-md bg-sunken px-3 py-2 text-[12px] font-medium tabular-nums text-ink-700">
-                      {monthlyFmt.format(limits.reviews)} {t("reviewsPerMonth")} ·{" "}
-                      {limits.businesses} {t("businessesIncluded")}
-                    </p>
-                  )}
-                  <ul className="mt-6 flex-1 space-y-3">
-                    {plan.features.map((f) => (
-                      <li key={f} className="flex items-start gap-3 text-sm text-ink-700">
-                        <IconCheck className="mt-0.5 size-4 shrink-0 text-aegean-600" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <Link
-                    href="/register"
+                <Tilt max={popular ? 3 : 5} className="h-full">
+                  <div
                     className={cn(
-                      "mt-8 inline-flex h-11 items-center justify-center rounded-md text-sm font-semibold transition-[background-color,transform,box-shadow] duration-150",
+                      "relative flex h-full flex-col rounded-xl border bg-surface p-6 shadow-xs transition-[transform,box-shadow] duration-[220ms] ease-out md:p-8",
                       popular
-                        ? "bg-aegean-600 text-white hover:-translate-y-px hover:bg-aegean-700 hover:shadow-sm"
-                        : "border border-line-strong bg-surface text-ink-900 hover:border-ink-500"
+                        ? "card-shine border-aegean-600 shadow-md md:scale-[1.02]"
+                        : "border-line hover:-translate-y-0.5 hover:shadow-md"
                     )}
                   >
-                    {plan.cta}
-                  </Link>
-                </div>
+                    {popular && (
+                      <span className="absolute -top-3 left-1/2 z-10 -translate-x-1/2 rounded-full bg-aegean-600 px-3 py-1 text-[11px] font-semibold text-white shadow-sm">
+                        {t("popular")}
+                      </span>
+                    )}
+                    <h3 className="font-display text-xl font-semibold text-ink-900">
+                      {plan.name}
+                    </h3>
+                    <p className="mt-1.5 min-h-[40px] text-[13px] leading-relaxed text-ink-500">
+                      {plan.desc}
+                    </p>
+                    {/* key change re-mounts the node → price-swap replays */}
+                    <p key={annual ? "annual" : "monthly"} className="price-swap mt-5 flex items-baseline gap-1.5">
+                      <span className="font-display text-4xl font-semibold tabular-nums text-ink-900">
+                        {priceFmt.format(monthly)}
+                      </span>
+                      <span className="text-[13px] text-ink-500">/{t("perMonth")}</span>
+                    </p>
+                    <p key={annual ? "billed-annual" : "billed-monthly"} className="price-swap mt-1 text-[12px] text-ink-300">
+                      {annual
+                        ? t("billedAnnual", { months: monthlyFmt.format(Math.round(plan.priceMonthly * 0.8 * 12)) })
+                        : t("billedMonthly")}
+                    </p>
+                    {limits && (
+                      <p className="mt-4 rounded-md bg-sunken px-3 py-2 text-[12px] font-medium tabular-nums text-ink-700">
+                        {monthlyFmt.format(limits.reviews)} {t("reviewsPerMonth")} ·{" "}
+                        {limits.businesses} {t("businessesIncluded")}
+                      </p>
+                    )}
+                    <ul className="mt-6 flex-1 space-y-3">
+                      {plan.features.map((f) => (
+                        <li key={f} className="flex items-start gap-3 text-sm text-ink-700">
+                          <IconCheck className="mt-0.5 size-4 shrink-0 text-aegean-600" />
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                    <Link
+                      href="/register"
+                      className={cn(
+                        "mt-8 inline-flex h-11 items-center justify-center rounded-md text-sm font-semibold transition-[background-color,transform,box-shadow] duration-150",
+                        popular
+                          ? "bg-aegean-600 text-white hover:-translate-y-px hover:bg-aegean-700 hover:shadow-sm"
+                          : "border border-line-strong bg-surface text-ink-900 hover:border-ink-500"
+                      )}
+                    >
+                      {plan.cta}
+                    </Link>
+                  </div>
+                </Tilt>
               </Reveal>
             );
           })}
@@ -158,7 +181,8 @@ export function Pricing() {
           </p>
         </Reveal>
 
-        {/* FAQ — native details/summary, zero JS */}
+        {/* FAQ — native details/summary for open/close; the answer panel
+         * animates open via the grid-rows transition (zero JS) */}
         <div id="faq" className="mt-20 md:mt-28">
           <Reveal>
             <h2 className="font-display text-[clamp(2.1rem,1.5rem+2vw,3.25rem)] font-semibold leading-[1.12] text-ink-900">
@@ -173,9 +197,13 @@ export function Pricing() {
                     {item.q}
                     <IconChevronDown className="size-4 shrink-0 text-ink-300 transition-transform duration-200 group-open:rotate-180" />
                   </summary>
-                  <p className="lh-body max-w-[62ch] pb-5 text-sm leading-relaxed text-ink-700">
-                    {item.a}
-                  </p>
+                  <div className="faq-panel">
+                    <div>
+                      <p className="lh-body max-w-[62ch] pb-5 text-sm leading-relaxed text-ink-700">
+                        {item.a}
+                      </p>
+                    </div>
+                  </div>
                 </details>
               </Reveal>
             ))}
