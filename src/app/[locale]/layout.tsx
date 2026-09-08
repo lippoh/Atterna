@@ -28,12 +28,10 @@ if (!routing.locales.includes(locale as Locale)) notFound();
 setRequestLocale(locale);
 const messages = await getMessages();
 return (
-<html lang={locale}>
-<body className="min-h-dvh bg-slate-50 text-slate-900 antialiased">
 <NextIntlClientProvider messages={messages}>
-{children}
+<div className="min-h-dvh bg-slate-50 text-slate-900 antialiased">
+	{children}
+</div>
 </NextIntlClientProvider>
-</body>
-</html>
 );
 }

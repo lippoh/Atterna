@@ -11,9 +11,9 @@ export interface RatingInputProps {
 
 export function RatingInput({ value, onChange, labels }: RatingInputProps) {
   return (
-    <div className="space-y-2">
-      <p className="text-center text-base font-semibold text-slate-800">{labels.question}</p>
-      <div className="flex justify-center gap-2">
+    <div className="space-y-5">
+      <p className="text-center font-display text-2xl font-semibold leading-tight text-ink-900">{labels.question}</p>
+      <div className="flex justify-center gap-2" role="radiogroup" aria-label={labels.question}>
         {[1, 2, 3, 4, 5].map((n) => {
           const active = value === n;
           return (
@@ -24,16 +24,14 @@ export function RatingInput({ value, onChange, labels }: RatingInputProps) {
               aria-pressed={active}
               onClick={() => onChange(n)}
               className={cn(
-                "flex h-14 w-14 flex-col items-center justify-center rounded-2xl border text-2xl transition-all active:scale-95",
+                "flex h-14 w-14 flex-col items-center justify-center rounded-lg border text-2xl transition-all duration-200 hover:scale-105 active:scale-95",
                 active
-                  ? "border-blue-600 bg-blue-600 text-white shadow-md"
-                  : "border-slate-300 bg-white text-slate-600 hover:border-blue-400",
+                  ? "border-star-400 bg-star-400 text-white shadow-sm"
+                  : "border-line-strong bg-surface text-ink-500 hover:border-aegean-600",
               )}
             >
-              {n}
-              <span className={cn("text-[10px]", active ? "text-blue-100" : "text-slate-400")}>
-                {n <= 2 ? "★" : n === 3 ? "★★" : "★★★"}
-              </span>
+              <span aria-hidden="true">★</span>
+              <span className={cn("text-[10px]", active ? "text-white/80" : "text-ink-300")}>{n}</span>
             </button>
           );
         })}

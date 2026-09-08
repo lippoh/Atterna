@@ -30,7 +30,7 @@ L${PAD.left},${(H - PAD.bottom).toFixed(1)} Z`
 const first = series[0]?.date?.slice(5) ?? "";
 const last = series[series.length - 1]?.date?.slice(5) ?? "";
 return (
-<figure className="rounded-xl border border-slate-200 bg-white p-3">
+<figure className="rounded-lg border border-line bg-surface p-5 shadow-xs">
 <svg
 viewBox={`0 0 ${W} ${H}`}
 role="img"
@@ -39,8 +39,8 @@ className="h-auto w-full"
 >
 <defs>
 <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
-<stop offset="0%" stopColor="#2d7ab3" stopOpacity="0.25" />
-<stop offset="100%" stopColor="#2d7ab3" stopOpacity="0.02" />
+<stop offset="0%" stopColor="var(--aegean-600)" stopOpacity="0.18" />
+<stop offset="100%" stopColor="var(--aegean-600)" stopOpacity="0.02" />
 </linearGradient>
 </defs>
 {/* gridlines at min / mid / max */}
@@ -51,24 +51,24 @@ x1={PAD.left}
 x2={W - PAD.right}
 y1={y(v)}
 y2={y(v)}
-stroke="#e2e8f0"
+stroke="var(--line)"
 strokeDasharray="3 3"
 />
-<text x={PAD.left - 6} y={y(v) + 3} textAnchor="end" fontSize="9" fill="#64748b">
+<text x={PAD.left - 6} y={y(v) + 3} textAnchor="end" fontSize="9" fill="var(--ink-500)">
 {v.toFixed(1)}
 </text>
 </g>
 ))}
 {areaPath && <path d={areaPath} fill="url(#trendFill)" />}
-{linePath && <path d={linePath} fill="none" stroke="#2d7ab3" strokeWidth="2"
+{linePath && <path d={linePath} fill="none" stroke="var(--aegean-600)" strokeWidth="2"
 strokeLinejoin="round" strokeLinecap="round" />}
 {series.map((p, i) =>
 p.value === null ? null : (
-<circle key={p.date} cx={x(i)} cy={y(p.value)} r="2.2" fill="#1a4a7a" />
+<circle key={p.date} cx={x(i)} cy={y(p.value)} r="2.2" fill="var(--aegean-700)" />
 )
 )}
-<text x={PAD.left} y={H - 4} fontSize="9" fill="#64748b">{first}</text>
-<text x={W - PAD.right} y={H - 4} textAnchor="end" fontSize="9" fill="#64748b">{last}</text>
+<text x={PAD.left} y={H - 4} fontSize="9" fill="var(--ink-500)">{first}</text>
+<text x={W - PAD.right} y={H - 4} textAnchor="end" fontSize="9" fill="var(--ink-500)">{last}</text>
 </svg>
 </figure>
 );

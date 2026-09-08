@@ -14,6 +14,7 @@ rating: number;
 labels: {
 negativePrompt: string;
 positivePrompt: string;
+commentPlaceholder: string;
 submit: string;
 submitting: string;
 thanks: string;
@@ -37,17 +38,18 @@ null
 );
 if (state?.ok) {
 return (
-<div className="space-y-4 text-center">
-<p className="text-lg font-semibold text-emerald-700">{labels.thanks}</p>
+<div className="space-y-5 text-center">
+<div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-success-100 text-2xl text-success-600">✓</div>
+<p className="font-display text-2xl font-semibold text-ink-900">{labels.thanks}</p>
 {state.positive && (
-<div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
-<p className="text-sm text-slate-700">{labels.invitation}</p>
+<div className="rounded-lg border border-aegean-600/20 bg-aegean-100 p-5">
+<p className="text-sm leading-6 text-ink-700">{labels.invitation}</p>
 {invitationUrl && (
 <a
 href={invitationUrl}
 target="_blank"
 rel="noopener noreferrer"
-className="mt-2 inline-block text-sm font-semibold text-blue-700 underline"
+className="mt-4 inline-block rounded-sm border border-aegean-600 px-4 py-2.5 text-sm font-semibold text-aegean-700 underline-offset-4 hover:bg-surface"
 >
 {labels.invitationCta}
 </a>
@@ -59,10 +61,10 @@ className="mt-2 inline-block text-sm font-semibold text-blue-700 underline"
 }
 const negative = rating <= 3;
 return (
-<form action={formAction} className="space-y-3">
+<form action={formAction} className="space-y-4">
 <input type="hidden" name="token" value={token} />
 <input type="hidden" name="rating" value={rating} />
-<p className="text-sm font-medium text-slate-700">
+<p className="text-sm font-medium leading-6 text-ink-700">
 {negative ? labels.negativePrompt : labels.positivePrompt}
 </p>
 {negative && (
@@ -70,12 +72,12 @@ return (
 name="comment"
 rows={4}
 maxLength={1000}
-placeholder="..."
-className="bg-white"
+placeholder={labels.commentPlaceholder}
+className="bg-surface"
 />
 )}
 {state && !state.ok && (
-<p className="text-xs font-medium text-rose-600">{labels.error}</p>
+<p className="text-xs font-medium text-danger-600" role="alert">{labels.error}</p>
 )}
 <Button type="submit" size="lg" className="w-full" disabled={pending}>
 {pending ? labels.submitting : labels.submit}

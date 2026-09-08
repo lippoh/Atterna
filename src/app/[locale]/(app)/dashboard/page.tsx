@@ -27,15 +27,15 @@ getInsights(orgId, business.id, { locale }),
 ]);
 if (!business.gbpConnection) {
 return (
-<main className="mx-auto max-w-2xl space-y-4 p-4">
-  <h1 className="text-xl font-semibold">{t("title")}</h1>
-<p className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-slate-700">
+<main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6">
+  <div><p className="text-xs font-semibold uppercase tracking-[.12em] text-terracotta-500">Atterna / {t("title")}</p><h1 className="mt-2 font-display text-4xl font-semibold text-ink-900">{t("title")}</h1></div>
+<p className="max-w-2xl rounded-lg border border-aegean-600/20 bg-aegean-100 p-5 text-sm leading-7 text-ink-700">
 {t("connectFirst")}
 </p>
 <Link
 href="/onboarding"
-className="inline-block rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold
-text-white"
+className="inline-block rounded-sm bg-aegean-600 px-4 py-2.5 text-sm font-semibold
+text-white shadow-xs hover:bg-aegean-700"
 >
 → {locale === "en" ? "Connect now" : "Σύνδεση τώρα"}
 </Link>
@@ -43,9 +43,9 @@ text-white"
 );
 }
 return (
-<main className="mx-auto max-w-2xl space-y-4 p-4">
-<h1 className="text-xl font-semibold">{t("title")}</h1>
-<div className="grid grid-cols-2 gap-3">
+<main className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6">
+<div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-xs font-semibold uppercase tracking-[.12em] text-terracotta-500">Atterna / {t("title")}</p><h1 className="mt-2 font-display text-4xl font-semibold text-ink-900">{t("title")}</h1></div><span className="font-mono text-xs text-ink-500">{new Intl.DateTimeFormat(locale, { dateStyle: "long" }).format(new Date())}</span></div>
+<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 <MetricCard
 tone={m.rating >= 4.3 ? "good" : m.rating >= 3.8 ? "warn" : "bad"}
 label={t("rating")}
@@ -73,10 +73,10 @@ locale={locale}
 />
 </div>
 <TrendChart series={m.rating30d} aria-label={t("trend")} />
-<section className="space-y-3">
-<h2 className="text-base font-semibold text-slate-900">{t("insights")}</h2>
+<section className="space-y-4">
+<h2 className="font-display text-2xl font-semibold text-ink-900">{t("insights")}</h2>
 {insights.length === 0 ? (
-<p className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-500">
+<p className="rounded-lg border border-line bg-surface p-5 text-sm text-ink-500">
 {t("noInsights")}
 </p>
 ) : (

@@ -55,17 +55,17 @@ sentiment: r.analysis?.sentiment ?? null,
 };
 });
 return (
-<main className="mx-auto max-w-2xl space-y-4 p-4">
-<h1 className="text-xl font-semibold">{t("title")}</h1>
-<nav className="flex flex-wrap gap-2">
+<main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6">
+<div><p className="text-xs font-semibold uppercase tracking-[.12em] text-terracotta-500">Atterna / inbox</p><h1 className="mt-2 font-display text-4xl font-semibold text-ink-900">{t("title")}</h1><p className="mt-2 text-sm text-ink-500">{locale === "en" ? "The reviews that need your attention, in one calm place." : "Οι κριτικές που χρειάζονται την προσοχή σας, σε ένα ήσυχο μέρος."}</p></div>
+<nav className="flex flex-wrap gap-2 border-b border-line pb-4" aria-label="Review filters">
 {FILTERS.map((f) => (
 <Link
 key={f}
 href={{ pathname: "/reviews", query: f === "all" ? {} : { filter: f } }}
 className={`rounded-full px-3 py-1 text-xs font-semibold ${
 f === active
-? "bg-blue-700 text-white"
-: "border border-slate-300 bg-white text-slate-600"
+? "bg-aegean-600 text-white"
+: "border border-line-strong bg-surface text-ink-500 hover:border-aegean-600"
 }`}
 >
 {t(`filter.${f}`)}
