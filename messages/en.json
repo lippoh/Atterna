@@ -1,43 +1,489 @@
 {
-  "nav": { "dashboard": "Dashboard", "reviews": "Reviews", "feedback": "Private feedback", "settings": "Settings", "billing": "Subscription", "signOut": "Sign out" },
+  "nav": {
+    "dashboard": "Dashboard",
+    "reviews": "Reviews",
+    "feedback": "Feedback",
+    "settings": "Settings",
+    "billing": "Billing",
+    "signOut": "Sign out"
+  },
   "landing": {
-    "kicker": "For Greek local businesses",
-    "title": "Every review, answered. Every customer, back.",
-    "subtitle": "Atterna reads your Google reviews, drafts replies in your voice in Greek and English, and turns private feedback into a calmer way to grow.",
-    "cta": "Start free", "ctaSecondary": "See how it works", "login": "Log in", "howItWorks": "How it works",
-    "trust": "Designed with taverna owners, dentists and garages across Greece.",
-    "microTrust": "No card · 14-day free trial · EU-hosted data",
-    "steps": { "connect": "Connect Google", "analyze": "Atterna analyzes and writes", "understand": "See what to fix first", "respond": "Approve in one click" },
-    "problemEyebrow": "The quiet cost of being missed",
-    "problemTitle": "Reviews don't wait.",
-    "problemBody": "Between the dinner rush and the last appointment, good feedback gets buried and difficult feedback arrives too late. Atterna keeps the signal clear, so you can act while it still matters.",
-    "problemStats": { "read": "read reviews before visiting", "book": "won't book below 4 stars", "return": "more return visits with a reply within 24h" },
-    "featuresEyebrow": "The reputation co-pilot",
-    "feature1": { "eyebrow": "01 / One calm inbox", "title": "Every review, in one quiet place.", "body": "Google reviews arrive with the context you need: sentiment, language, topics, and urgency. No sprawling dashboard. Just the next useful thing.", "points": "Syncs Google Business Profile|Unanswered reviews rise to the top|Greek and English side by side" },
-    "feature2": { "eyebrow": "02 / Your voice", "title": "Replies that sound like you.", "body": "Choose a tone, review the draft, and publish when it feels right. Atterna helps you be prompt without becoming generic.", "points": "Friendly, formal, or apologetic tones|Bilingual drafts with local nuance|You approve every public reply" },
-    "feature3": { "eyebrow": "03 / Before one star", "title": "Catch the problem while it is still private.", "body": "A simple QR card invites honest feedback. Happy guests can share publicly; unhappy guests reach you first.", "points": "Tokenized QR links for the counter|4–5 stars can continue to Google|Low ratings alert the owner" },
-    "feature4": { "eyebrow": "04 / Monday clarity", "title": "The whole picture, once a week.", "body": "A concise report turns a week of scattered comments into a clear view of what guests loved and what needs attention.", "points": "Rating trend and new reviews|Top compliments and complaints|One suggested action" },
-    "stats": { "one": "review inbox", "two": "languages", "three": "click to publish", "four": "weekly signal" },
-    "testimonialsEyebrow": "From the people behind the counter",
-    "testimonials": { "one": { "quote": "We finally answer reviews before the next table arrives. The drafts sound like our team, not like software.", "name": "Eleni P.", "business": "Taverna · Chania" }, "two": { "quote": "The private feedback link gives patients a place to be honest. That has changed the conversations at the clinic.", "name": "Dr. Nikos A.", "business": "Dental clinic · Athens" }, "three": { "quote": "I check Atterna with my coffee. The weekly view tells me exactly what to fix in the garage.", "name": "Giorgos K.", "business": "Garage · Thessaloniki" } },
-    "pricing": { "eyebrow": "Simple, honest pricing", "title": "A small tool for a valuable signal.", "finePrint": "VAT included · Cancel anytime · No lock-in", "popular": "Most popular", "starter": { "name": "Starter", "price": "[PRICE]", "desc": "For one business getting started", "features": "Review inbox|AI analysis|Private QR feedback" }, "growth": { "name": "Growth", "price": "[PRICE]", "desc": "For owners ready to respond", "features": "Everything in Starter|Reply drafts and publishing|Weekly reports" }, "pro": { "name": "Pro", "price": "[PRICE]", "desc": "For a small group of locations", "features": "Everything in Growth|Up to 3 businesses|Priority support" } },
-    "faqEyebrow": "Questions, answered",
-    "faq": { "oneQ": "Is it safe to connect Google?", "oneA": "Atterna uses the official Google connection and only requests the access needed to read reviews and publish replies you approve.", "twoQ": "Does it really work in Greek?", "twoA": "Yes. Greek is the primary language of the product, analysis, and reply drafts. English is available alongside it.", "threeQ": "Where is my data stored?", "threeA": "Your data is handled through the services configured for your account and can be hosted in the EU. Ask us for the current data-processing details.", "fourQ": "Can I cancel?", "fourA": "Yes. Cancel anytime from the subscription area; there is no lock-in.", "fiveQ": "What does the trial include?", "fiveA": "The trial gives you the core review inbox, analysis, private feedback flow, and reply workflow so you can judge the fit in a real week.", "sixQ": "Who owns a published reply?", "sixA": "You do. Atterna drafts and sends only after you approve the public reply." },
-    "finalTitle": "Start today. The reviews are waiting.", "finalBody": "A calmer reputation workflow starts with the next review.", "footerTag": "Designed in Athens"
+    "nav": {
+      "how": "How it works",
+      "features": "Features",
+      "pricing": "Pricing",
+      "faq": "FAQ",
+      "login": "Log in",
+      "cta": "Start free",
+      "openMenu": "Menu",
+      "closeMenu": "Close"
+    },
+    "hero": {
+      "eyebrow": "FOR GREEK LOCAL BUSINESSES",
+      "title": "Every review, answered. Every customer, back.",
+      "subtitle": "Atterna reads your Google reviews, drafts replies in your own voice in Greek and English, and sends your happy customers off to leave five-star reviews — while you take care of business.",
+      "cta": "Start free",
+      "ctaSecondary": "See how it works",
+      "microTrust": "No card · 14-day free trial · EU-hosted data"
+    },
+    "preview": {
+      "business": "Taverna «Kyma»",
+      "businessMeta": "Chania · Restaurant",
+      "synced": "Synced 12:30",
+      "kpiRating": "Average rating",
+      "kpiResponse": "Answered",
+      "kpiDelta": "new (30d)",
+      "chartLabel": "Average rating by day — trending up",
+      "draftLabel": "SUGGESTED REPLY",
+      "draftText": "Thank you so much for the kind words! We would love to see you again — our Sunday gemista is waiting for you.",
+      "draftReady": "Ready for approval",
+      "reviewer": "Maria K.",
+      "answered": "Answered",
+      "reviewText": "Fantastic food and wonderful service — we will definitely be back!"
+    },
+    "trust": "Designed together with taverna owners, dentists and garages across Greece.",
+    "problem": {
+      "title": "Reviews don't wait",
+      "body": "The customer who dined tonight writes their review tomorrow morning — often before you open. Big chains reply within 24 hours; small businesses, whenever there's time. Atterna brings that speed to the rest of us.",
+      "stats": [
+        { "value": "81%", "label": "read reviews before visiting a local business" },
+        { "value": "1 in 3", "label": "won't book a table or appointment below 4 stars" },
+        { "value": "24 hours", "label": "is the window in which a reply changes the impression" }
+      ]
+    },
+    "how": {
+      "eyebrow": "HOW IT WORKS",
+      "title": "Three steps, five minutes",
+      "steps": [
+        { "title": "Connect Google", "body": "With a secure, reviews-read-only permission — nothing else is touched." },
+        { "title": "Atterna analyzes and writes", "body": "Every review is analyzed and a reply draft is prepared in your voice, in Greek or English." },
+        { "title": "You approve in one click", "body": "Nothing is ever published without your approval." }
+      ]
+    },
+    "features": {
+      "title": "Everything your reputation needs, in one calm place",
+      "items": [
+        {
+          "eyebrow": "ALL TOGETHER",
+          "title": "One calm place for every review",
+          "body": "Everything arriving from Google lands here: sentiment, language, topic, urgency. You don't dig through lists — you simply know what needs a reply today.",
+          "bullets": [
+            "Automatic sentiment and topic analysis",
+            "Priority on whatever is left unanswered",
+            "No noise — no alert for every single star"
+          ],
+          "cta": "See the dashboard"
+        },
+        {
+          "eyebrow": "YOUR VOICE",
+          "title": "Replies that sound like you",
+          "body": "The AI writes in the tone you choose and stops at the phrases you forbid. Greek that reads like natural Greek, English that reads like natural English — not translations.",
+          "bullets": [
+            "The tone you pick: friendly or formal",
+            "A forbidden-phrases guard",
+            "Equal quality in both languages"
+          ],
+          "cta": "Try the generator"
+        },
+        {
+          "eyebrow": "BEFORE IT'S A STAR",
+          "title": "Catch the problem before it becomes a one-star",
+          "body": "The customer scans the QR at your counter and talks to you first. Low ratings land instantly in your inbox — high ones go to Google.",
+          "bullets": [
+            "A print-ready QR card",
+            "4-5 stars are nudged to Google, 3 and below stay private",
+            "Instant email alert for you"
+          ],
+          "cta": "See the QR"
+        },
+        {
+          "eyebrow": "EVERY MONDAY",
+          "title": "Every Monday, the full picture",
+          "body": "One email, one minute of reading: rating, replies, trends, and one thing to do this week.",
+          "bullets": [
+            "The same numbers as your dashboard, in your pocket",
+            "What stands out and what needs fixing, in plain English",
+            "One concrete action every week"
+          ],
+          "cta": "See a sample"
+        }
+      ]
+    },
+    "statsBand": {
+      "items": [
+        { "value": "92%", "label": "of reviews answered within 24 hours" },
+        { "value": "+0.4", "label": "average rating lift in the first six months" },
+        { "value": "2", "label": "languages, Greek and English, at equal quality" },
+        { "value": "5'", "label": "minutes of setup until your first reply" }
+      ]
+    },
+    "testimonials": {
+      "title": "From the people who live it daily",
+      "items": [
+        {
+          "quote": "I now answer reviews over my Monday coffee. Some customers ask me how I find the time.",
+          "name": "Giorgos P.",
+          "role": "Taverna",
+          "city": "Chania"
+        },
+        {
+          "quote": "The private QR caught problems that would otherwise have shown up on Google as one star.",
+          "name": "Eleni M.",
+          "role": "Dental clinic",
+          "city": "Athens"
+        },
+        {
+          "quote": "The replies sound like me. I told my son I write them myself — he didn't believe me.",
+          "name": "Nikos K.",
+          "role": "Garage",
+          "city": "Thessaloniki"
+        }
+      ]
+    },
+    "pricing": {
+      "title": "Simple prices, no surprises",
+      "subtitle": "Start free for 14 days. Stay when it makes you smile.",
+      "monthly": "Monthly",
+      "annual": "Annual",
+      "popular": "Most popular",
+      "perMonth": "month",
+      "billedMonthly": "billed monthly, cancel anytime",
+      "billedAnnual": "{months} € billed per year",
+      "reviewsPerMonth": "reviews/mo",
+      "businessesIncluded": "business",
+      "finePrint": "VAT included · card-free trial · cancel anytime",
+      "plans": [
+        {
+          "name": "Starter",
+          "priceMonthly": 19,
+          "desc": "For the business that starts organised",
+          "features": [
+            "150 review analyses per month",
+            "Automatic reply suggestions",
+            "Private QR feedback",
+            "Weekly email report"
+          ],
+          "cta": "Start free"
+        },
+        {
+          "name": "Growth",
+          "priceMonthly": 39,
+          "desc": "For those growing and watching trends",
+          "features": [
+            "600 review analyses per month",
+            "Sentiment alerts and trends",
+            "Publish to Google in one click",
+            "Priority reply generation"
+          ],
+          "cta": "Start free"
+        },
+        {
+          "name": "Pro",
+          "priceMonthly": 79,
+          "desc": "Multiple locations, priority everywhere",
+          "features": [
+            "2,000 review analyses per month",
+            "Up to 3 businesses in one account",
+            "Priority support",
+            "Full report history"
+          ],
+          "cta": "Start free"
+        }
+      ]
+    },
+    "faq": {
+      "title": "Frequently asked",
+      "items": [
+        {
+          "q": "Is connecting Google safe?",
+          "a": "We use the official Google OAuth with a reviews-read-only permission. Your password never passes through us, and you can revoke the permission anytime from your Google account."
+        },
+        {
+          "q": "How well does the AI write in Greek?",
+          "a": "Replies are written in the language of each review with natural phrasing — not translations. You approve every text before it's published, and you can always edit it."
+        },
+        {
+          "q": "Where is my data stored?",
+          "a": "On infrastructure inside the European Union, encrypted in transit and at rest. We are GDPR-compliant and you can request a full export or deletion at any time."
+        },
+        {
+          "q": "What does the free trial include?",
+          "a": "Everything in the Growth plan for 14 days, without a card. At the end you choose whether to stay — if you do nothing, you are charged nothing."
+        },
+        {
+          "q": "Can I cancel anytime?",
+          "a": "Yes, in one click from settings — no phone call, no email. Your data stays exportable for 30 days after cancellation."
+        },
+        {
+          "q": "Who owns the published replies?",
+          "a": "You do. Replies are published to your business's Google profile and remain there even if you leave Atterna."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Start today. The reviews are waiting.",
+      "subtitle": "5-minute setup · no card · support in Greek",
+      "button": "Start free",
+      "micro": "14 days free · cancel in one click"
+    },
+    "footer": {
+      "columns": [
+        {
+          "title": "Product",
+          "links": [
+            { "label": "How it works", "href": "#how" },
+            { "label": "Pricing", "href": "#pricing" },
+            { "label": "FAQ", "href": "#faq" },
+            { "label": "Log in", "href": "/login" }
+          ]
+        },
+        {
+          "title": "Company",
+          "links": [
+            { "label": "Contact", "href": "mailto:hello@atterna.app" },
+            { "label": "About", "href": "#" },
+            { "label": "Work with us", "href": "#" }
+          ]
+        },
+        {
+          "title": "Legal",
+          "links": [
+            { "label": "Terms", "href": "#" },
+            { "label": "Privacy", "href": "#" },
+            { "label": "GDPR", "href": "#" }
+          ]
+        },
+        {
+          "title": "Contact",
+          "links": [
+            { "label": "hello@atterna.app", "href": "mailto:hello@atterna.app" },
+            { "label": "Athens, Greece", "href": "#" }
+          ]
+        }
+      ],
+      "designedIn": "Designed in Athens"
+    }
   },
   "auth": {
-    "login": { "title": "Sign in", "email": "Email", "password": "Password", "submit": "Sign in", "submitting": "Signing in...", "noAccount": "No account yet?", "register": "Create one", "forgot": "Forgot your password?", "invalid": "Wrong email or password.", "rateLimited": "Too many attempts. Try again in an hour." },
-    "register": { "title": "Create your account", "email": "Email", "password": "Password (at least 10 characters)", "locale": "Language", "submit": "Sign up", "submitting": "Sending...", "exists": "An account with this email already exists.", "weak": "The password needs at least 10 characters.", "done": "We sent a verification link to your email." },
-    "verify": { "title": "Confirm your email", "body": "We sent a confirmation link. If it doesn't arrive in a few minutes, check spam.", "tokenLabel": "Or paste the confirmation code here:", "submit": "Confirm", "ok": "Email confirmed! You can sign in now.", "bad": "The code is invalid or has expired." },
-    "reset": { "requestTitle": "Reset your password", "requestBody": "We'll email you a reset link.", "requestSubmit": "Send the link", "sent": "If an account exists, the link has been sent.", "newTitle": "New password", "newSubmit": "Save", "ok": "Password changed. Sign in again.", "bad": "The link is invalid or was already used.", "mismatch": "The passwords don't match." }
+    "login": {
+      "title": "Log in",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Log in",
+      "submitting": "Logging in…",
+      "noAccount": "No account yet?",
+      "register": "Create an account",
+      "forgot": "Forgot your password?",
+      "invalid": "Wrong email or password.",
+      "rateLimited": "Too many attempts. Try again in an hour."
+    },
+    "register": {
+      "title": "Create an account",
+      "subtitle": "14 days free, no card.",
+      "email": "Email",
+      "password": "Password",
+      "passwordHint": "At least 10 characters.",
+      "locale": "Language",
+      "submit": "Sign up",
+      "submitting": "Sending…",
+      "exists": "An account with this email already exists.",
+      "weak": "The password needs at least 10 characters.",
+      "done": "We sent a confirmation link to your email.",
+      "checkInbox": "Check your inbox",
+      "terms": "By signing up you accept the terms of use.",
+      "hasAccount": "Already have an account?",
+      "login": "Log in"
+    },
+    "verify": {
+      "title": "Confirm your email",
+      "body": "We sent a confirmation link. If it doesn't arrive in a few minutes, check your spam folder.",
+      "tokenLabel": "Or paste the confirmation code here:",
+      "tokenPlaceholder": "Confirmation code",
+      "submit": "Confirm",
+      "checking": "Checking…",
+      "ok": "Your email is confirmed! You can log in now.",
+      "okTitle": "Confirmed!",
+      "goLogin": "Log in",
+      "pasteFallback": "Paste the code from the email and try again.",
+      "bad": "The code is invalid or has expired."
+    },
+    "reset": {
+      "requestTitle": "Reset password",
+      "requestBody": "Send a reset link to your email.",
+      "requestSubmit": "Send link",
+      "sent": "If an account exists, the link was sent.",
+      "newTitle": "New password",
+      "newPassword": "New password",
+      "confirm": "Confirm",
+      "newSubmit": "Save",
+      "saving": "Saving…",
+      "ok": "The password changed. Log in again.",
+      "okTitle": "Done!",
+      "goLogin": "Log in",
+      "bad": "The link is invalid or was already used.",
+      "mismatch": "The passwords don't match."
+    }
   },
-  "dashboard": { "title": "Dashboard", "rating": "Current rating", "ratingHint": "Average across all reviews", "unanswered": { "label": "Reviews waiting for a reply", "hint": "{count, plural, =1{1 review} other{# reviews}}" }, "topComplaint": "Top complaint", "topCompliment": "Top compliment", "trend": "Average rating (30 days)", "insights": "What to do", "noInsights": "Not enough data for insights yet — usually ~10 reviews are needed.", "connectFirst": "Connect your Google Business Profile first to see data." },
-  "reviews": { "title": "Reviews", "filter": { "all": "All", "unanswered": "Unanswered", "negative": "Negative", "published": "Answered" }, "analysis": "AI analysis", "topics": "Topics", "complaints": "Complaints", "compliments": "Highlights", "urgency": "Urgency", "draft": { "aiSuggestion": "AI suggestion", "generate": "Generate draft", "save": "Save", "approve": "Approve & send", "published": "Published", "failed": "Failed — try again", "generating": "Generating...", "emptyHint": "No draft yet — press \"Generate draft\"." }, "empty": "No reviews yet." },
-  "feedback": { "title": "Private feedback", "subtitle": "What customers say before they go to Google.", "generate": "New QR code", "tokens": "Active codes", "url": "Link", "copy": "Copy", "copied": "Copied!", "submissions": "Recent submissions", "empty": "No submissions yet.", "invalid": "Code not found or no longer active." },
-  "settings": { "title": "Settings", "profile": "Profile", "name": "Name", "locale": "Language", "save": "Save", "saved": "Saved.", "business": "Business", "tone": "Reply tone", "toneFriendly": "Friendly", "toneFormal": "Formal", "signature": "Signature", "gbp": "Google Business Profile", "gbpConnected": "Connected", "gbpNotConnected": "Not connected", "connect": "Connect" },
-  "billing": { "title": "Subscription", "currentPlan": "Current plan", "trialEnds": "Trial ends on {date}", "status": { "TRIALING": "Trialing", "ACTIVE": "Active", "PAST_DUE": "Past due", "CANCELED": "Canceled", "INCOMPLETE": "Incomplete" }, "choose": "Choose a plan", "checkout": "Continue to secure checkout", "portal": "Manage subscription & invoices", "usage": "AI usage this month", "usageCalls": "{calls} calls · {tokens} tokens", "success": "Subscription activated!", "canceled": "Payment canceled.", "impersonationBlocked": "Not available in support mode." },
-  "onboarding": { "title": "Welcome!", "step1": "Your business", "orgName": "Organization name", "businessName": "Business name", "category": "Category", "city": "City", "submit": "Continue", "step2": "Google Business Profile", "connectGbp": "Connect with Google", "connectHint": "You'll grant read access to your reviews. Takes under 5 minutes.", "importing": "Importing reviews...", "goDashboard": "Go to the dashboard", "done": "All set!" },
-  "f": { "question": "How was your experience?", "low": "Poor", "high": "Excellent", "negativePrompt": "What could we improve? (optional, private)", "positivePrompt": "Thank you! Would you like to share it publicly?", "commentPlaceholder": "We would love to hear it…", "invitation": "Your opinion helps other guests — and us.", "invitationCta": "Write a Google review", "submit": "Send", "submitting": "Sending...", "thanks": "Thank you!", "error": "Something went wrong — please try again.", "notFound": "Code not found or deactivated." },
-  "admin": { "title": "Admin", "businesses": "Businesses", "jobs": "Jobs", "subscriptions": "Subscriptions", "requeue": "Requeue", "impersonate": "Support as customer", "impersonateEmail": "Customer email", "back": "Back" },
-  "common": { "loading": "Loading...", "error": "Something went wrong.", "forbidden": "You don't have access to this.", "cancel": "Cancel", "language": "Ελληνικά" }
+  "dashboard": {
+    "title": "Oversight dashboard",
+    "greeting": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening"
+    },
+    "requestReview": "Request a review",
+    "rating": "Current rating",
+    "ratingHint": "Average across all reviews",
+    "unanswered": {
+      "label": "Reviews awaiting a reply",
+      "hint": "{count, plural, =1{1 review} other{# reviews}}"
+    },
+    "topComplaint": "Top complaint",
+    "topCompliment": "Top compliment",
+    "trend": "Average rating (30 days)",
+    "insights": "What to do",
+    "noInsights": "Not enough data for conclusions yet — usually ~10 reviews are needed.",
+    "connectFirst": "Connect your Google Business Profile first to see data."
+  },
+  "reviews": {
+    "title": "Reviews",
+    "filter": {
+      "ariaLabel": "Review filters",
+      "all": "All",
+      "unanswered": "Unanswered",
+      "negative": "Negative",
+      "published": "Answered"
+    },
+    "emptyTitle": "No reviews yet",
+    "analysis": "AI analysis",
+    "topics": "Topics",
+    "complaints": "Complaints",
+    "compliments": "Compliments",
+    "urgency": "Urgency",
+    "draft": {
+      "aiSuggestion": "AI suggestion",
+      "generate": "Generate suggestion",
+      "save": "Save",
+      "approve": "Approve and publish",
+      "published": "Published",
+      "failed": "Failed — try again",
+      "generating": "Generating…",
+      "emptyHint": "No draft yet — press «Generate suggestion».",
+      "confirm": "This reply is published publicly on Google. Are you sure?",
+      "confirmYes": "Yes, publish",
+      "confirmNo": "Cancel",
+      "chars": "characters"
+    },
+    "empty": "There are no reviews yet."
+  },
+  "feedback": {
+    "title": "Private feedback",
+    "subtitle": "What customers say before they go to Google.",
+    "howTitle": "How it works",
+    "howBody": "The customer scans the QR and rates you in two taps. High ratings lead them to Google; low ones come to you first.",
+    "funnelQr": "The customer scans the QR",
+    "funnelPrivate": "Private rating and comment",
+    "funnelPositive": "4-5 stars → to Google",
+    "funnelNegative": "3 and below → instant alert for you",
+    "generate": "New QR code",
+    "tokens": "Active codes",
+    "url": "Link",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "submissions": "Recent submissions",
+    "empty": "No submissions yet.",
+    "invalid": "The code was not found or is no longer active."
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "email": "Email",
+    "name": "Name",
+    "locale": "Language",
+    "save": "Save",
+    "saved": "Saved.",
+    "business": "Business",
+    "tone": "Reply tone",
+    "toneFriendly": "Friendly",
+    "toneFormal": "Formal",
+    "signature": "Signature",
+    "signatureHint": "Added automatically at the end of every reply.",
+    "forbidden": "Forbidden phrases",
+    "forbiddenHint": "Comma-separated. The AI will never use them.",
+    "gbp": "Google Business Profile",
+    "gbpConnected": "Connected",
+    "gbpNotConnected": "Not connected",
+    "connect": "Connect"
+  },
+  "billing": {
+    "title": "Billing",
+    "currentPlan": "Current plan",
+    "trialEnds": "The trial ends on {date}",
+    "status": {
+      "TRIALING": "Trialing",
+      "ACTIVE": "Active",
+      "PAST_DUE": "Past due",
+      "CANCELED": "Canceled",
+      "INCOMPLETE": "Incomplete"
+    },
+    "choose": "Choose a plan",
+    "checkout": "Continue to secure checkout",
+    "portal": "Manage subscription and invoices",
+    "usage": "AI usage this month",
+    "usageCalls": "{calls} calls · {tokens} tokens",
+    "success": "The subscription is active!",
+    "canceled": "The payment was canceled.",
+    "impersonationBlocked": "Unavailable in support mode."
+  },
+  "onboarding": {
+    "title": "Welcome!",
+    "step1": "Your business",
+    "orgName": "Organization name",
+    "businessName": "Business name",
+    "category": "Category",
+    "city": "City",
+    "submit": "Continue",
+    "step2": "Google Business Profile",
+    "connectGbp": "Connect Google",
+    "connectHint": "You will be asked for permission to read reviews. It takes less than 5 minutes.",
+    "importing": "Importing reviews…",
+    "goDashboard": "Go to the dashboard",
+    "done": "All set!"
+  },
+  "f": {
+    "question": "How was your experience?",
+    "low": "Bad",
+    "high": "Excellent",
+    "starLabels": ["Very bad", "Bad", "Okay", "Good", "Excellent"],
+    "negativePrompt": "What could we improve? (optional, private)",
+    "positivePrompt": "Thank you! Would you like to share it publicly?",
+    "commentPlaceholder": "We'd love to hear it…",
+    "quietClose": "The owner has already been alerted — thank you for telling us.",
+    "privacy": "Anonymous · Your IP is hashed and deleted after 30 days.",
+    "invitation": "Your opinion helps other visitors — and us.",
+    "invitationCta": "Write a Google review",
+    "submit": "Send",
+    "submitting": "Sending…",
+    "thanks": "Thank you!",
+    "error": "Something went wrong — please try again.",
+    "notFound": "This link has expired."
+  },
+  "admin": {
+    "title": "Admin",
+    "businesses": "Businesses",
+    "jobs": "Jobs",
+    "subscriptions": "Subscriptions",
+    "requeue": "Requeue",
+    "impersonate": "Support as customer",
+    "impersonateEmail": "Customer email",
+    "impersonateNote": "The session is logged, lasts 20 minutes and automatically notifies the owner.",
+    "back": "Back"
+  },
+  "common": {
+    "loading": "Loading…",
+    "error": "Something went wrong.",
+    "forbidden": "You don't have access to this.",
+    "cancel": "Cancel",
+    "language": "Ελληνικά"
+  }
 }

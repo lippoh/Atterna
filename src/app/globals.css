@@ -1,28 +1,96 @@
+/* src/app/globals.css — Atterna "Aegean Premium" design system
+ * Porcelain & Ink light palette + Night Calm dark (app surfaces), Greek-
+ * first typography, restrained motion. Tokens per the design brief §5;
+ * @theme inline maps them to Tailwind utilities that flip with the
+ * media query automatically.
+ */
 @import "tailwindcss";
 
+/* ── Semantic tokens (light: "Porcelain & Ink") ─────────────────────────── */
 :root {
-  --background: #FAF9F7;
-  --foreground: #12283F;
-  --surface: #FFFFFF;
-  --sunken: #F2EFE9;
-  --ink-900: #12283F;
-  --ink-700: #31445A;
-  --ink-500: #66788B;
-  --ink-300: #8FA0B0;
-  --line: #E7E2D8;
-  --line-strong: #D4CFC2;
-  --aegean-600: #175E9E;
-  --aegean-700: #11497E;
-  --aegean-100: #E8F1F8;
-  --terracotta-500: #C05B33;
-  --terracotta-100: #F9EAE2;
-  --success-600: #237A57;
-  --success-100: #E6F1EB;
-  --danger-600: #C23B2E;
-  --danger-100: #FBEAE7;
-  --star-400: #E8A13D;
+  --background: #faf9f7;
+  --foreground: #12283f;
+  --surface: #ffffff;
+  --sunken: #f2efe9;
+
+  --ink-900: #12283f;
+  --ink-700: #31445a;
+  --ink-500: #66788b;
+  --ink-300: #8fa0b0;
+
+  --line: #e7e2d8;
+  --line-strong: #d4cfc2;
+
+  --aegean-600: #175e9e;
+  --aegean-700: #11497e;
+  --aegean-100: #e8f1f8;
+
+  --terracotta-500: #c05b33;
+  --terracotta-100: #f9eae2;
+
+  --success-600: #237a57;
+  --success-100: #e6f1eb;
+  --danger-600: #c23b2e;
+  --danger-100: #fbeae7;
+  --star-400: #e8a13d;
 }
 
+/* ── Night Calm (app surfaces only; marketing stays light) ──────────────── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0b1522;
+    --foreground: #e9eff5;
+    --surface: #122233;
+    --sunken: #0e1a29;
+
+    --ink-900: #e9eff5;
+    --ink-700: #c3ced9;
+    --ink-500: #8da0b3;
+    --ink-300: #5e7186;
+
+    --line: #22354a;
+    --line-strong: #2e4257;
+
+    --aegean-600: #4e9fd1;
+    --aegean-700: #6cb1dd;
+    --aegean-100: #16304a;
+
+    --terracotta-500: #e08a5f;
+    --terracotta-100: #33211b;
+
+    --success-600: #57b08a;
+    --success-100: #14291f;
+    --danger-600: #e06555;
+    --danger-100: #331d1a;
+    --star-400: #e8a13d;
+  }
+}
+
+/* Marketing surfaces opt out of dark mode regardless of system setting:
+ * wrap marketing markup in .force-light (set on <html> by the landing). */
+.force-light {
+  --background: #faf9f7;
+  --foreground: #12283f;
+  --surface: #ffffff;
+  --sunken: #f2efe9;
+  --ink-900: #12283f;
+  --ink-700: #31445a;
+  --ink-500: #66788b;
+  --ink-300: #8fa0b0;
+  --line: #e7e2d8;
+  --line-strong: #d4cfc2;
+  --aegean-600: #175e9e;
+  --aegean-700: #11497e;
+  --aegean-100: #e8f1f8;
+  --terracotta-500: #c05b33;
+  --terracotta-100: #f9eae2;
+  --success-600: #237a57;
+  --success-100: #e6f1eb;
+  --danger-600: #c23b2e;
+  --danger-100: #fbeae7;
+}
+
+/* ── Tailwind theme bridge ──────────────────────────────────────────────── */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -44,69 +112,211 @@
   --color-danger-600: var(--danger-600);
   --color-danger-100: var(--danger-100);
   --color-star-400: var(--star-400);
-  --font-display: var(--font-playfair), Georgia, serif;
-  --font-sans: var(--font-inter), system-ui, sans-serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  --font-display: var(--font-serif-display), "Source Serif 4", Georgia, serif;
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-mono-plex), ui-monospace, "SF Mono", monospace;
+
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 24px;
+
   --shadow-xs: 0 1px 2px rgba(18, 40, 63, 0.05);
   --shadow-sm: 0 1px 2px rgba(18, 40, 63, 0.06), 0 2px 8px rgba(18, 40, 63, 0.06);
-  --shadow-md: 0 2px 4px rgba(18, 40, 63, 0.05), 0 12px 28px rgba(18, 40, 63, 0.10);
+  --shadow-md: 0 2px 4px rgba(18, 40, 63, 0.05), 0 12px 28px rgba(18, 40, 63, 0.1);
   --shadow-lg: 0 4px 8px rgba(18, 40, 63, 0.06), 0 24px 56px rgba(18, 40, 63, 0.14);
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@media (prefers-color-scheme: dark) {
-  .app-shell {
-    --background: #0B1522;
-    --foreground: #E9EFF5;
-    --surface: #122233;
-    --sunken: #0E1A29;
-    --ink-900: #E9EFF5;
-    --ink-700: #C3CED9;
-    --ink-500: #8DA0B3;
-    --ink-300: #647A90;
-    --line: #22354A;
-    --line-strong: #304861;
-    --aegean-600: #4E9FD1;
-    --aegean-700: #75B5DE;
-    --aegean-100: #16304A;
-    --terracotta-500: #E08A5F;
-    --terracotta-100: #33211B;
-    --success-600: #57B08A;
-    --success-100: #14291F;
-    --danger-600: #E06555;
-    --danger-100: #331D1A;
-    --star-400: #F0B45D;
+/* ── Base ───────────────────────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--background);
+  color: var(--ink-700);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background-color: var(--aegean-100);
+  color: var(--ink-900);
+}
+
+:focus-visible {
+  outline: 2px solid var(--aegean-600);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Greek body copy gets roomier leading — diacritics collide at tight
+ * line-height (brief §6.3). */
+:lang(el) .lh-body {
+  line-height: 1.75;
+}
+
+/* ── Motion system (restrained; brief §8) ───────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 320ms var(--ease-out-soft),
+    transform 320ms var(--ease-out-soft);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Nav link underline that grows from the left (220ms). */
+.link-grow {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 2px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  padding-bottom: 2px;
+  transition: background-size 220ms var(--ease-out-soft);
+}
+.link-grow:hover,
+.link-grow:focus-visible {
+  background-size: 100% 2px;
+}
+
+/* Chart line draw-in: 700ms, once. pathLength=1 normalizes the path. */
+.chart-line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: chart-draw 700ms var(--ease-out-soft) 120ms forwards;
+}
+@keyframes chart-draw {
+  to {
+    stroke-dashoffset: 0;
   }
 }
 
-* { border-color: var(--line); }
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-inter), system-ui, sans-serif;
-  line-height: 1.6;
+/* Success check draws itself on the public feedback page (400ms). */
+.check-draw {
+  stroke-dasharray: 60;
+  stroke-dashoffset: 60;
+  animation: check-draw 400ms var(--ease-out-soft) 120ms forwards;
+}
+@keyframes check-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
-::selection { background: var(--aegean-100); color: var(--ink-900); }
-
-button, a, input, textarea, select, summary { outline-offset: 3px; }
-
-:focus-visible { outline: 2px solid var(--aegean-600); outline-offset: 3px; }
-
-.meander-divider {
-  height: 8px;
-  background-image: url("data:image/svg+xml,%3Csvg width='48' height='8' viewBox='0 0 48 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 2h6v4h6V2h6v4h6V2h6v4h6V2h6v4h6' fill='none' stroke='%2312283f' stroke-opacity='.08'/%3E%3C/svg%3E");
+/* Star selection pop (200ms) + hover scale 1.08. */
+.star-pop {
+  animation: star-pop 200ms var(--ease-out-soft);
+}
+@keyframes star-pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1.08);
+  }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .reveal { opacity: 0; transform: translateY(12px); transition: opacity 320ms cubic-bezier(.22,1,.36,1), transform 320ms cubic-bezier(.22,1,.36,1); }
-  .reveal.is-visible { opacity: 1; transform: translateY(0); }
+/* Urgency dot pulse — 1.6s, disabled under reduced motion. */
+.pulse-dot {
+  animation: pulse-dot 1.6s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
 }
 
+/* Skeleton shimmer: 90° gradient sweep, 1.2s. */
+.skeleton {
+  background-color: var(--sunken);
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(18, 40, 63, 0.06) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.2s linear infinite;
+}
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* ── Accessibility: reduced motion collapses everything (brief §8) ─────── */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; scroll-behavior: auto !important; }
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal {
+    transition-duration: 1ms;
+    opacity: 1;
+    transform: none;
+  }
+  .chart-line,
+  .check-draw {
+    animation-duration: 1ms;
+    stroke-dashoffset: 0;
+  }
+  .star-pop,
+  .pulse-dot,
+  .skeleton {
+    animation: none;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 1ms !important;
+  }
+}
+
+/* ── Skip link: first focusable element (a11y contract §11) ─────────────── */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 8px;
+  z-index: 100;
+}
+.skip-link:focus-visible {
+  left: 8px;
+}
+
+/* ── Meander wave divider (the single motif, brief §5.4) ────────────────── */
+.meander-strip {
+  height: 8px;
+  background-repeat: repeat-x;
+  background-size: 24px 8px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='8' viewBox='0 0 24 8'%3E%3Cpath d='M0 6 Q3 0 6 6 T12 6 T18 6 T24 6' fill='none' stroke='%2312283f' stroke-opacity='0.14' stroke-width='1.25'/%3E%3C/svg%3E");
+}
+.meander-strip-light {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='8' viewBox='0 0 24 8'%3E%3Cpath d='M0 6 Q3 0 6 6 T12 6 T18 6 T24 6' fill='none' stroke='%23ffffff' stroke-opacity='0.16' stroke-width='1.25'/%3E%3C/svg%3E");
+}
+
+/* Print: the QR card prints clean on white. */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #ffffff;
+  }
 }

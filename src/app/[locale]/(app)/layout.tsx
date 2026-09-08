@@ -1,9 +1,16 @@
-// src/app/[locale]/(app)/layout.tsx — auth guard + app shell
+// src/app/[locale]/(app)/layout.tsx — auth guard + app shell (§9.3)
+// Top bar: wordmark + desktop nav tabs (active state) + billing link +
+// initials avatar. Bottom mobile bar with the same four destinations.
+// The impersonation banner is danger-tinted — the one state that must
+// never be missed. App surfaces honor dark mode via the token system.
 import type { ReactNode } from "react";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { requireUser } from "@/lib/session";
 import { Link } from "@/i18n/navigation";
-import { signOutAction } from "./actions";
+import { Logo } from "@/components/ui/logo";
+import { DesktopNavTabs, MobileNavTabs } from "@/components/app/nav-tabs";
+import { IconLogout } from "@/components/ui/icons";
+import { signOutAction } from "../(auth)/actions";
 
 export default async function AppLayout({
   children,
@@ -16,17 +23,18 @@ export default async function AppLayout({
   const user = await requireUser();
   const t = await getTranslations({ namespace: "nav", locale });
 
-  const nav = [
-    { href: "/dashboard", label: t("dashboard") },
-    { href: "/reviews", label: t("reviews") },
-    { href: "/feedback", label: t("feedback") },
-    { href: "/settings", label: t("settings") },
-  ] as const;
+  const initials = (user.email ?? "?")
+    .split("@")[0]
+    .split(/[\s._-]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part: string) => part[0]?.toUpperCase())
+    .join("");
 
   return (
-    <div className="app-shell min-h-dvh bg-background pb-20 text-ink-900 lg:pb-0">
+    <div className="min-h-dvh bg-background pb-20 md:pb-0">
       {user.impersonatedBy && (
-        <div className="border-b border-terracotta-500/20 bg-terracotta-100 px-4 py-2 text-center text-xs font-semibold text-terracotta-500">
+        <div className="bg-danger-600 px-4 py-2 text-center text-[13px] font-semibold text-white">
           {locale === "en"
             ? "Support session — read-only billing. The owner has been notified."
             : "Συνεδρία υποστήριξης — η χρέωση είναι μόνο για ανάγνωση. Ο ιδιοκτήτης έχει ενημερωθεί."}
@@ -34,30 +42,42 @@ export default async function AppLayout({
       )}
 
       <header className="sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur-md">
-        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6">
-          <div className="flex items-center gap-8">
-            <Link href="/dashboard" className="font-display text-xl font-semibold tracking-tight text-ink-900">Atterna<span className="text-terracotta-500">.</span></Link>
-            <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary navigation">
-              {nav.map((item) => <Link key={item.href} href={item.href} className="rounded-sm px-3 py-2 text-sm font-medium text-ink-500 transition hover:bg-sunken hover:text-ink-900">{item.label}</Link>)}
-            </nav>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link href="/billing" className="hidden rounded-full bg-aegean-100 px-3 py-1.5 text-xs font-semibold text-aegean-700 sm:inline-flex">{t("billing")}</Link>
-            <span className="grid h-8 w-8 place-items-center rounded-full bg-aegean-100 text-xs font-semibold text-aegean-600">{user.email?.slice(0, 1).toUpperCase() ?? "A"}</span>
-            <form action={signOutAction} className="hidden sm:block"><button type="submit" className="text-xs font-medium text-ink-500 hover:text-aegean-600">{t("signOut")}</button></form>
+        <div className="mx-auto flex h-14 max-w-[1280px] items-center gap-4 px-4 sm:px-6">
+          <Link href="/dashboard" aria-label="Atterna" className="shrink-0">
+            <Logo size="sm" />
+          </Link>
+          <DesktopNavTabs />
+          <div className="ml-auto flex items-center gap-2">
+            <Link
+              href="/billing"
+              className="hidden h-9 items-center rounded-md px-3 text-sm font-medium text-ink-500 transition-colors hover:bg-sunken hover:text-ink-700 sm:inline-flex"
+            >
+              {t("billing")}
+            </Link>
+            <form action={signOutAction}>
+              <button
+                type="submit"
+                aria-label={t("signOut")}
+                title={t("signOut")}
+                className="flex size-9 items-center justify-center rounded-md text-ink-500 transition-colors hover:bg-sunken hover:text-ink-700"
+              >
+                <IconLogout className="size-5" />
+              </button>
+            </form>
+            <Link
+              href="/settings"
+              aria-label={t("settings")}
+              className="flex size-9 items-center justify-center rounded-full bg-aegean-100 text-[13px] font-semibold text-aegean-600 transition-transform hover:scale-105"
+            >
+              {initials}
+            </Link>
           </div>
         </div>
       </header>
 
-      <main>{children}</main>
+      {children}
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-line bg-surface/95 backdrop-blur-md lg:hidden" aria-label="Mobile navigation">
-        {nav.map((item) => (
-          <Link key={item.href} href={item.href} className="flex min-h-14 flex-1 items-center justify-center px-1 text-[11px] font-medium text-ink-500 hover:text-aegean-600">
-            {item.label}
-          </Link>
-        ))}
-      </nav>
+      <MobileNavTabs />
     </div>
   );
 }
