@@ -8,10 +8,10 @@ import {
   randomBytes,
   timingSafeEqual,
 } from "node:crypto";
-const KEY = Buffer.from(
-  process.env.TOKEN_ENC_KEY ?? "", // "base64" prefix tolerated
-  process.env.TOKEN_ENC_KEY?.startsWith("base64:") ? "base64" : "base64"
-);
+const encodedKey = (process.env.TOKEN_ENC_KEY ?? "")
+  .trim()
+  .replace(/^base64:/i, "");
+const KEY = Buffer.from(encodedKey, "base64");
 const SECRET = process.env.AUTH_SECRET ?? "dev-secret";
 if (KEY.length !== 32) {
   throw new Error(

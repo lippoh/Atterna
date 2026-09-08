@@ -14,6 +14,7 @@ export interface FeedbackFormLabels {
   high: string;
   negativePrompt: string;
   positivePrompt: string;
+  commentPlaceholder: string;
   submit: string;
   submitting: string;
   thanks: string;

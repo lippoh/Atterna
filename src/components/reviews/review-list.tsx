@@ -18,11 +18,11 @@ export interface ReviewListRow {
 }
 const REPLY_LABEL: Record<ReviewListRow["replyStatus"], { el: string; en: string; cls: string }>
     = {
-  none: { el: "χωρίς απάντηση", en: "unanswered", cls: "bg-rose-100 text-rose-800" },
-  draft: { el: "πρόχειρο", en: "draft", cls: "bg-amber-100 text-amber-800" },
-  approved: { el: "εγκεκριμένο", en: "approved", cls: "bg-blue-100 text-blue-800" },
-  published: { el: "δημοσιεύτηκε", en: "published", cls: "bg-emerald-100 text-emerald-800" },
-  failed: { el: "απέτυχε", en: "failed", cls: "bg-slate-200 text-slate-800" },
+  none: { el: "χωρίς απάντηση", en: "unanswered", cls: "bg-danger-100 text-danger-600" },
+  draft: { el: "πρόχειρο", en: "draft", cls: "bg-terracotta-100 text-terracotta-500" },
+  approved: { el: "εγκεκριμένο", en: "approved", cls: "bg-aegean-100 text-aegean-700" },
+  published: { el: "δημοσιεύτηκε", en: "published", cls: "bg-success-100 text-success-600" },
+  failed: { el: "απέτυχε", en: "failed", cls: "bg-sunken text-ink-700" },
 };
 function stars(rating: number): string {
   return "★".repeat(rating) + "☆".repeat(5 - rating);
@@ -30,14 +30,14 @@ function stars(rating: number): string {
 export function ReviewList({ rows, locale = "el" }: { rows: ReviewListRow[]; locale?: string }) {
   if (rows.length === 0) {
     return (
-      <p className="rounded-xl border border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
+      <p className="rounded-lg border border-line bg-surface p-6 text-center text-sm text-ink-500">
         {locale === "en" ? "No reviews in this view yet." : "Δεν υπάρχουν κριτικές σε αυτή την προβολή."}
       </p>
     );
   }
 
   return (
-    <ul className="space-y-3">
+    <ul className="divide-y divide-line rounded-lg border border-line bg-surface shadow-xs">
       {rows.map((row) => {
         const reply = REPLY_LABEL[row.replyStatus];
 
@@ -46,32 +46,32 @@ export function ReviewList({ rows, locale = "el" }: { rows: ReviewListRow[]; loc
             <Link
               locale={locale === "en" ? "en" : "el"}
               href={`/reviews/${row.id}`}
-              className="block rounded-xl border border-slate-200 bg-white p-4 hover:border-blue-300"
+              className="block p-5 transition-colors hover:bg-sunken focus-visible:bg-sunken"
             >
               <div className="flex flex-wrap items-center gap-2">
                 <span
                   className={
                     row.rating <= 2
-                      ? "text-rose-500"
+                      ? "text-danger-600"
                       : row.rating >= 4
-                        ? "text-amber-500"
-                        : "text-slate-400"
+                        ? "text-star-400"
+                        : "text-ink-300"
                   }
                 >
                   {stars(row.rating)}
                 </span>
                 <LanguageBadge language={row.language} />
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${reply.cls}`}>
+                <span className={`rounded-full px-2 py-1 text-[10px] font-semibold ${reply.cls}`}>
                   {locale === "en" ? reply.en : reply.el}
                 </span>
-                <span className="ml-auto text-xs text-slate-400">
-                  {row.receivedAt.toLocaleDateString(locale === "en" ? "en-GB" : "el-GR")}
+                <span className="ml-auto font-mono text-xs text-ink-300">
+                  {new Intl.DateTimeFormat(locale === "en" ? "en-GB" : "el-GR", { dateStyle: "medium" }).format(row.receivedAt)}
                 </span>
               </div>
-              <p className="mt-2 line-clamp-2 text-sm text-slate-700">
+              <p className="mt-3 line-clamp-2 text-sm leading-6 text-ink-700">
                 {row.text ?? (locale === "en" ? "(no text — rating only)" : "(χωρίς κείμενο — μόνο βαθμολογία)")}
               </p>
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-2 text-xs text-ink-500">
                 {row.reviewerName ?? (locale === "en" ? "Guest" : "Επισκέπτης")}
               </p>
             </Link>

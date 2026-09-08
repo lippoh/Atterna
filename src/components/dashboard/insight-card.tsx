@@ -6,22 +6,22 @@ import { cn } from "@/lib/utils";
 import type { Insight } from "@/lib/metrics";
 const SEVERITY: Record<Insight["severity"], { border: string; badge: string; badgeText: string
 }> = {
-info: { border: "border-slate-200", badge: "bg-slate-100 text-slate-700", badgeText: "info" },
-warning: { border: "border-amber-200", badge: "bg-amber-100 text-amber-800", badgeText: "⚠" },
-critical: { border: "border-rose-200", badge: "bg-rose-100 text-rose-800", badgeText: "!" },
+info: { border: "border-line", badge: "bg-aegean-100 text-aegean-700", badgeText: "INFO" },
+warning: { border: "border-line", badge: "bg-terracotta-100 text-terracotta-500", badgeText: "WATCH" },
+critical: { border: "border-danger-600/30", badge: "bg-danger-100 text-danger-600", badgeText: "ACT" },
 };
 export function InsightCard({ insight }: { insight: Insight }) {
 const s = SEVERITY[insight.severity];
 return (
-<div className={cn("rounded-xl border bg-white p-4", s.border)}>
+<div className={cn("rounded-lg border bg-surface p-5 shadow-xs", s.border)}>
 <div className="flex items-center justify-between gap-2">
-<p className="text-sm font-semibold text-slate-900">{insight.title}</p>
-<span className={cn("rounded-full px-2 py-0.5 text-[10px] font-bold", s.badge)}>
-{insight.confidence}
+<p className="text-sm font-semibold text-ink-900">{insight.title}</p>
+<span className={cn("rounded-full px-2 py-1 text-[10px] font-bold tracking-wide", s.badge)}>
+{s.badgeText} · {insight.confidence}
 </span>
 </div>
-<p className="mt-1 text-xs text-slate-500">{insight.evidence}</p>
-<p className="mt-2 text-sm font-medium text-blue-800">→ {insight.suggestedAction}</p>
+<p className="mt-2 text-xs leading-6 text-ink-500">{insight.evidence}</p>
+<p className="mt-3 text-sm font-semibold text-aegean-600">{insight.suggestedAction} →</p>
 </div>
 );
 }

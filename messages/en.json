@@ -1,18 +1,29 @@
 {
   "nav": { "dashboard": "Dashboard", "reviews": "Reviews", "feedback": "Private feedback", "settings": "Settings", "billing": "Subscription", "signOut": "Sign out" },
   "landing": {
-    "kicker": "Greece first · Greece first",
-    "title": "The AI that doesn't write reviews — it listens to your customers",
-    "subtitle": "Review analysis in Greek and English, AI-drafted replies you approve, and private QR feedback.",
-    "cta": "Start free", "ctaSecondary": "Tell me more", "howItWorks": "How it works",
-    "steps": { "connect": "Connect your Google Business Profile", "analyze": "The AI reads every review", "understand": "See what to fix first", "respond": "Reply in a minute, in any language" },
-    "pricing": {
-      "title": "VAT-inclusive pricing",
-      "starter": { "name": "Starter", "price": "€19/month", "desc": "150 analyses/month, dashboard, QR, weekly email" },
-      "growth": { "name": "Growth", "price": "€39/month", "desc": "600 analyses/month, trends, alerts, reply publishing" },
-      "pro": { "name": "Pro", "price": "€79/month", "desc": "2,000 analyses/month, up to 3 businesses, priority support" }
-    },
-    "trustedBy": "Built for Greek local businesses"
+    "kicker": "For Greek local businesses",
+    "title": "Every review, answered. Every customer, back.",
+    "subtitle": "Atterna reads your Google reviews, drafts replies in your voice in Greek and English, and turns private feedback into a calmer way to grow.",
+    "cta": "Start free", "ctaSecondary": "See how it works", "login": "Log in", "howItWorks": "How it works",
+    "trust": "Designed with taverna owners, dentists and garages across Greece.",
+    "microTrust": "No card · 14-day free trial · EU-hosted data",
+    "steps": { "connect": "Connect Google", "analyze": "Atterna analyzes and writes", "understand": "See what to fix first", "respond": "Approve in one click" },
+    "problemEyebrow": "The quiet cost of being missed",
+    "problemTitle": "Reviews don't wait.",
+    "problemBody": "Between the dinner rush and the last appointment, good feedback gets buried and difficult feedback arrives too late. Atterna keeps the signal clear, so you can act while it still matters.",
+    "problemStats": { "read": "read reviews before visiting", "book": "won't book below 4 stars", "return": "more return visits with a reply within 24h" },
+    "featuresEyebrow": "The reputation co-pilot",
+    "feature1": { "eyebrow": "01 / One calm inbox", "title": "Every review, in one quiet place.", "body": "Google reviews arrive with the context you need: sentiment, language, topics, and urgency. No sprawling dashboard. Just the next useful thing.", "points": "Syncs Google Business Profile|Unanswered reviews rise to the top|Greek and English side by side" },
+    "feature2": { "eyebrow": "02 / Your voice", "title": "Replies that sound like you.", "body": "Choose a tone, review the draft, and publish when it feels right. Atterna helps you be prompt without becoming generic.", "points": "Friendly, formal, or apologetic tones|Bilingual drafts with local nuance|You approve every public reply" },
+    "feature3": { "eyebrow": "03 / Before one star", "title": "Catch the problem while it is still private.", "body": "A simple QR card invites honest feedback. Happy guests can share publicly; unhappy guests reach you first.", "points": "Tokenized QR links for the counter|4–5 stars can continue to Google|Low ratings alert the owner" },
+    "feature4": { "eyebrow": "04 / Monday clarity", "title": "The whole picture, once a week.", "body": "A concise report turns a week of scattered comments into a clear view of what guests loved and what needs attention.", "points": "Rating trend and new reviews|Top compliments and complaints|One suggested action" },
+    "stats": { "one": "review inbox", "two": "languages", "three": "click to publish", "four": "weekly signal" },
+    "testimonialsEyebrow": "From the people behind the counter",
+    "testimonials": { "one": { "quote": "We finally answer reviews before the next table arrives. The drafts sound like our team, not like software.", "name": "Eleni P.", "business": "Taverna · Chania" }, "two": { "quote": "The private feedback link gives patients a place to be honest. That has changed the conversations at the clinic.", "name": "Dr. Nikos A.", "business": "Dental clinic · Athens" }, "three": { "quote": "I check Atterna with my coffee. The weekly view tells me exactly what to fix in the garage.", "name": "Giorgos K.", "business": "Garage · Thessaloniki" } },
+    "pricing": { "eyebrow": "Simple, honest pricing", "title": "A small tool for a valuable signal.", "finePrint": "VAT included · Cancel anytime · No lock-in", "popular": "Most popular", "starter": { "name": "Starter", "price": "[PRICE]", "desc": "For one business getting started", "features": "Review inbox|AI analysis|Private QR feedback" }, "growth": { "name": "Growth", "price": "[PRICE]", "desc": "For owners ready to respond", "features": "Everything in Starter|Reply drafts and publishing|Weekly reports" }, "pro": { "name": "Pro", "price": "[PRICE]", "desc": "For a small group of locations", "features": "Everything in Growth|Up to 3 businesses|Priority support" } },
+    "faqEyebrow": "Questions, answered",
+    "faq": { "oneQ": "Is it safe to connect Google?", "oneA": "Atterna uses the official Google connection and only requests the access needed to read reviews and publish replies you approve.", "twoQ": "Does it really work in Greek?", "twoA": "Yes. Greek is the primary language of the product, analysis, and reply drafts. English is available alongside it.", "threeQ": "Where is my data stored?", "threeA": "Your data is handled through the services configured for your account and can be hosted in the EU. Ask us for the current data-processing details.", "fourQ": "Can I cancel?", "fourA": "Yes. Cancel anytime from the subscription area; there is no lock-in.", "fiveQ": "What does the trial include?", "fiveA": "The trial gives you the core review inbox, analysis, private feedback flow, and reply workflow so you can judge the fit in a real week.", "sixQ": "Who owns a published reply?", "sixA": "You do. Atterna drafts and sends only after you approve the public reply." },
+    "finalTitle": "Start today. The reviews are waiting.", "finalBody": "A calmer reputation workflow starts with the next review.", "footerTag": "Designed in Athens"
   },
   "auth": {
     "login": { "title": "Sign in", "email": "Email", "password": "Password", "submit": "Sign in", "submitting": "Signing in...", "noAccount": "No account yet?", "register": "Create one", "forgot": "Forgot your password?", "invalid": "Wrong email or password.", "rateLimited": "Too many attempts. Try again in an hour." },
@@ -26,7 +37,7 @@
   "settings": { "title": "Settings", "profile": "Profile", "name": "Name", "locale": "Language", "save": "Save", "saved": "Saved.", "business": "Business", "tone": "Reply tone", "toneFriendly": "Friendly", "toneFormal": "Formal", "signature": "Signature", "gbp": "Google Business Profile", "gbpConnected": "Connected", "gbpNotConnected": "Not connected", "connect": "Connect" },
   "billing": { "title": "Subscription", "currentPlan": "Current plan", "trialEnds": "Trial ends on {date}", "status": { "TRIALING": "Trialing", "ACTIVE": "Active", "PAST_DUE": "Past due", "CANCELED": "Canceled", "INCOMPLETE": "Incomplete" }, "choose": "Choose a plan", "checkout": "Continue to secure checkout", "portal": "Manage subscription & invoices", "usage": "AI usage this month", "usageCalls": "{calls} calls · {tokens} tokens", "success": "Subscription activated!", "canceled": "Payment canceled.", "impersonationBlocked": "Not available in support mode." },
   "onboarding": { "title": "Welcome!", "step1": "Your business", "orgName": "Organization name", "businessName": "Business name", "category": "Category", "city": "City", "submit": "Continue", "step2": "Google Business Profile", "connectGbp": "Connect with Google", "connectHint": "You'll grant read access to your reviews. Takes under 5 minutes.", "importing": "Importing reviews...", "goDashboard": "Go to the dashboard", "done": "All set!" },
-  "f": { "question": "How was your experience?", "low": "Poor", "high": "Excellent", "negativePrompt": "What could we improve? (optional, private)", "positivePrompt": "Thank you! Would you like to share it publicly?", "invitation": "Your opinion helps other guests — and us.", "invitationCta": "Write a Google review", "submit": "Send", "submitting": "Sending...", "thanks": "Thank you!", "error": "Something went wrong — please try again.", "notFound": "Code not found or deactivated." },
+  "f": { "question": "How was your experience?", "low": "Poor", "high": "Excellent", "negativePrompt": "What could we improve? (optional, private)", "positivePrompt": "Thank you! Would you like to share it publicly?", "commentPlaceholder": "We would love to hear it…", "invitation": "Your opinion helps other guests — and us.", "invitationCta": "Write a Google review", "submit": "Send", "submitting": "Sending...", "thanks": "Thank you!", "error": "Something went wrong — please try again.", "notFound": "Code not found or deactivated." },
   "admin": { "title": "Admin", "businesses": "Businesses", "jobs": "Jobs", "subscriptions": "Subscriptions", "requeue": "Requeue", "impersonate": "Support as customer", "impersonateEmail": "Customer email", "back": "Back" },
   "common": { "loading": "Loading...", "error": "Something went wrong.", "forbidden": "You don't have access to this.", "cancel": "Cancel", "language": "Ελληνικά" }
 }

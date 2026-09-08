@@ -1,26 +1,112 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #FAF9F7;
+  --foreground: #12283F;
+  --surface: #FFFFFF;
+  --sunken: #F2EFE9;
+  --ink-900: #12283F;
+  --ink-700: #31445A;
+  --ink-500: #66788B;
+  --ink-300: #8FA0B0;
+  --line: #E7E2D8;
+  --line-strong: #D4CFC2;
+  --aegean-600: #175E9E;
+  --aegean-700: #11497E;
+  --aegean-100: #E8F1F8;
+  --terracotta-500: #C05B33;
+  --terracotta-100: #F9EAE2;
+  --success-600: #237A57;
+  --success-100: #E6F1EB;
+  --danger-600: #C23B2E;
+  --danger-100: #FBEAE7;
+  --star-400: #E8A13D;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-surface: var(--surface);
+  --color-sunken: var(--sunken);
+  --color-ink-900: var(--ink-900);
+  --color-ink-700: var(--ink-700);
+  --color-ink-500: var(--ink-500);
+  --color-ink-300: var(--ink-300);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-aegean-600: var(--aegean-600);
+  --color-aegean-700: var(--aegean-700);
+  --color-aegean-100: var(--aegean-100);
+  --color-terracotta-500: var(--terracotta-500);
+  --color-terracotta-100: var(--terracotta-100);
+  --color-success-600: var(--success-600);
+  --color-success-100: var(--success-100);
+  --color-danger-600: var(--danger-600);
+  --color-danger-100: var(--danger-100);
+  --color-star-400: var(--star-400);
+  --font-display: var(--font-playfair), Georgia, serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --shadow-xs: 0 1px 2px rgba(18, 40, 63, 0.05);
+  --shadow-sm: 0 1px 2px rgba(18, 40, 63, 0.06), 0 2px 8px rgba(18, 40, 63, 0.06);
+  --shadow-md: 0 2px 4px rgba(18, 40, 63, 0.05), 0 12px 28px rgba(18, 40, 63, 0.10);
+  --shadow-lg: 0 4px 8px rgba(18, 40, 63, 0.06), 0 24px 56px rgba(18, 40, 63, 0.14);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  .app-shell {
+    --background: #0B1522;
+    --foreground: #E9EFF5;
+    --surface: #122233;
+    --sunken: #0E1A29;
+    --ink-900: #E9EFF5;
+    --ink-700: #C3CED9;
+    --ink-500: #8DA0B3;
+    --ink-300: #647A90;
+    --line: #22354A;
+    --line-strong: #304861;
+    --aegean-600: #4E9FD1;
+    --aegean-700: #75B5DE;
+    --aegean-100: #16304A;
+    --terracotta-500: #E08A5F;
+    --terracotta-100: #33211B;
+    --success-600: #57B08A;
+    --success-100: #14291F;
+    --danger-600: #E06555;
+    --danger-100: #331D1A;
+    --star-400: #F0B45D;
   }
 }
+
+* { border-color: var(--line); }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), system-ui, sans-serif;
+  line-height: 1.6;
+}
+
+::selection { background: var(--aegean-100); color: var(--ink-900); }
+
+button, a, input, textarea, select, summary { outline-offset: 3px; }
+
+:focus-visible { outline: 2px solid var(--aegean-600); outline-offset: 3px; }
+
+.meander-divider {
+  height: 8px;
+  background-image: url("data:image/svg+xml,%3Csvg width='48' height='8' viewBox='0 0 48 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 2h6v4h6V2h6v4h6V2h6v4h6V2h6v4h6' fill='none' stroke='%2312283f' stroke-opacity='.08'/%3E%3C/svg%3E");
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .reveal { opacity: 0; transform: translateY(12px); transition: opacity 320ms cubic-bezier(.22,1,.36,1), transform 320ms cubic-bezier(.22,1,.36,1); }
+  .reveal.is-visible { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; scroll-behavior: auto !important; }
 }
