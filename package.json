@@ -8,6 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run",
+    "test:unit": "vitest run tests/unit/analysis-schema.test.ts",
     "postinstall": "prisma generate",
     "contract:emit": "prisma contract emit"
   },
