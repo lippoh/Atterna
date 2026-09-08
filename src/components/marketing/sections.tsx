@@ -344,14 +344,19 @@ export async function Testimonials() {
           </h2>
         </Reveal>
       </div>
-      {/* Infinite marquee — hover pauses it; edges fade out */}
+      {/* Infinite marquee — hover pauses it; edges fade out.
+       * Contained to the centered 1120px page rhythm: one card group
+       * (3 × 360px + gaps = 1152px) is wider than the 1120px marquee
+       * region, so the two-group loop stays seamless at EVERY viewport —
+       * full-bleed broke above 1092px (a growing gap swept the right side). */}
       <Reveal delay={100} className="mt-12">
-        <Marquee duration={38} itemClassName="gap-6 pr-6">
-          {items.map((item) => (
-            <figure
-              key={item.name}
-              className="flex w-[300px] shrink-0 flex-col rounded-xl border border-line bg-surface p-6 shadow-xs transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-md sm:w-[340px]"
-            >
+        <div className="mx-auto max-w-[1120px]">
+          <Marquee duration={38} itemClassName="gap-6 pr-6">
+            {items.map((item) => (
+              <figure
+                key={item.name}
+                className="flex w-[300px] shrink-0 flex-col rounded-xl border border-line bg-surface p-6 shadow-xs transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-md sm:w-[360px]"
+              >
               <div className="flex text-star-400" aria-label="5/5">
                 {Array.from({ length: 5 }).map((_, s) => (
                   <IconStarFilled key={s} className="size-3.5" />
@@ -373,7 +378,8 @@ export async function Testimonials() {
               </figcaption>
             </figure>
           ))}
-        </Marquee>
+          </Marquee>
+        </div>
       </Reveal>
     </section>
   );

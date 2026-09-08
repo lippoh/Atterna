@@ -62,7 +62,9 @@ export async function Hero() {
             </h1>
           </Reveal>
           <Reveal delay={120}>
-            <p className="lh-body mt-6 max-w-[52ch] text-[1.0625rem] text-ink-700">
+            {/* min-h reserves the Greek 4-line height so the hero (and every
+             * section below) keeps identical geometry in EN and EL */}
+            <p className="lh-body mt-6 min-h-[7.5rem] max-w-[52ch] text-[1.0625rem] text-ink-700">
               {t("subtitle")}
             </p>
           </Reveal>
@@ -71,7 +73,7 @@ export async function Hero() {
               <Magnetic>
                 <Link
                   href="/register"
-                  className="btn-shine inline-flex h-12 items-center gap-2 rounded-md bg-aegean-600 px-6 text-base font-semibold text-white shadow-sm transition-[background-color,transform,box-shadow] duration-150 ease-out hover:-translate-y-px hover:bg-aegean-700 hover:shadow-md active:translate-y-0"
+                  className="btn-shine inline-flex h-12 min-w-[13.75rem] items-center justify-center gap-2 whitespace-nowrap rounded-md bg-aegean-600 px-6 text-base font-semibold text-white shadow-sm transition-[background-color,transform,box-shadow] duration-150 ease-out hover:-translate-y-px hover:bg-aegean-700 hover:shadow-md active:translate-y-0"
                 >
                   {t("cta")}
                   <IconArrowRight className="size-4" />
@@ -79,7 +81,7 @@ export async function Hero() {
               </Magnetic>
               <a
                 href="#demo"
-                className="inline-flex h-12 items-center rounded-md border border-line-strong bg-surface px-6 text-base font-semibold text-ink-900 transition-[border-color,transform] duration-150 hover:border-ink-500 hover:-translate-y-px"
+                className="inline-flex h-12 min-w-[13rem] items-center justify-center whitespace-nowrap rounded-md border border-line-strong bg-surface px-6 text-base font-semibold text-ink-900 transition-[border-color,transform] duration-150 hover:border-ink-500 hover:-translate-y-px"
               >
                 {t("ctaSecondary")}
               </a>

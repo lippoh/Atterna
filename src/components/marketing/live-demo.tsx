@@ -252,7 +252,7 @@ export function LiveDemo() {
                   onClick={publish}
                   disabled={phase !== "ready"}
                   className={cn(
-                    "inline-flex h-10 items-center gap-2 rounded-md px-5 text-sm font-semibold transition-[background-color,transform,box-shadow,opacity] duration-200",
+                    "inline-flex h-10 min-w-[14.5rem] items-center justify-center gap-2 whitespace-nowrap rounded-md px-5 text-sm font-semibold transition-[background-color,transform,box-shadow,opacity] duration-200",
                     phase === "ready"
                       ? "bg-aegean-600 text-white shadow-sm hover:-translate-y-px hover:bg-aegean-700 hover:shadow-md active:translate-y-0"
                       : "cursor-default bg-ink-300/40 text-ink-300"

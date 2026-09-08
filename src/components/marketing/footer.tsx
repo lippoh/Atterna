@@ -1,7 +1,8 @@
 // src/components/marketing/footer.tsx — final CTA band + footer (§9.1)
 // Final CTA: ink-900 band with a display-lg white line and a surface
 // button. Footer: four columns, 13px ink-500 on canvas, meander hairline
-// on top, bottom row with © + "Designed in Athens" + locale pill.
+// on top, bottom row with © + locale pill. CTA button width is slot-fixed
+// (wider locale) so ΕΛ/EN keep identical geometry.
 import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Reveal } from "@/components/ui/reveal";
@@ -33,7 +34,7 @@ export async function FinalCta() {
             <Magnetic strength={0.35} distance={10}>
               <Link
                 href="/register"
-                className="btn-shine inline-flex h-12 items-center gap-2 rounded-md bg-surface px-7 text-base font-semibold text-ink-900 shadow-md transition-[transform,box-shadow] duration-150 hover:-translate-y-px hover:shadow-lg active:translate-y-0"
+                className="btn-shine inline-flex h-12 min-w-[14.25rem] items-center justify-center gap-2 whitespace-nowrap rounded-md bg-surface px-7 text-base font-semibold text-ink-900 shadow-md transition-[transform,box-shadow] duration-150 hover:-translate-y-px hover:shadow-lg active:translate-y-0"
               >
                 {t("button")}
                 <IconArrowRight className="size-4" />
@@ -80,8 +81,6 @@ export async function MarketingFooter() {
           <Logo size="sm" />
           <div className="flex flex-wrap items-center gap-4 text-[13px] text-ink-500">
             <span>© 2026 Atterna</span>
-            <span aria-hidden="true">·</span>
-            <span>{t("designedIn")}</span>
             <span aria-hidden="true">·</span>
             <Link
               locale={other}

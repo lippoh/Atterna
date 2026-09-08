@@ -2,6 +2,10 @@
 // Client island: h-16, canvas/85 + backdrop-blur, hairline appears after
 // 8px scroll. Mobile: 44px hamburger → full-canvas overlay, links stagger
 // in at 40ms. Locale pill ΕΛ/EN swaps via the i18n Link (route preserved).
+// i18n-stable structure: every link/button sits in a FIXED-width slot sized
+// to the wider locale (Greek), so switching ΕΛ ↔ EN changes only the text —
+// never the geometry. Desktop links therefore start at lg (the Greek nav
+// needs ~880px of slots; md would squeeze and wrap).
 "use client";
 
 import { useEffect, useState } from "react";
@@ -62,13 +66,21 @@ export function MarketingNav() {
           <Logo size="md" />
         </Link>
 
-        {/* Desktop links — hover grows a 2px terracotta underline (220ms) */}
-        <div className="hidden items-center gap-7 md:flex">
+        {/* Desktop links — hover grows a 2px terracotta underline (220ms).
+         * Slot widths (min-w) fit the WIDER label of the two locales, so
+         * EN/EL render identical positions — text-center swaps glyphs only. */}
+        <div className="hidden items-center gap-7 lg:flex">
           {links.map((l) => (
             <a
               key={l.href}
               href={l.href}
-              className="link-grow text-[15px] font-medium text-ink-700 transition-colors hover:text-ink-900"
+              className={cn(
+                "link-grow whitespace-nowrap text-center text-[15px] font-medium text-ink-700 transition-colors hover:text-ink-900",
+                l.href === "#how" && "min-w-[7.5rem]",
+                l.href === "#features" && "min-w-[6.25rem]",
+                l.href === "#pricing" && "min-w-[3.5rem]",
+                l.href === "#faq" && "min-w-[5rem]"
+              )}
             >
               {l.label}
             </a>
@@ -87,13 +99,13 @@ export function MarketingNav() {
           </Link>
           <Link
             href="/login"
-            className="hidden h-10 items-center rounded-md px-3 text-sm font-semibold text-aegean-600 transition-colors hover:bg-aegean-100 sm:inline-flex"
+            className="hidden h-10 min-w-[5.5rem] items-center justify-center whitespace-nowrap rounded-md px-3 text-sm font-semibold text-aegean-600 transition-colors hover:bg-aegean-100 sm:inline-flex"
           >
             {t("login")}
           </Link>
           <Link
             href="/register"
-            className="hidden h-10 items-center rounded-md bg-aegean-600 px-4 text-sm font-semibold text-white shadow-xs transition-[background-color,transform,box-shadow] duration-150 ease-out hover:-translate-y-px hover:bg-aegean-700 hover:shadow-sm active:translate-y-0 sm:inline-flex"
+            className="hidden h-10 min-w-[10.25rem] items-center justify-center whitespace-nowrap rounded-md bg-aegean-600 px-4 text-sm font-semibold text-white shadow-xs transition-[background-color,transform,box-shadow] duration-150 ease-out hover:-translate-y-px hover:bg-aegean-700 hover:shadow-sm active:translate-y-0 sm:inline-flex"
           >
             {t("cta")}
           </Link>
@@ -104,7 +116,7 @@ export function MarketingNav() {
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
             aria-label={open ? t("closeMenu") : t("openMenu")}
-            className="flex size-11 items-center justify-center rounded-md text-ink-700 transition-colors hover:bg-sunken md:hidden"
+            className="flex size-11 items-center justify-center rounded-md text-ink-700 transition-colors hover:bg-sunken lg:hidden"
           >
             {open ? <IconX className="size-6" /> : <IconMenu className="size-6" />}
           </button>
@@ -113,7 +125,7 @@ export function MarketingNav() {
 
       {/* Mobile full-canvas overlay; links stagger in at 40ms */}
       {open && (
-        <div className="fixed inset-x-0 bottom-0 top-16 z-30 flex flex-col bg-background px-6 pb-8 pt-8 md:hidden">
+        <div className="fixed inset-x-0 bottom-0 top-16 z-30 flex flex-col bg-background px-6 pb-8 pt-8 lg:hidden">
           <nav className="flex flex-col gap-2" aria-label="Mobile">
             {[...links, { href: "/login", label: t("login") }].map((l, i) => (
               <a
