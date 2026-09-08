@@ -3,7 +3,29 @@
 // subscription state — the webhook is the only writer (Section 27).
 import Stripe from "stripe";
 import { env } from "@/lib/env";
-export const stripe = new Stripe(env.STRIPE_SECRET_KEY);
+
+// V2.2: lazy client. A module-scope `new Stripe(env.STRIPE_SECRET_KEY)`
+// evaluates env at import time and fails Next's build-time route module
+// evaluation when secrets are absent. The proxy instantiates the real
+// client on first use, so importing this module is side-effect free and
+// every existing `stripe.*` call site keeps working unchanged.
+let _stripe: Stripe | null = null;
+
+function client(): Stripe {
+  if (!_stripe) _stripe = new Stripe(env.STRIPE_SECRET_KEY);
+  return _stripe;
+}
+
+export const stripe: Stripe = new Proxy({} as Stripe, {
+  get(_target: Stripe, prop: string | symbol) {
+    const c = client();
+    const value = Reflect.get(c, prop);
+    return typeof value === "function"
+      ? (value as (...args: unknown[]) => unknown).bind(c)
+      : value;
+  },
+});
+
 export async function createCheckoutSession(input: {
   orgId: string;
   planKey: "STARTER" | "GROWTH" | "PRO";
@@ -16,6 +38,7 @@ export async function createCheckoutSession(input: {
     : input.planKey === "GROWTH"
       ? env.STRIPE_PRICE_GROWTH
       : env.STRIPE_PRICE_PRO;
+
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     line_items: [{ price, quantity: 1 }],
@@ -38,6 +61,7 @@ export async function createCheckoutSession(input: {
   });
   return { url: session.url ?? "" };
 }
+
 export async function createPortalSession(input: {
   customerId: string;
   locale: string;

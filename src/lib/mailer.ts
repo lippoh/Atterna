@@ -4,7 +4,16 @@
 // header the weekly report needs (one-click unsubscribe, Table 32.1).
 import { Resend } from "resend";
 import { env } from "@/lib/env";
-const resend = new Resend(env.RESEND_API_KEY);
+
+// V2.2: lazy client — module-scope `new Resend(env.RESEND_API_KEY)` fails
+// build-time route module evaluation without runtime secrets.
+let _resend: Resend | null = null;
+
+function resendClient(): Resend {
+  if (!_resend) _resend = new Resend(env.RESEND_API_KEY);
+  return _resend;
+}
+
 export interface SendInput {
   to: string;
   subject: string;
@@ -12,12 +21,15 @@ export interface SendInput {
   listUnsubscribe?: boolean;
   replyTo?: string;
 }
+
 export interface SendResult {
   ok: boolean;
   id?: string;
   error?: string;
 }
+
 const BOUNCED = new Set<string>(); // 3 permanent bounces → disable address
+
 export async function send(input: SendInput): Promise<SendResult> {
   if (BOUNCED.has(input.to)) {
     return { ok: false, error: "suppressed: bounced" };
@@ -29,7 +41,8 @@ export async function send(input: SendInput): Promise<SendResult> {
       headers["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click";
     }
     if (input.replyTo) headers["Reply-To"] = input.replyTo;
-    const { data, error } = await resend.emails.send({
+
+    const { data, error } = await resendClient().emails.send({
       from: env.EMAIL_FROM,
       to: [input.to],
       subject: input.subject,
