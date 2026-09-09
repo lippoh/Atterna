@@ -10,6 +10,7 @@ import { runNextBatch } from "@/jobs/runner";
 import { enqueueSyncs, enqueueOvernightSyncs } from "@/jobs/sync-reviews";
 import { enqueuePendingAnalyses } from "@/jobs/analyze-reviews";
 import { runWeeklyReports } from "@/jobs/weekly-report";
+import { enqueueRefreshes } from "@/jobs/refresh-reputation";
 export const maxDuration = 300;
 const DAY_MS = 86_400_000;
 async function runPrune(): Promise<{ jobs: number; ipHashes: number }> {
@@ -43,6 +44,13 @@ case "prune": {
 const result = await runPrune();
 return NextResponse.json({ ok: true, type, ...result });
 }
+case "intel": {
+// Daily 03:30 UTC: refresh issues, recommendations and the
+// deterministic health snapshot for every active business.
+const enqueued = await enqueueRefreshes();
+const executed = await runNextBatch(50);
+return NextResponse.json({ ok: true, type: "intel", enqueued, executed });
+}
 case "sync":
 default: {
 // Daytime (05-21 UTC = 08:00-24:00 Athens) → 30-min cadence;
@@ -52,7 +60,12 @@ hourUtc >= 5 && hourUtc <= 21
 ? await enqueueSyncs()
 : await enqueueOvernightSyncs();
 const pending = await enqueuePendingAnalyses();
-const executed = await runNextBatch(25);
+let executed = await runNextBatch(25);
+// After a daytime sync, keep the intelligence fresh (daily dedupe).
+if (hourUtc >= 5 && hourUtc <= 21) {
+await enqueueRefreshes();
+executed += await runNextBatch(25);
+}
 return NextResponse.json({ ok: true, type: "sync", enqueued, pending, executed });
 }
 }

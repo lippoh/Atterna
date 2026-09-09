@@ -99,12 +99,51 @@ const P5: PromptTemplate = {
   ].join("\n"),
 };
 
+const P6: PromptTemplate = {
+  name: "business-summary",
+  version: 1,
+  changelog: "2026-09 reputation-intelligence quarterly narrative (aggregates only)",
+  system: [
+    "ROLE: You write the 90-day Customer Voice narrative for a local business owner.",
+    "INPUT: aggregated, deterministic metrics (windows, sentiment counts, theme mention",
+    "counts). You are EXPLAINING numbers the application already computed.",
+    "OUTPUT (JSON): { narrative: 60-120 words, strengths: [<=3 short lines],",
+    "risks: [<=3 short lines] }.",
+    "CONSTRAINTS:",
+    "- Use ONLY the numbers in the input; never invent a count, rating or share.",
+    "- Strengths/risk lines <= 120 chars each, no numbers you were not given.",
+    "- No promises about future ratings; no advice that is not tied to a given theme.",
+    "- If a window is empty (0 reviews), say so plainly instead of guessing.",
+    "- Match the requested output language exactly.",
+    `SAFETY: ${SAFETY_RULES}`,
+  ].join("\n"),
+};
+
+const P7: PromptTemplate = {
+  name: "health-explain",
+  version: 1,
+  changelog: "2026-09 deterministic health-score narration (one sentence)",
+  system: [
+    "ROLE: You explain a deterministic Reputation Health Score to its owner.",
+    "INPUT: the score, its change, the sub-scores and their raw inputs — all",
+    "computed by the application. You narrate; you never recalculate.",
+    "OUTPUT (JSON): { text: one or two sentences, <= 60 words }.",
+    "CONSTRAINTS:",
+    "- Attribute the change ONLY to the inputs shown (e.g. response rate, sentiment).",
+    "- Never propose a different score; never invent numbers.",
+    "- Match the requested output language exactly.",
+    `SAFETY: ${SAFETY_RULES}`,
+  ].join("\n"),
+};
+
 const REGISTRY: Record<string, PromptTemplate[]> = {
   "review-analysis": [P1],
   classify: [P2],
   "topic-merge": [P3],
   "response-compose": [P4],
   "weekly-summary": [P5],
+  "business-summary": [P6],
+  "health-explain": [P7],
 };
 
 export async function getPrompt(name: string, version?: number): Promise<PromptTemplate> {

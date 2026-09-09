@@ -6,6 +6,7 @@
 import { Link } from "@/i18n/navigation";
 import { LanguageBadge } from "./language-badge";
 import { IconCheck, IconStarFilled } from "@/components/ui/icons";
+import { sourceLabel } from "@/lib/sources/registry";
 import { cn } from "@/lib/utils";
 
 export interface ReviewListRow {
@@ -14,6 +15,7 @@ export interface ReviewListRow {
   text: string | null;
   language: string | null;
   reviewerName: string | null;
+  source: string | null;
   receivedAt: Date;
   replyStatus: "none" | "draft" | "approved" | "published" | "failed";
   sentiment?: "POSITIVE" | "NEUTRAL" | "NEGATIVE" | null;
@@ -99,6 +101,14 @@ export function ReviewList({
                 )}
                 <Stars rating={row.rating} />
                 <LanguageBadge language={row.language} />
+                {row.source && (
+                  <span
+                    className="rounded-full border border-line-strong px-2 py-0.5 text-[10px] font-medium text-ink-500"
+                    title={row.source}
+                  >
+                    {sourceLabel(row.source, locale)}
+                  </span>
+                )}
                 <span
                   className={cn(
                     "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold",

@@ -3,7 +3,8 @@
 // every cron invocation imports this module first so queued rows always
 // find their handler. Job types: sync-reviews · analyze-review ·
 // publish-reply · weekly-report · notify-negative-feedback ·
-// notify-negative-review.
+// notify-negative-review · refresh-reputation (daily intel: issues →
+// recommendations → deterministic score snapshot).
 import { registerJob } from "./runner";
 import { handleSyncReviews } from "./sync-reviews";
 import { handleAnalyzeReview } from "./analyze-reviews";
@@ -13,6 +14,9 @@ handleNotifyNegativeFeedback,
 handleNotifyNegativeReview,
 } from "./notify";
 import { handlePublishReply } from "./publish-reply";
+import { handleRefreshReputation } from "./refresh-reputation";
+import { registerProvider } from "@/lib/sources/provider";
+import { googleProvider } from "@/integrations/gbp/provider";
 let registered = false;
 export function registerAllJobs(): void {
 if (registered) return;
@@ -23,4 +27,7 @@ registerJob("publish-reply", handlePublishReply);
 registerJob("weekly-report", handleWeeklyReport);
 registerJob("notify-negative-feedback", handleNotifyNegativeFeedback);
 registerJob("notify-negative-review", handleNotifyNegativeReview);
+registerJob("refresh-reputation", handleRefreshReputation);
+// Google is one provider among many — future connectors register here.
+registerProvider(googleProvider);
 }

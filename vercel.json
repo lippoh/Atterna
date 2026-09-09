@@ -1,0 +1,20 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron",
+      "schedule": "*/30 5-21 * * *"
+    },
+    {
+      "path": "/api/cron?type=intel",
+      "schedule": "30 3 * * *"
+    },
+    {
+      "path": "/api/cron?type=weekly-report",
+      "schedule": "0 5 * * 1"
+    },
+    {
+      "path": "/api/cron?type=prune",
+      "schedule": "0 2 * * *"
+    }
+  ]
+}

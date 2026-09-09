@@ -1,17 +1,49 @@
-// src/app/[locale]/(app)/dashboard/page.tsx — the 30-second view (§9.3)
-// Same data pipeline as V1 (metrics.ts + insights); the visual layer is
-// Aegean Premium: greeting row, 4-up metric grid, trend chart card, the
-// What/Why/Do insight list. All numbers Intl-formatted, tabular-nums.
+// src/app/[locale]/(app)/dashboard/page.tsx — the Reputation Intelligence
+// dashboard (spec §37 IA): Health → What changed → Customer Voice →
+// Recurring/Emerging Issues → Recommendations → Competitor position →
+// Source breakdown → Seasonal + Historical trend.
+//
+// Two structural changes vs the old page:
+// 1. NO Google gate — the dashboard runs on ANY mix of sources (CSV,
+//    manual, QR feedback, Google); with zero data it shows an import CTA.
+// 2. Low-review months stay useful (spec §14): every block falls back to
+//    longer windows and labels exactly which window it is showing.
+// Every number is deterministic (lib/reputation); the AI layer only adds
+// cached narrative when available.
 import { redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { requireOrg } from "@/lib/session";
-import { getDashboardMetrics, getInsights } from "@/lib/metrics";
-import { MetricCard } from "@/components/dashboard/metric-card";
-import { TrendChart } from "@/components/dashboard/trend-chart";
-import { InsightCard } from "@/components/dashboard/insight-card";
 import { prisma } from "@/lib/db";
 import { Link } from "@/i18n/navigation";
-import { IconQr, IconArrowRight } from "@/components/ui/icons";
+import { IconQr, IconArrowRight, IconUpload } from "@/components/ui/icons";
+import { MetricCard } from "@/components/dashboard/metric-card";
+import { TrendChart } from "@/components/dashboard/trend-chart";
+import { HealthCard } from "@/components/dashboard/intel/health-card";
+import { VoiceCard } from "@/components/dashboard/intel/voice-card";
+import { IssuesPanel } from "@/components/dashboard/intel/issues-panel";
+import {
+  CompetitorCard,
+  SourceCard,
+  SeasonalCard,
+} from "@/components/dashboard/intel/context-panel";
+import {
+  getWindowStats,
+  getMonthlyBuckets,
+  monthlyTrendPoints,
+  getSourceBreakdown,
+} from "@/lib/reputation/analytics";
+import {
+  getScoreWithChange,
+  collectScoreInput,
+  computeReputationScore,
+} from "@/lib/reputation/score";
+import { getThemeStats } from "@/lib/reputation/themes";
+import { buildSeasonalComparison } from "@/lib/reputation/seasonal";
+import { getCompetitors, getBenchmark } from "@/lib/reputation/competitors";
+import {
+  getCachedQuarterlySummary,
+  getCachedHealthNarrative,
+} from "@/ai/insights";
 
 function greetingKey(d: Date): "morning" | "afternoon" | "evening" {
   const h = d.getHours();
@@ -27,15 +59,29 @@ export default async function DashboardPage() {
   const business = await prisma.business.findFirst({
     where: { organizationId: orgId, deletedAt: null },
     orderBy: { createdAt: "asc" },
-    include: { gbpConnection: { select: { id: true } } },
   });
   if (!business) redirect(`/${locale}/onboarding`);
 
-  const [t, m, insights] = await Promise.all([
+  const [t, w30, w90, w365, wAll, sourceBreakdown] = await Promise.all([
     getTranslations({ namespace: "dashboard", locale }),
-    getDashboardMetrics(orgId, business.id, locale),
-    getInsights(orgId, business.id, { locale }),
+    getWindowStats(orgId, business.id, "30d"),
+    getWindowStats(orgId, business.id, "90d"),
+    getWindowStats(orgId, business.id, "365d"),
+    getWindowStats(orgId, business.id, "all"),
+    getSourceBreakdown(orgId, business.id),
   ]);
+
+  // Current calendar month count (the "this month" context line, §14).
+  const now = new Date();
+  const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+  const monthCount = await prisma.review.count({
+    where: {
+      organizationId: orgId,
+      businessId: business.id,
+      deletedAt: null,
+      receivedAt: { gte: monthStart },
+    },
+  });
 
   const dateFmt = new Intl.DateTimeFormat(locale === "en" ? "en-GB" : "el-GR", {
     weekday: "long",
@@ -43,25 +89,72 @@ export default async function DashboardPage() {
     month: "long",
   });
 
-  if (!business.gbpConnection) {
+  // ── Empty state: no customer voice at all → import/connect CTA (§35) ──
+  if (wAll.count === 0 && sourceBreakdown.feedbackCount === 0) {
     return (
       <main id="main-content" className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6">
-        <h1 className="font-display text-3xl font-semibold text-ink-900">
-          {t("title")}
-        </h1>
-        <div className="mt-6 rounded-lg border border-aegean-100 bg-aegean-100/60 p-5">
-          <p className="text-sm text-ink-700">{t("connectFirst")}</p>
-          <Link
-            href="/onboarding"
-            className="mt-4 inline-flex h-10 items-center gap-2 rounded-md bg-aegean-600 px-4 text-sm font-semibold text-white shadow-xs transition-[background-color,transform,box-shadow] duration-150 hover:-translate-y-px hover:bg-aegean-700 hover:shadow-sm"
-          >
-            {locale === "en" ? "Connect now" : "Σύνδεση τώρα"}
-            <IconArrowRight className="size-4" />
-          </Link>
+        <h1 className="font-display text-3xl font-semibold text-ink-900">{t("title")}</h1>
+        <div className="mt-8 rounded-lg border border-aegean-100 bg-aegean-100/60 p-6 sm:p-8">
+          <h2 className="text-lg font-semibold text-ink-900">{t("intel.empty.title")}</h2>
+          <p className="lh-body mt-2 max-w-[56ch] text-sm text-ink-700">
+            {t("intel.empty.body")}
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link
+              href="/settings/sources"
+              className="inline-flex h-10 items-center gap-2 rounded-md bg-aegean-600 px-4 text-sm font-semibold text-white shadow-xs transition-[background-color,transform,box-shadow] duration-150 hover:-translate-y-px hover:bg-aegean-700 hover:shadow-sm"
+            >
+              <IconUpload className="size-4" />
+              {t("intel.empty.import")}
+            </Link>
+            <Link
+              href="/onboarding"
+              className="inline-flex h-10 items-center gap-2 rounded-md border border-line-strong bg-surface px-4 text-sm font-semibold text-ink-700 transition-colors hover:border-ink-500"
+            >
+              {t("intel.empty.connect")}
+              <IconArrowRight className="size-4" />
+            </Link>
+          </div>
         </div>
       </main>
     );
   }
+
+  // ── Intelligence pipeline (deterministic + cached AI) ─────────────────
+  const [
+    scoreChange,
+    scoreInput,
+    issues,
+    recommendations,
+    competitors,
+    benchmark,
+    themeStats,
+    monthly,
+    summary,
+  ] = await Promise.all([
+    getScoreWithChange(business.id),
+    collectScoreInput(orgId, business.id),
+    prisma.issue.findMany({
+      where: { businessId: business.id, status: { in: ["OPEN", "IN_PROGRESS"] } },
+      orderBy: [{ severity: "desc" }, { mentionsCurrent: "desc" }],
+    }),
+    prisma.recommendation.findMany({
+      where: { businessId: business.id, status: { in: ["OPEN", "IN_PROGRESS"] } },
+      orderBy: [{ impact: "desc" }, { createdAt: "asc" }],
+      take: 6,
+    }),
+    getCompetitors(business.id),
+    getBenchmark(orgId, business.id),
+    getThemeStats(orgId, business.id),
+    getMonthlyBuckets(orgId, business.id, 12),
+    getCachedQuarterlySummary(business.id),
+  ]);
+  const score = computeReputationScore(scoreInput);
+  const narrative = await getCachedHealthNarrative(business.id, score.score, scoreChange.delta);
+  const seasonal = buildSeasonalComparison(monthly, themeStats);
+
+  const negativeShare = score.inputsSummary.negativeShare90d;
+  const responseRate = w90.responseRate ?? wAll.responseRate;
 
   return (
     <main id="main-content" className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6">
@@ -82,53 +175,98 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      {/* Metric grid */}
-      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          tone={m.rating >= 4.3 ? "good" : m.rating >= 3.8 ? "warn" : "bad"}
-          label={t("rating")}
-          value={m.rating.toFixed(1)}
-          hint={t("ratingHint")}
-          locale={locale}
-        />
-        <MetricCard
-          tone={m.unanswered === 0 ? "good" : "warn"}
-          label={t("unanswered.label")}
-          value={String(m.unanswered)}
-          locale={locale}
-        />
-        <MetricCard
-          tone={m.complaintTrend <= 0 ? "good" : "warn"}
-          label={t("topComplaint")}
-          value={m.topComplaintLabel}
-          locale={locale}
-        />
-        <MetricCard
-          tone="good"
-          label={t("topCompliment")}
-          value={m.topComplimentLabel}
+      {/* ── Reputation Health (deterministic score + cached AI line) ──── */}
+      <div className="mt-8">
+        <HealthCard
+          score={score}
+          change={scoreChange}
+          narrative={narrative?.text ?? null}
           locale={locale}
         />
       </div>
 
-      {/* 30-day trend */}
+      {/* ── What changed (90-day comparisons; honest when young) ───────── */}
       <section className="mt-6">
-        <TrendChart series={m.rating30d} aria-label={t("trend")} />
+        <h2 className="text-lg font-semibold text-ink-900">{t("intel.changed.title")}</h2>
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <MetricCard
+            tone={
+              score.inputsSummary.ratingDelta90d === null
+                ? "warn"
+                : score.inputsSummary.ratingDelta90d >= 0
+                  ? "good"
+                  : "bad"
+            }
+            label={t("intel.changed.rating")}
+            value={
+              score.inputsSummary.ratingDelta90d === null
+                ? "—"
+                : `${score.inputsSummary.ratingDelta90d >= 0 ? "+" : ""}${score.inputsSummary.ratingDelta90d}`
+            }
+            hint={`${w90.avgRating?.toFixed(1) ?? "—"} → ${score.inputsSummary.avgRating90d?.toFixed(1) ?? "—"}`}
+            locale={locale}
+          />
+          <MetricCard
+            tone={responseRate === null ? "warn" : responseRate >= 0.8 ? "good" : "warn"}
+            label={t("intel.changed.response")}
+            value={responseRate === null ? "—" : `${Math.round(responseRate * 100)}%`}
+            hint={t("intel.changed.responseHint", { count: w90.answered })}
+            locale={locale}
+          />
+          <MetricCard
+            tone={negativeShare === null ? "warn" : negativeShare <= 0.15 ? "good" : "warn"}
+            label={t("intel.changed.negative")}
+            value={negativeShare === null ? "—" : `${Math.round(negativeShare * 100)}%`}
+            hint={t("intel.changed.negativeHint", { count: w90.sentiment.negative })}
+            locale={locale}
+          />
+          <MetricCard
+            tone="good"
+            label={t("intel.changed.velocity")}
+            value={String(w30.count)}
+            hint={t("intel.changed.velocityHint", { count: monthCount })}
+            locale={locale}
+          />
+        </div>
       </section>
 
-      {/* What/Why/Do insights */}
-      <section className="mt-8">
-        <h2 className="text-lg font-semibold text-ink-900">{t("insights")}</h2>
-        <div className="mt-4 space-y-3">
-          {insights.length === 0 ? (
-            <p className="rounded-lg border border-line bg-surface p-5 text-sm text-ink-500">
-              {t("noInsights")}
-            </p>
-          ) : (
-            insights.map((insight) => (
-              <InsightCard key={insight.key} insight={insight} />
-            ))
-          )}
+      {/* ── Intelligence grid: voice + issues/actions | context column ── */}
+      <div className="mt-6 grid grid-cols-1 items-start gap-6 lg:grid-cols-[7fr_5fr]">
+        <div className="space-y-6">
+          <VoiceCard
+            w30={w30}
+            w90={w90}
+            w365={w365}
+            wAll={wAll}
+            monthCount={monthCount}
+            themes={themeStats}
+            narrative={summary?.narrative ?? null}
+            strengths={summary?.strengths ?? []}
+            risks={summary?.risks ?? []}
+            locale={locale}
+          />
+          <IssuesPanel
+            issues={issues}
+            recommendations={recommendations}
+            locale={locale}
+          />
+        </div>
+        <div className="space-y-6">
+          <CompetitorCard
+            benchmark={benchmark}
+            competitors={competitors}
+            locale={locale}
+          />
+          <SourceCard breakdown={sourceBreakdown} locale={locale} />
+          <SeasonalCard comparison={seasonal} locale={locale} />
+        </div>
+      </div>
+
+      {/* ── Historical trend: 12-month rating line (§12, all-source) ──── */}
+      <section className="mt-6">
+        <h2 className="text-lg font-semibold text-ink-900">{t("intel.trend")}</h2>
+        <div className="mt-4">
+          <TrendChart series={monthlyTrendPoints(monthly)} aria-label={t("trend")} />
         </div>
       </section>
     </main>

@@ -48,18 +48,36 @@
       "title": "Reviews don't wait",
       "body": "The customer who dined tonight writes their review tomorrow morning — often before you open. Big chains reply within 24 hours; small businesses, whenever there's time. Atterna brings that speed to the rest of us.",
       "stats": [
-        { "value": "81%", "label": "read reviews before visiting a local business" },
-        { "value": "1 in 3", "label": "won't book a table or appointment below 4 stars" },
-        { "value": "24 hours", "label": "is the window in which a reply changes the impression" }
+        {
+          "value": "81%",
+          "label": "read reviews before visiting a local business"
+        },
+        {
+          "value": "1 in 3",
+          "label": "won't book a table or appointment below 4 stars"
+        },
+        {
+          "value": "24 hours",
+          "label": "is the window in which a reply changes the impression"
+        }
       ]
     },
     "how": {
       "eyebrow": "HOW IT WORKS",
       "title": "Three steps, five minutes",
       "steps": [
-        { "title": "Connect Google", "body": "With a secure, reviews-read-only permission — nothing else is touched." },
-        { "title": "Atterna analyzes and writes", "body": "Every review is analyzed and a reply draft is prepared in your voice, in Greek or English." },
-        { "title": "You approve in one click", "body": "Nothing is ever published without your approval." }
+        {
+          "title": "Connect Google",
+          "body": "With a secure, reviews-read-only permission — nothing else is touched."
+        },
+        {
+          "title": "Atterna analyzes and writes",
+          "body": "Every review is analyzed and a reply draft is prepared in your voice, in Greek or English."
+        },
+        {
+          "title": "You approve in one click",
+          "body": "Nothing is ever published without your approval."
+        }
       ]
     },
     "demo": {
@@ -154,10 +172,22 @@
     },
     "statsBand": {
       "items": [
-        { "value": "92%", "label": "of reviews answered within 24 hours" },
-        { "value": "+0.4", "label": "average rating lift in the first six months" },
-        { "value": "2", "label": "languages, Greek and English, at equal quality" },
-        { "value": "5'", "label": "minutes of setup until your first reply" }
+        {
+          "value": "92%",
+          "label": "of reviews answered within 24 hours"
+        },
+        {
+          "value": "+0.4",
+          "label": "average rating lift in the first six months"
+        },
+        {
+          "value": "2",
+          "label": "languages, Greek and English, at equal quality"
+        },
+        {
+          "value": "5'",
+          "label": "minutes of setup until your first reply"
+        }
       ]
     },
     "testimonials": {
@@ -274,33 +304,69 @@
         {
           "title": "Product",
           "links": [
-            { "label": "How it works", "href": "#how" },
-            { "label": "Pricing", "href": "#pricing" },
-            { "label": "FAQ", "href": "#faq" },
-            { "label": "Log in", "href": "/login" }
+            {
+              "label": "How it works",
+              "href": "#how"
+            },
+            {
+              "label": "Pricing",
+              "href": "#pricing"
+            },
+            {
+              "label": "FAQ",
+              "href": "#faq"
+            },
+            {
+              "label": "Log in",
+              "href": "/login"
+            }
           ]
         },
         {
           "title": "Company",
           "links": [
-            { "label": "Contact", "href": "mailto:hello@atterna.app" },
-            { "label": "About", "href": "#" },
-            { "label": "Work with us", "href": "#" }
+            {
+              "label": "Contact",
+              "href": "mailto:hello@atterna.app"
+            },
+            {
+              "label": "About",
+              "href": "#"
+            },
+            {
+              "label": "Work with us",
+              "href": "#"
+            }
           ]
         },
         {
           "title": "Legal",
           "links": [
-            { "label": "Terms", "href": "#" },
-            { "label": "Privacy", "href": "#" },
-            { "label": "GDPR", "href": "#" }
+            {
+              "label": "Terms",
+              "href": "#"
+            },
+            {
+              "label": "Privacy",
+              "href": "#"
+            },
+            {
+              "label": "GDPR",
+              "href": "#"
+            }
           ]
         },
         {
           "title": "Contact",
           "links": [
-            { "label": "hello@atterna.app", "href": "mailto:hello@atterna.app" },
-            { "label": "Athens, Greece", "href": "#" }
+            {
+              "label": "hello@atterna.app",
+              "href": "mailto:hello@atterna.app"
+            },
+            {
+              "label": "Athens, Greece",
+              "href": "#"
+            }
           ]
         }
       ]
@@ -389,7 +455,99 @@
     "trend": "Average rating (30 days)",
     "insights": "What to do",
     "noInsights": "Not enough data for conclusions yet — usually ~10 reviews are needed.",
-    "connectFirst": "Connect your Google Business Profile first to see data."
+    "connectFirst": "Connect your Google Business Profile first to see data.",
+    "intel": {
+      "health": {
+        "label": "Reputation Health",
+        "change": "vs previous snapshot",
+        "noChange": "first snapshot",
+        "confidence": {
+          "thin": "Thin data: {count} reviews in 90 days — historical windows carry the score",
+          "building": "Building: {count} reviews in 90 days",
+          "solid": "Solid: {count} reviews in 90 days"
+        }
+      },
+      "changed": {
+        "title": "What changed",
+        "rating": "Rating (90d vs prior 90d)",
+        "response": "Response rate (90d)",
+        "responseHint": "{count} answered in the last 90 days",
+        "negative": "Negative sentiment (90d)",
+        "negativeHint": "{count} negative in the last 90 days",
+        "velocity": "New reviews (30d)",
+        "velocityHint": "{count} this calendar month"
+      },
+      "voice": {
+        "title": "Customer Voice",
+        "window90": "last 90 days",
+        "thisMonth": "new this month",
+        "in90d": "in the last 90 days",
+        "in12m": "in the last 12 months",
+        "allTime": "all-time",
+        "quietMonth": "No new reviews in the last 30 days. Your 90-day reputation remains {rating} ★ — we keep monitoring every source.",
+        "positive": "Positive",
+        "neutral": "Neutral",
+        "negative": "Negative",
+        "noAnalysis": "No analyzed reviews in the last 90 days yet — analysis runs automatically as feedback arrives.",
+        "strengths": "Top strengths"
+      },
+      "issues": {
+        "title": "Issues",
+        "empty": "No recurring or emerging issues detected in the last 90 days. Detection refreshes daily.",
+        "mentions": "{count} mentions",
+        "vs90": "vs previous 90 days",
+        "firstDetected": "first detected {date}",
+        "start": "Start",
+        "resolve": "Resolve",
+        "dismiss": "Dismiss"
+      },
+      "recommendations": {
+        "title": "Recommended actions",
+        "empty": "No open recommendations right now.",
+        "impact": {
+          "HIGH": "High impact",
+          "MEDIUM": "Medium impact",
+          "LOW": "Low impact"
+        },
+        "start": "Start",
+        "resolve": "Resolve",
+        "dismiss": "Dismiss"
+      },
+      "loopHint": "Problem → recommendation → your action → future customer feedback → measured improvement. Resolving an issue closes its recommendations.",
+      "competitors": {
+        "title": "Competitor position",
+        "yourRating": "Your rating",
+        "localAverage": "Competitor average",
+        "position": "Position",
+        "gapAbove": "{gap} above the local average",
+        "gapBelow": "{gap} below the local average",
+        "remove": "Remove",
+        "honestyNote": "You add and confirm competitors yourself — Atterna never invents competitor data. Leave a rating empty when you don't know it.",
+        "manage": "Manage competitors"
+      },
+      "sources": {
+        "title": "All sources",
+        "total": "total customer feedback",
+        "qr": "Atterna feedback",
+        "manage": "Manage sources"
+      },
+      "seasonal": {
+        "title": "Season",
+        "reviews": "reviews",
+        "ratingDelta": "Rating {delta} vs last year",
+        "volumeDelta": "Volume {pct}% vs last year",
+        "offSeasonIssue": "Off-season plan: address {issue} before the next high season.",
+        "noComparison": "No same-season data from last year yet — your first year-over-year comparison unlocks after 12 months.",
+        "noData": "Seasonal comparisons appear once a few months of feedback accumulate."
+      },
+      "trend": "12-month rating trend",
+      "empty": {
+        "title": "No customer feedback yet",
+        "body": "Import your historical reviews from any platform (CSV) or connect Google — Atterna builds your reputation profile from every source, and stays useful even in quiet months.",
+        "import": "Import reviews (CSV)",
+        "connect": "Connect Google"
+      }
+    }
   },
   "reviews": {
     "title": "Reviews",
@@ -420,7 +578,12 @@
       "confirmNo": "Cancel",
       "chars": "characters"
     },
-    "empty": "There are no reviews yet."
+    "empty": "There are no reviews yet.",
+    "sourceFilter": {
+      "ariaLabel": "Filter by source",
+      "all": "All sources"
+    },
+    "emptySources": "Add a data source"
   },
   "feedback": {
     "title": "Private feedback",
@@ -459,7 +622,10 @@
     "gbp": "Google Business Profile",
     "gbpConnected": "Connected",
     "gbpNotConnected": "Not connected",
-    "connect": "Connect"
+    "connect": "Connect",
+    "sources": "Data sources",
+    "sourcesHint": "Google, CSV import, QR feedback and everything coming next — one page.",
+    "sourcesManage": "Manage data sources"
   },
   "billing": {
     "title": "Billing",
@@ -494,13 +660,23 @@
     "connectHint": "You will be asked for permission to read reviews. It takes less than 5 minutes.",
     "importing": "Importing reviews…",
     "goDashboard": "Go to the dashboard",
-    "done": "All set!"
+    "done": "All set!",
+    "feedbackHint": "Add your customer feedback — Atterna builds your reputation profile from every source. You can connect Google, import a CSV with your historical reviews, or start with the QR channel and add sources later.",
+    "importCsv": "Import reviews (CSV)",
+    "comingSoonNote": "Tripadvisor, Facebook and Booking.com are coming soon — your intelligence engine already works with every source you add.",
+    "skipToDashboard": "Skip for now — open the dashboard →"
   },
   "f": {
     "question": "How was your experience?",
     "low": "Bad",
     "high": "Excellent",
-    "starLabels": ["Very bad", "Bad", "Okay", "Good", "Excellent"],
+    "starLabels": [
+      "Very bad",
+      "Bad",
+      "Okay",
+      "Good",
+      "Excellent"
+    ],
     "negativePrompt": "What could we improve? (optional, private)",
     "positivePrompt": "Thank you! Would you like to share it publicly?",
     "commentPlaceholder": "We'd love to hear it…",
@@ -531,5 +707,50 @@
     "forbidden": "You don't have access to this.",
     "cancel": "Cancel",
     "language": "Ελληνικά"
+  },
+  "sources": {
+    "title": "Data sources",
+    "subtitle": "Every channel your customers speak through. Google is one source among many — Atterna's intelligence works with any mix, and quiet months still show your history.",
+    "connected": "Connected",
+    "available": "Import reviews",
+    "comingSoon": "Coming soon",
+    "soonBadge": "soon",
+    "soonNote": "New sources are added only when their official APIs and terms allow it — no scraping, ever.",
+    "lastSync": "last sync",
+    "googleNotConnected": "Not connected",
+    "connect": "Connect",
+    "csvImported": "{count} reviews imported via CSV/manual",
+    "qrStats": "{tokens} active QR links · {submissions} private feedback submissions",
+    "manageQr": "Manage",
+    "history": "Import history",
+    "historyRow": "{total} rows → {imported} imported · {invalid} invalid",
+    "cap": {
+      "sync": "auto sync",
+      "reply": "reply from Atterna",
+      "oauth": "OAuth",
+      "import": "bulk import"
+    },
+    "import": {
+      "chooseFile": "Choose a CSV file…",
+      "submit": "Import",
+      "importing": "Importing…",
+      "hint": "Columns: source, external_id, date, rating, review, reviewer, reply, url. Dates accept 2026-08-20 or 20/08/2026; ratings 1–5 (Booking's 1–10 are converted). Max 2 MB / 5,000 rows.",
+      "error": {
+        "noFile": "Choose a CSV file first.",
+        "fileTooLarge": "The file is too large (max 2 MB / 5,000 rows).",
+        "badHeader": "The first row must be a header naming at least two of: source, date, rating, review.",
+        "noBusiness": "Create your business first.",
+        "server": "Import failed — please try again."
+      },
+      "summary": "{total} rows: {imported} imported, {updated} updated, {invalid} invalid.",
+      "rowErrors": "{count} rows skipped — details",
+      "reason": {
+        "BAD_SOURCE": "Line {line}: unknown source",
+        "BAD_RATING": "Line {line}: rating must be 1–5 (or 1–10)",
+        "BAD_DATE": "Line {line}: invalid date",
+        "EMPTY_ROW": "Line {line}: empty row",
+        "PRIVATE_SOURCE": "Line {line}: QR/direct feedback cannot be imported"
+      }
+    }
   }
 }

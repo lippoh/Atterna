@@ -10,11 +10,26 @@ import {
 import { render } from "@react-email/components";
 import type { DashboardMetrics, Insight } from "@/lib/metrics";
 
+/** Reputation Intelligence section (spec §26) — optional; when present the
+ * email leads with health + what-changed + position + recommendations. */
+export interface IntelSection {
+  healthScore: number;
+  healthDelta: number | null;
+  ratingDelta: number | null; // 90d vs prior 90d
+  responseRate: number | null; // 0..1
+  negativeShare: number | null; // 0..1 among analyzed
+  position: string | null; // e.g. "#2/7"
+  topStrength: string | null;
+  recommendations: { title: string }[];
+  narrative: string | null;
+}
+
 export interface WeeklyEmailProps {
   locale: string;
   businessName: string;
   metrics: DashboardMetrics;
   insights: Insight[];
+  intel?: IntelSection;
   appUrl?: string;
 }
 
@@ -61,6 +76,89 @@ export function WeeklyEmail(props: WeeklyEmailProps) {
             <Text style={{ color: C.muted, fontSize: 13, margin: "0 0 20px" }}>
               {props.businessName}
             </Text>
+
+            {props.intel && (
+              <>
+                {/* Reputation Health (deterministic score) */}
+                <Text style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: 32, fontWeight: 700, color: C.aegean, margin: "0 0 2px" }}>
+                  {props.intel.healthScore}
+                  <span style={{ fontSize: 15, color: C.muted, fontWeight: 400 }}> / 100</span>
+                  {props.intel.healthDelta !== null && props.intel.healthDelta !== 0 && (
+                    <span style={{ fontSize: 15, color: props.intel.healthDelta > 0 ? "#1c7c4a" : "#b3392b", fontWeight: 700 }}>
+                      {" "}{props.intel.healthDelta > 0 ? "↑" : "↓"}{Math.abs(props.intel.healthDelta)}
+                    </span>
+                  )}
+                </Text>
+                <Text style={{ color: C.muted, fontSize: 13, margin: "0 0 8px" }}>
+                  {el ? "Reputation Health" : "Reputation Health"}
+                </Text>
+                {props.intel.narrative && (
+                  <Text style={{ fontSize: 13.5, color: C.body, margin: "0 0 16px", lineHeight: 1.5 }}>
+                    {props.intel.narrative}
+                  </Text>
+                )}
+
+                {/* What changed */}
+                <Heading as="h2" style={{ fontSize: 15, color: C.aegean, margin: "0 0 6px", fontWeight: 700 }}>
+                  {el ? "Τι άλλαξε" : "What changed"}
+                </Heading>
+                {[
+                  {
+                    label: el ? "Βαθμολογία (90 ημέρες)" : "Rating (90 days)",
+                    value:
+                      props.intel.ratingDelta === null
+                        ? "—"
+                        : `${props.intel.ratingDelta >= 0 ? "+" : ""}${props.intel.ratingDelta}`,
+                  },
+                  {
+                    label: el ? "Απαντήσεις (90 ημέρες)" : "Response rate (90 days)",
+                    value: props.intel.responseRate === null ? "—" : pct(props.intel.responseRate),
+                  },
+                  {
+                    label: el ? "Αρνητικό σεντίμεντ (90 ημέρες)" : "Negative sentiment (90 days)",
+                    value:
+                      props.intel.negativeShare === null ? "—" : pct(props.intel.negativeShare),
+                  },
+                  props.intel.position
+                    ? {
+                        label: el ? "Θέση απέναντι σε ανταγωνιστές" : "Competitor position",
+                        value: props.intel.position,
+                      }
+                    : null,
+                  props.intel.topStrength
+                    ? {
+                        label: el ? "Κορυφαίο πλεονέκτημα" : "Top strength",
+                        value: props.intel.topStrength,
+                      }
+                    : null,
+                ]
+                  .filter((r): r is { label: string; value: string } => r !== null)
+                  .map((row) => (
+                    <Section key={row.label} style={{ display: "block", padding: "5px 0" }}>
+                      <Text style={{ fontSize: 13, color: C.muted, margin: 0 }}>{row.label}</Text>
+                      <Text style={{ fontSize: 15, color: C.ink, fontWeight: 600, margin: 0 }}>
+                        {row.value}
+                      </Text>
+                    </Section>
+                  ))}
+
+                {props.intel.recommendations.length > 0 && (
+                  <>
+                    <div style={{ height: 1, backgroundColor: C.line, margin: "14px 0" }} />
+                    <Heading as="h2" style={{ fontSize: 15, color: C.aegean, margin: "0 0 8px", fontWeight: 700 }}>
+                      {el ? "Προτεινόμενες ενέργειες" : "Recommended actions"}
+                    </Heading>
+                    {props.intel.recommendations.slice(0, 3).map((rec) => (
+                      <Text key={rec.title} style={{ fontSize: 13.5, color: C.body, margin: "0 0 6px" }}>
+                        → {rec.title}
+                      </Text>
+                    ))}
+                  </>
+                )}
+
+                <div style={{ height: 1, backgroundColor: C.line, margin: "16px 0" }} />
+              </>
+            )}
 
             {/* Big metric — Georgia for numerals (§9.8) */}
             <Text style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: 32, fontWeight: 700, color: C.aegean, margin: "0 0 2px" }}>

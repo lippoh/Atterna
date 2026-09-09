@@ -74,6 +74,11 @@ model Business {
   feedbackRequests   FeedbackRequest[]
   feedbackSubmissions FeedbackSubmission[]
   reportLogs         ReportLog[]
+  reputationSnapshots ReputationSnapshot[]
+  issues             Issue[]
+  recommendations    Recommendation[]
+  competitors        Competitor[]
+  businessInsights   BusinessInsight[]
   aiSettings         Json? // tone, formality, signature, forbidden phrases
   deletedAt          DateTime?
   createdAt          DateTime         @default(now())
@@ -107,6 +112,7 @@ model Review {
   text              String?
   language          String?
   reviewerName      String?
+  sourceUrl         String? // deep link to the review on its platform (imports)
   createdOnPlatform DateTime?
   receivedAt        DateTime        @default(now())
   createdAt         DateTime        @default(now())
@@ -282,4 +288,116 @@ model ImpersonationSession {
   endedAt     DateTime?
   reason      String?
   createdAt   DateTime @default(now())
+}
+
+// ── Reputation Intelligence (multi-source refactor) ─────────────────────
+// All additive: the unified Review/Feedback models above stay untouched;
+// these tables make historical intelligence, issues, recommendations,
+// competitors and cached AI summaries first-class data.
+
+// Daily deterministic Health Score history (computed by app code — never
+// the LLM). One row per business per day; `breakdown` keeps every input
+// and sub-score so any past score is explainable and auditable.
+model ReputationSnapshot {
+  id          String   @id @default(cuid())
+  businessId  String
+  business    Business @relation(fields: [businessId], references: [id])
+  date        DateTime // day granularity, stored at 00:00 UTC
+  score       Int // 0-100
+  breakdown   Json
+  createdAt   DateTime @default(now())
+
+  @@unique([businessId, date])
+  @@index([businessId, date])
+}
+
+// First-class recurring / emerging customer problems, detected
+// deterministically from persisted ReviewAnalysis categories.
+model Issue {
+  id               String    @id @default(cuid())
+  organizationId   String
+  businessId       String
+  business         Business  @relation(fields: [businessId], references: [id])
+  category         String // closed-vocabulary theme key (ai/schemas.ts)
+  kind             String // RECURRING | EMERGING
+  severity         String    @default("MEDIUM") // LOW | MEDIUM | HIGH
+  mentionsCurrent  Int       @default(0) // last 90d (recurring) / last 30d (emerging)
+  mentionsPrevious Int       @default(0) // comparison window
+  trend            String    @default("STABLE") // UP | DOWN | STABLE
+  status           String    @default("OPEN") // OPEN | IN_PROGRESS | RESOLVED | DISMISSED
+  sources          String[]  @default([])
+  firstDetectedAt  DateTime  @default(now())
+  lastSeenAt       DateTime  @default(now())
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  recommendations  Recommendation[]
+
+  @@unique([businessId, category, kind])
+  @@index([businessId, status])
+}
+
+// Recommended actions — the feedback loop: problem → recommendation →
+// business action → future feedback → measured improvement.
+model Recommendation {
+  id              String    @id @default(cuid())
+  organizationId  String
+  businessId      String
+  business        Business  @relation(fields: [businessId], references: [id])
+  issueId         String?
+  issue           Issue?    @relation(fields: [issueId], references: [id])
+  title           String
+  impact          String    @default("MEDIUM") // HIGH | MEDIUM | LOW
+  steps           String[]  @default([])
+  status          String    @default("OPEN") // OPEN | IN_PROGRESS | RESOLVED | DISMISSED
+  source          String    @default("RULES") // RULES | AI
+  evidence        Json?
+  resolvedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([businessId, status])
+}
+
+// Competitors the owner confirmed (manual entry; suggestions are only
+// labeled as such until confirmed). No scraping, no fabricated stats —
+// nullable rating/count means "not provided".
+model Competitor {
+  id              String    @id @default(cuid())
+  organizationId  String
+  businessId      String
+  business        Business  @relation(fields: [businessId], references: [id])
+  name            String
+  category        String?
+  city            String?
+  rating          Float?
+  reviewCount     Int?
+  status          String    @default("CONFIRMED") // SUGGESTED | CONFIRMED | DISMISSED
+  suggestedReason String?
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([businessId, name])
+  @@index([businessId, status])
+}
+
+// Cached business-level AI insights, keyed by a data fingerprint — the
+// 90-day summary is regenerated ONLY when the underlying data changed
+// (cost control, spec §16). Kind: QUARTERLY_SUMMARY | HEALTH_EXPLAIN.
+model BusinessInsight {
+  id             String   @id @default(cuid())
+  businessId     String
+  business       Business @relation(fields: [businessId], references: [id])
+  kind           String
+  windowStart    DateTime
+  windowEnd      DateTime
+  fingerprint    String
+  payload        Json
+  model          String?
+  promptVersion  String?
+  tokensIn       Int      @default(0)
+  tokensOut      Int      @default(0)
+  createdAt      DateTime @default(now())
+
+  @@index([businessId, kind, createdAt])
 }

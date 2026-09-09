@@ -3,6 +3,7 @@
 // select fields styled to match inputs, and the GBP connection card
 // with a status chip. Inline server actions preserved verbatim.
 import { getLocale, getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { requireOrg, requireUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
 import { updateLocaleAction } from "../../(auth)/actions";
@@ -127,6 +128,18 @@ export default async function SettingsPage() {
             </form>
           </section>
         )}
+
+        {/* Data sources */}
+        <section className="rounded-lg border border-line bg-surface p-5 shadow-xs sm:p-6">
+          <h2 className="text-lg font-semibold text-ink-900">{t("sources")}</h2>
+          <p className="mt-2 max-w-[56ch] text-sm text-ink-500">{t("sourcesHint")}</p>
+          <Link
+            href="/settings/sources"
+            className="link-grow mt-4 inline-block text-sm font-semibold text-aegean-600"
+          >
+            {t("sourcesManage")}
+          </Link>
+        </section>
 
         {/* Google Business Profile connection */}
         <section className="rounded-lg border border-line bg-surface p-5 shadow-xs sm:p-6">

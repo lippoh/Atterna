@@ -366,3 +366,12 @@ export function IconEye(props: IconProps) {
     </svg>
   );
 }
+
+export function IconUpload(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M12 16V4m0 0 4 4m-4-4L8 8" />
+      <path d="M4 16v2.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V16" />
+    </svg>
+  );
+}

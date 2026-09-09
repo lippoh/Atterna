@@ -4,6 +4,7 @@
 // hairline progress rail; actions preserved verbatim.
 import { getLocale, getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
+import { Link } from "@/i18n/navigation";
 import { requireUser, requireOrg } from "@/lib/session";
 import { prisma } from "@/lib/db";
 import { trialEndsAt } from "@/lib/billing/trial";
@@ -75,6 +76,9 @@ export default async function OnboardingPage({
   }
 
   const hasOrg = Boolean(membership);
+  const hasAnyData = business
+    ? Boolean(business.gbpConnection) || step === "import"
+    : false;
 
   return (
     <main id="main-content" className="mx-auto max-w-[560px] px-4 py-8 sm:px-6">
@@ -145,26 +149,44 @@ export default async function OnboardingPage({
           </form>
         </section>
       ) : (
+        /* Step 2 — "Add your customer feedback" (spec §34): the customer
+         * chooses ANY source; Google is one option, never a gate. CSV
+         * import and skip-to-dashboard keep onboarding unblocked. */
         <section className="mt-8 rounded-lg border border-line bg-surface p-5 shadow-xs sm:p-6">
           <h2 className="text-lg font-semibold text-ink-900">{t("step2")}</h2>
-          <p className="lh-body mt-2 text-sm leading-relaxed text-ink-700">{t("connectHint")}</p>
-          {step === "import" && business?.gbpConnection && (
+          <p className="lh-body mt-2 text-sm leading-relaxed text-ink-700">{t("feedbackHint")}</p>
+
+          {hasAnyData && (
             <p className="mt-3 flex items-center gap-2 text-sm font-medium text-success-600">
               <IconCheckCircle className="size-4" />
               {t("importing")}
             </p>
           )}
-          <form action={connectGbp} className="mt-5">
-            <Button type="submit">{t("connectGbp")}</Button>
-          </form>
-          {business?.gbpConnection && (
-            <a
-              href={`/${locale}/dashboard`}
-              className="link-grow mt-4 inline-block text-sm font-semibold text-aegean-600"
+
+          <div className="mt-5 space-y-3">
+            <form action={connectGbp}>
+              <Button type="submit" className="w-full sm:w-auto">
+                {t("connectGbp")}
+              </Button>
+            </form>
+
+            <Link
+              href="/settings/sources"
+              className="flex h-10 w-full items-center justify-center gap-2 rounded-md border border-line-strong bg-surface px-4 text-sm font-semibold text-ink-700 transition-colors hover:border-aegean-600 hover:text-aegean-600 sm:w-auto"
             >
-              {t("goDashboard")}
-            </a>
-          )}
+              {t("importCsv")}
+              <IconArrowRight className="size-4" />
+            </Link>
+
+            <p className="text-[12px] text-ink-300">{t("comingSoonNote")}</p>
+
+            <Link
+              href="/dashboard"
+              className="link-grow inline-block text-sm font-semibold text-aegean-600"
+            >
+              {t("skipToDashboard")}
+            </Link>
+          </div>
         </section>
       )}
     </main>
