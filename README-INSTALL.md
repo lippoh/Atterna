@@ -76,6 +76,43 @@ This zip contains **45 new/changed files** — the complete, verified delta.
    05:00 UTC weekly report, 02:00 UTC prune. If you configure crons in the
    Vercel dashboard instead, add `GET /api/cron?type=intel` daily.
 
+## Running the test suite (all 6 files, 55 tests)
+
+The five pure suites need nothing. The tenant-isolation suite is a REAL
+integration test: `resetTestDb()` **truncates every table** in the
+database it connects to, so it must never see your production database.
+
+Vitest does not load `.env` on its own (the Prisma CLI does, via
+`prisma7.config.ts` → `dotenv`). `tests/setup.ts` (wired through
+`vitest.config.ts` → `setupFiles`) closes that gap: it loads `.env`, then
+routes the app's Prisma singleton at the test database:
+
+- `TEST_DATABASE_URL` — the database the tests may truncate. Set it to a
+  disposable Postgres: local or a Neon branch. **Required for anything
+  not on localhost.**
+- Without it, `DATABASE_URL` is used only when it points at `localhost`/
+  `127.0.0.1` — otherwise the suite refuses to run (protecting your
+  remote/production database) and tells you exactly what to set.
+
+One-time setup for a local test database (never run these against
+production):
+
+```bash
+createdb atterna_test
+# .env:
+#   TEST_DATABASE_URL=postgresql://postgres@localhost:5432/atterna_test
+# The repo's only migration is additive-only (it assumes base tables
+# exist), so provision a FRESH test database with the full schema:
+TEST_DATABASE_URL=postgresql://postgres@localhost:5432/atterna_test \
+  pnpm exec prisma db push
+
+pnpm test   # Test Files 6 passed (6) · Tests 55 passed (55)
+```
+
+CI (`.github/workflows/ci.yml` → `test` job) does the same automatically:
+a `postgres:17` service container, `TEST_DATABASE_URL` pointing at it,
+`prisma db push` provisioning the schema, then `vitest run`.
+
 ## How the intelligence engine works
 
 ```
@@ -104,9 +141,9 @@ tests — the LLM only narrates what app code already computed.
 ## Verified before packing
 
 - `tsc --noEmit` → **0 errors**
-- `vitest run` (pure suites: csv, score, issues, sources/benchmarks, schema)
-  → **53/53 passed** (tenant-isolation suite stays CI-only, as before — it
-  needs the Neon branch)
+- `vitest run` → **55/55 passed** across all 6 suites (tenant-isolation
+  included — it now runs against a disposable Postgres, locally via
+  `TEST_DATABASE_URL`, in CI via the `postgres:17` service container)
 - `next build` → **full pass**, new route `/{locale}/settings/sources`
   included
 - Migration SQL generated from `prisma migrate diff` (zero drift) and

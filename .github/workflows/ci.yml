@@ -22,6 +22,28 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    services:
+      # Real Postgres for the tenant-isolation integration suite
+      # (tests/unit/tenant-isolation.test.ts truncates it on every run —
+      # it is disposable by design).
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: atterna_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      # Route BOTH the Prisma CLI (prisma7.config.ts) and the Vitest setup
+      # (tests/setup.ts) at the disposable service database.
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/atterna_test
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/atterna_test
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -32,6 +54,11 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Provision the full schema on the fresh service database. The repo's
+      # only migration is additive-only (it assumes base tables such as
+      # "Review" already exist), so `prisma migrate deploy` cannot build an
+      # empty database from scratch — `db push` applies the whole schema.
+      - run: pnpm exec prisma db push
       - run: pnpm exec vitest run
 
   e2e:

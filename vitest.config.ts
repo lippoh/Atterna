@@ -13,5 +13,8 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["tests/unit/**/*.test.ts"],
+    // Loads .env + routes DATABASE_URL at a disposable test database
+    // before any test module (incl. src/lib/db.ts) is imported.
+    setupFiles: ["tests/setup.ts"],
   },
 });

@@ -1,13 +1,32 @@
 // tests/unit/helpers.ts — integration test scaffolding (real Postgres)
-// Exports prisma (V1's import list), resetTestDb (migrates a fresh Neon
-// branch in CI), seedTwoOrgs → { a, b } bundles, and
+// Exports prisma (V1's import list), resetTestDb (truncates a disposable
+// test database), seedTwoOrgs → { a, b } bundles, and
 // requireOrgWithBusiness — the requireOrg() guard logic replicated as a
 // test seam (no Next request context needed under vitest).
 import { prisma } from "@/lib/db";
+import { resolveTestDatabaseUrl } from "../db-url";
+
 export { prisma };
+
+// Fail fast with an actionable message when the test process has no
+// usable, SAFE database. Without this guard the suite went straight to
+// pg's silent localhost fallback and died inside Prisma's generic
+// "Invalid prisma.$queryRaw() invocation" wrapper (empty cause), which
+// said nothing about the environment being the actual problem. (The pool
+// below is lazy — no connection is attempted until the first query, so
+// throwing here is safe even though @/lib/db was already imported.)
+const testDb = resolveTestDatabaseUrl(process.env);
+if (!testDb.url) {
+  throw new Error(
+    "tenant-isolation tests need a disposable Postgres database, but the " +
+      `test environment is not usable:\n${testDb.error}`
+  );
+}
+
 export async function resetTestDb(): Promise<void> {
-  // CI: `prisma migrate deploy` runs against DATABASE_URL (a Neon branch)
-  // before vitest — this hook only truncates data, never the schema.
+  // CI: the schema is provisioned on a disposable database before vitest
+  // (see .github/workflows/ci.yml — `prisma db push` on a postgres service
+  // container) — this hook only truncates data, never the schema.
   const tables = await prisma.$queryRaw<Array<{ tablename: string }>>`
     SELECT tablename FROM pg_tables WHERE schemaname = 'public'`;
   const names = tables.map((t) => `"${t.tablename}"`).filter((n) => n !==
