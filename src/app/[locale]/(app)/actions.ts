@@ -23,8 +23,8 @@ import { rateLimit } from "@/lib/ratelimit";
 import { hashIp } from "@/lib/hash";
 import { audit } from "@/lib/audit";
 import { send } from "@/lib/mailer";
-import { renderAlertEmail } from "@/emails/alert";
-import { renderResetEmail } from "@/emails/reset";
+import { renderAlertEmail, renderAlertEmailText } from "@/emails/alert";
+import { renderResetEmail, renderResetEmailText } from "@/emails/reset";
 import { env } from "@/lib/env";
 import { routing } from "@/i18n/routing";
 
@@ -87,6 +87,13 @@ export async function registerAction(
     });
     if (!parsed.success) return { error: "weak" };
     const email = parsed.data.email.toLowerCase();
+    const ip = await requestIp();
+    // Step 7: registration is a public email-sending surface — without a
+    // bucket, an attacker burns Resend quota with throwaway signups
+    // (Appendix 58 discipline, same as login/reset).
+    if (!(await rateLimit(`register:${hashIp(ip)}`, 3, 3600))) {
+      return { error: "rateLimited" };
+    }
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) return { error: "exists" };
     const user = await prisma.user.create({
@@ -98,20 +105,34 @@ export async function registerAction(
     });
     const token = createToken(email, "verify", 24 * 60 * 60_000);
     const origin = await siteOrigin();
-    const html = await renderAlertEmail({
+    const props = {
       locale: parsed.data.locale,
-      kind: "verify",
+      kind: "verify" as const,
       verifyUrl: `${origin}/${parsed.data.locale}/verify?token=${encodeURIComponent(token)}`,
-    });
-    await send({
+    };
+    const [html, text] = await Promise.all([
+      renderAlertEmail(props),
+      renderAlertEmailText(props),
+    ]);
+    const result = await send({
       to: email,
       subject:
         parsed.data.locale === "en"
           ? "Confirm your email"
           : "Επιβεβαιώστε το email σας",
       html,
+      text,
     });
     await audit("auth.register", { userId: user.id });
+    if (!result.ok) {
+      // The account exists but the verification email failed. Surface it
+      // instead of pretending "check your inbox": the register page shows
+      // the emailFailed state and links to /verify, where a fresh link can
+      // be requested (resendVerificationAction).
+      console.error("registerAction: verification email failed:", result.error);
+      await audit("auth.register_email_failed", { userId: user.id });
+      return { error: "emailFailed" };
+    }
     return { ok: true };
   } catch (error) {
     if (isRedirect(error)) throw error;
@@ -146,6 +167,55 @@ export async function verifyEmailAction(
   }
 }
 
+// ── Resend verification ─────────────────────────────────────────────────────
+/** Step 7: the recovery path for a lost/failed signup email. Rate-limited
+ *  3/h/IP; returns { ok: true } whether or not a pending account exists
+ *  (same no-enumeration contract as requestResetAction) — send failures
+ *  are logged server-side, never surfaced as a different response. */
+export async function resendVerificationAction(
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  try {
+    const locale = normalizeLocale(formData.get("locale"));
+    const email = String(formData.get("email") ?? "").toLowerCase();
+    const ip = await requestIp();
+    if (!(await rateLimit(`resend-verify:${hashIp(ip)}`, 3, 3600))) {
+      return { error: "rateLimited" };
+    }
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (user && !user.emailVerified) {
+      const token = createToken(email, "verify", 24 * 60 * 60_000);
+      const origin = await siteOrigin();
+      const props = {
+        locale,
+        kind: "verify" as const,
+        verifyUrl: `${origin}/${locale}/verify?token=${encodeURIComponent(token)}`,
+      };
+      const [html, text] = await Promise.all([
+        renderAlertEmail(props),
+        renderAlertEmailText(props),
+      ]);
+      const result = await send({
+        to: email,
+        subject: locale === "en" ? "Confirm your email" : "Επιβεβαιώστε το email σας",
+        html,
+        text,
+      });
+      if (result.ok) {
+        await audit("auth.verification_resent", { userId: user.id });
+      } else {
+        console.error("resendVerificationAction: send failed:", result.error);
+      }
+    }
+    return { ok: true };
+  } catch (error) {
+    if (isRedirect(error)) throw error;
+    console.error("resendVerificationAction failed:", error);
+    return { error: "serverError" };
+  }
+}
+
 // ── Password reset ─────────────────────────────────────────────────────────
 export async function requestResetAction(
   _prev: ActionState,
@@ -160,15 +230,20 @@ export async function requestResetAction(
     if (user) {
       const token = createToken(email, "reset", 60 * 60_000);
       const origin = await siteOrigin();
-      const html = await renderResetEmail({
+      const props = {
         locale,
         minutesValid: 60,
         resetUrl: `${origin}/${locale}/reset/${encodeURIComponent(token)}`,
-      });
+      };
+      const [html, text] = await Promise.all([
+        renderResetEmail(props),
+        renderResetEmailText(props),
+      ]);
       await send({
         to: email,
         subject: locale === "en" ? "Password reset" : "Επαναφορά κωδικού πρόσβασης",
         html,
+        text,
       });
       await audit("auth.reset_requested", { userId: user.id });
     }

@@ -10,7 +10,7 @@ import { AuthShell } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { IconCheckCircle } from "@/components/ui/icons";
+import { IconCheckCircle, IconXCircle } from "@/components/ui/icons";
 import { registerAction, type ActionState } from "../actions";
 
 export default function RegisterPage() {
@@ -20,6 +20,29 @@ export default function RegisterPage() {
     registerAction,
     {}
   );
+
+  // Step 7: the account was created but the verification email failed —
+  // offer the recovery path (resend from /verify) instead of the usual
+  // "check your inbox" success panel, which would be a lie here.
+  if (state.error === "emailFailed") {
+    return (
+      <AuthShell locale={locale}>
+        <main id="main-content" className="text-center">
+          <IconXCircle className="mx-auto size-12 text-danger-600" />
+          <h1 className="mt-5 font-display text-2xl font-semibold text-ink-900">
+            {t("emailFailedTitle")}
+          </h1>
+          <p className="lh-body mt-3 text-sm text-ink-700">{t("emailFailedBody")}</p>
+          <Link
+            href="/verify"
+            className="mt-6 inline-block text-sm font-semibold text-aegean-600 link-grow"
+          >
+            {t("goResend")}
+          </Link>
+        </main>
+      </AuthShell>
+    );
+  }
 
   if (state.ok) {
     return (

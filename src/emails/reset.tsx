@@ -80,4 +80,9 @@ export async function renderResetEmail(props: ResetEmailProps): Promise<string> 
   return render(<ResetEmail {...props} />);
 }
 
+/** Step 7: plain-text alternative (spam scoring + accessibility). */
+export async function renderResetEmailText(props: ResetEmailProps): Promise<string> {
+  return render(<ResetEmail {...props} />, { plainText: true });
+}
+
 export default ResetEmail;

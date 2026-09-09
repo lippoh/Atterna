@@ -14,7 +14,7 @@ import { AuthShell } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { IconCheckCircle, IconXCircle } from "@/components/ui/icons";
-import { verifyEmailAction, type ActionState } from "../actions";
+import { verifyEmailAction, resendVerificationAction, type ActionState } from "../actions";
 
 export function VerifyForm() {
   const t = useTranslations("auth.verify");
@@ -24,6 +24,9 @@ export function VerifyForm() {
     verifyEmailAction,
     {}
   );
+  // Step 7: the resend lane for a lost/failed signup email.
+  const [resendState, resendFormAction, resendPending] =
+    useActionState<ActionState, FormData>(resendVerificationAction, {});
 
   const tokenFromUrl = searchParams.get("token") ?? "";
 
@@ -105,6 +108,41 @@ export function VerifyForm() {
             </Button>
           </form>
         )}
+
+        {/* Step 7: didn't get the email? request a fresh verification link. */}
+        <div className="mt-8 border-t border-line pt-6">
+          <p className="text-[13px] font-medium text-ink-700">{t("resendTitle")}</p>
+          <form action={resendFormAction} className="mt-3 flex items-start gap-2">
+            <input type="hidden" name="locale" value={locale} />
+            <div className="flex-1">
+              <Input
+                name="email"
+                type="email"
+                autoComplete="email"
+                placeholder={t("resendEmailPlaceholder")}
+                aria-label={t("resendEmailLabel")}
+                required
+              />
+            </div>
+            <Button
+              type="submit"
+              variant="secondary"
+              disabled={resendPending}
+            >
+              {resendPending ? t("resendSending") : t("resendSubmit")}
+            </Button>
+          </form>
+          {resendState.ok && (
+            <p role="status" className="mt-2 text-[13px] font-medium text-aegean-700">
+              {t("resendOk")}
+            </p>
+          )}
+          {resendState.error && (
+            <p role="alert" className="mt-2 text-[13px] font-medium text-danger-600">
+              {resendState.error === "rateLimited" ? t("rateLimited") : t("serverError")}
+            </p>
+          )}
+        </div>
       </main>
     </AuthShell>
   );

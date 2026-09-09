@@ -8,6 +8,7 @@ import {
   Html, Head, Body, Container, Section, Heading, Text, Hr, Link, Preview,
 } from "@react-email/components";
 import { render } from "@react-email/components";
+import { env } from "@/lib/env";
 import type { DashboardMetrics, Insight } from "@/lib/metrics";
 
 /** Reputation Intelligence section (spec §26) — optional; when present the
@@ -49,7 +50,10 @@ const C = {
 
 export function WeeklyEmail(props: WeeklyEmailProps) {
   const el = props.locale !== "en";
-  const appUrl = props.appUrl ?? process.env.APP_URL ?? "https://app.example.gr";
+  // Step 7: the CTA link comes from the validated env proxy (never a raw
+  // process.env read with a placeholder fallback — an unset APP_URL now
+  // fails the send loudly instead of shipping example.gr links).
+  const appUrl = props.appUrl ?? env.APP_URL;
   const m = props.metrics;
   return (
     <Html lang={el ? "el" : "en"}>
@@ -257,6 +261,11 @@ export function WeeklyEmail(props: WeeklyEmailProps) {
 
 export async function renderWeeklyEmail(props: WeeklyEmailProps): Promise<string> {
   return render(<WeeklyEmail {...props} />);
+}
+
+/** Step 7: plain-text alternative (spam scoring + accessibility). */
+export async function renderWeeklyEmailText(props: WeeklyEmailProps): Promise<string> {
+  return render(<WeeklyEmail {...props} />, { plainText: true });
 }
 
 export default WeeklyEmail;

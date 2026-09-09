@@ -30,7 +30,16 @@ const serverSchema = z.object({
   STRIPE_PRICE_PRO: z.string().startsWith("price_"),
 
   RESEND_API_KEY: z.string().min(20),
-  EMAIL_FROM: z.string().min(3),
+  // Step 7: the single sender for every Atterna email. Accepts
+  // "Display Name <local@domain>" or a bare "local@domain" — the domain
+  // must be added and verified in Resend before production sending.
+  EMAIL_FROM: z
+    .string()
+    .min(3)
+    .regex(
+      /^(?:[^\n<>@]+ <)?[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}>?$/,
+      'EMAIL_FROM must be "Display Name <local@domain>" or "local@domain" (verified Resend domain)'
+    ),
 
   GOOGLE_CLIENT_ID: z.string().min(10),
   GOOGLE_CLIENT_SECRET: z.string().min(10),

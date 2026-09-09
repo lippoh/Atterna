@@ -289,3 +289,90 @@ database. Fresh environments (CI, new branches) can simply
 `prisma migrate deploy` from empty. The legacy columns `Subscription.plan`
 and `Invoice.amount` are deprecated in the schema but deliberately
 retained; retiring them is a separate, additive-only step.
+
+---
+
+# Email deliverability fix pack (Step 7 — Resend)
+
+Resend is the single transactional email provider. One server-side
+boundary (`src/lib/mailer.ts`), one sender (`EMAIL_FROM`), five flows:
+signup verification, password reset, resend-verification, owner alerts
+(negative review / private QR feedback) and the weekly report. No email
+is ever sent from a client component — the Resend SDK is imported only
+by the mailer, which is imported only by server actions and jobs.
+
+## What the fix pack changed
+
+- **Retry wiring**: `mailer.send()` never throws (returns `{ ok, error }`)
+  — but the alert handlers now CHECK it and throw, so the job runner's
+  backoff (5 attempts → DEAD) retries transient provider failures. The
+  old code marked the job DONE and silently lost the alert.
+- **Register is hardened**: rate-limited 3/h/IP (was unlimited — a Resend
+  spend/abuse vector); a failed verification email now surfaces as the
+  `emailFailed` state with a link to /verify instead of a lying
+  "check your inbox" panel.
+- **Resend-verification path**: `resendVerificationAction` + a form on the
+  /verify page (no account enumeration; rate-limited 3/h/IP) — the
+  recovery path for a lost/failed signup email that used to lock users
+  out permanently.
+- **Plain-text twins**: every template renders both HTML and text
+  (`render*` + `render*Text`) — spam scoring and accessibility.
+- **Weekly report idempotency**: a `ReportLog` row is written only on a
+  DELIVERED email and doubles as the same-day guard — a double-fired cron
+  (or manual re-run) re-sends nothing that already went out, while
+  failed businesses are retried by the next run. Failed sends write no
+  ReportLog, so they never block their own retry.
+- **Email subjects single-lined** (multi-line subjects break header
+  folding and hurt spam scoring).
+- **`EMAIL_FROM` validated** ("Display Name <local@domain>" or bare
+  address) instead of `min(3)` — a typo can no longer silently become
+  the production sender.
+- **`token.ts` no longer falls back to `"dev-secret"`** — verify/reset
+  tokens are signed with the validated `AUTH_SECRET` and fail loudly if
+  it is missing.
+- **Provider message ids logged** (`[mailer] delivered {id}`) for
+  deliverability incident tracing; the dead in-memory BOUNCED stub was
+  removed (bounce monitoring lives in the Resend Dashboard).
+- **`weekly.tsx` CTA links** come from the validated `APP_URL` — no more
+  `app.example.gr` placeholder fallback.
+
+## Resend setup (do this BEFORE launch)
+
+1. **Account + API key**: resend.com → sign up → API Keys → Create.
+   Put the key (`re_…`) in `RESEND_API_KEY`. Server-only; it never
+   reaches the browser bundle.
+2. **Verify your sending domain**: Resend → Domains → Add your domain →
+   publish the DNS records it shows (SPF TXT, DKIM, domain verification).
+   Wait for "Verified". **Production sending requires a verified
+   domain** — unverified senders go to spam or bounce.
+3. **Set the single sender**: `EMAIL_FROM="Atterna <no-reply@YOUR_DOMAIN>"`
+   in `.env` / your deployment env. This is the ONLY sender source — no
+   code changes needed if you later want a persona like
+   `Sofia <sofia@YOUR_DOMAIN>`: change the env var.
+4. **Local development without a verified domain**: Resend's default
+   `onboarding@resend.dev` sender can ONLY deliver to your own account
+   email. It is acceptable for local smoke tests and nothing else —
+   NEVER set it as production `EMAIL_FROM`.
+5. **Smoke test** (local): register an account with an email you own →
+   expect the verification email (HTML + plain-text part) → click the
+   link → sign in. Then: request a password reset → 60-minute link. Then
+   on /verify use the resend form. Check the Resend → Emails dashboard:
+   every send shows the provider message id (also logged server-side as
+   `[mailer] delivered`).
+6. **Replay / idempotency expectations**: alerts are deduped at enqueue
+   (one per review/feedback); a failed alert send re-queues with backoff
+   (up to 5 attempts, then DEAD with `lastError`); the weekly report
+   never re-sends a business's report twice in the same UTC day.
+
+## Vercel env vars (production)
+
+```
+RESEND_API_KEY   = re_live_…        (from the live Resend project)
+EMAIL_FROM       = Atterna <no-reply@YOUR_DOMAIN>
+```
+
+`APP_URL` must already be set (Stripe section) — verification/reset links
+are built from it. Monitor bounces and complaints in the Resend
+Dashboard (Emails → Bounced/Complained). Do not send live marketing
+email from this transactional sender — the weekly report's RFC 2369
+`List-Unsubscribe` header covers it as a transactional report.

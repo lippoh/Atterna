@@ -2,9 +2,17 @@
 // Email verification: 24-hour expiry. Password reset: 1-hour expiry and
 // single-use in effect — resetPasswordAction stamps User.passwordChangedAt,
 // and any token issued before that instant is rejected.
+// Step 7: AUTH_SECRET is read lazily through the validated env proxy —
+// there is no silent "dev-secret" fallback any more. A deployment
+// without AUTH_SECRET fails loudly (env.ts names the variable) the first
+// time a verify/reset token is signed, instead of silently signing with
+// a publicly-known constant.
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { env } from "@/lib/env";
 export type TokenKind = "verify" | "reset";
-const SECRET = process.env.AUTH_SECRET ?? "dev-secret";
+function secret(): string {
+  return env.AUTH_SECRET as string;
+}
 interface TokenPayload {
   identifier: string; // user email (lowercase)
   kind: TokenKind;
@@ -19,7 +27,7 @@ function b64url(input: string | Buffer): string {
   return Buffer.from(input).toString("base64url");
 }
 function sign(data: string): string {
-  return createHmac("sha256", SECRET).update(data, "utf8").digest("base64url");
+  return createHmac("sha256", secret()).update(data, "utf8").digest("base64url");
 }
 /** Create a signed token for an identifier. */
 export function createToken(

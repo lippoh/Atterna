@@ -112,4 +112,9 @@ export async function renderAlertEmail(props: AlertEmailProps): Promise<string> 
   return render(<AlertEmail {...props} />);
 }
 
+/** Step 7: plain-text alternative (spam scoring + accessibility). */
+export async function renderAlertEmailText(props: AlertEmailProps): Promise<string> {
+  return render(<AlertEmail {...props} />, { plainText: true });
+}
+
 export default AlertEmail;

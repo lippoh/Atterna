@@ -397,6 +397,10 @@
       "submitting": "Sending…",
       "exists": "An account with this email already exists.",
       "weak": "The password needs at least 10 characters.",
+      "rateLimited": "Too many attempts. Try again in an hour.",
+      "emailFailedTitle": "Account created — but the email didn't send",
+      "emailFailedBody": "Your account was created, but the verification email could not be sent. Request a fresh link from the confirmation page.",
+      "goResend": "Resend verification email",
       "serverError": "Something went wrong on our side. Please try again — if it persists, let us know.",
       "done": "We sent a confirmation link to your email.",
       "checkInbox": "Check your inbox",
@@ -416,7 +420,14 @@
       "goLogin": "Log in",
       "pasteFallback": "Paste the code from the email and try again.",
       "bad": "The code is invalid or has expired.",
-      "serverError": "Something went wrong on our side. Please try again — if it persists, let us know."
+      "serverError": "Something went wrong on our side. Please try again — if it persists, let us know.",
+      "resendTitle": "Didn't get the email?",
+      "resendEmailLabel": "Email to resend to",
+      "resendEmailPlaceholder": "your email",
+      "resendSubmit": "Resend",
+      "resendSending": "Sending…",
+      "resendOk": "If confirmation is pending for this email, we sent a fresh link.",
+      "rateLimited": "Too many attempts. Try again in an hour."
     },
     "reset": {
       "requestTitle": "Reset password",

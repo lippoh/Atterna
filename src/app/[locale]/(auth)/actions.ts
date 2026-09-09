@@ -3,6 +3,7 @@
 import {
   registerAction as registerServerAction,
   verifyEmailAction as verifyEmailServerAction,
+  resendVerificationAction as resendVerificationServerAction,
   requestResetAction as requestResetServerAction,
   resetPasswordAction as resetPasswordServerAction,
   signInAction as signInServerAction,
@@ -19,6 +20,10 @@ export async function registerAction(_prev: ActionState, formData: FormData) {
 
 export async function verifyEmailAction(_prev: ActionState, formData: FormData) {
   return verifyEmailServerAction(_prev, formData);
+}
+
+export async function resendVerificationAction(_prev: ActionState, formData: FormData) {
+  return resendVerificationServerAction(_prev, formData);
 }
 
 export async function requestResetAction(_prev: ActionState, formData: FormData) {
