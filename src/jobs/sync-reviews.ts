@@ -6,7 +6,6 @@ import { enqueue } from "./runner";
 import { syncBusinessReviews } from "@/integrations/gbp/reviews";
 import { prisma } from "@/lib/db";
 const STALE_AFTER_MS = 25 * 60_000; // cron fires every 30 min
-const DAY_MS = 86_400_000;
 /** Enqueue one sync-reviews job per stale connected business (deduped). */
 export async function enqueueSyncs(): Promise<number> {
 const stale = new Date(Date.now() - STALE_AFTER_MS);
@@ -42,22 +41,10 @@ dedupeKey: `analyze:${review.id}`,
 });
 }
 }
-/** Nightly overnight sweep companion (2h cadence would be a cron change). */
-export async function enqueueOvernightSyncs(): Promise<number> {
-const overnight = new Date(Date.now() - 2 * 60 * 60_000);
-const connections = await prisma.gbpConnection.findMany({
-where: {
-status: "ACTIVE",
-OR: [{ lastSyncAt: null }, { lastSyncAt: { lt: overnight } }],
-},
-select: { businessId: true },
-take: 50,
-});
-for (const conn of connections) {
-await enqueue("sync-reviews", { businessId: conn.businessId }, {
-dedupeKey: `sync:${conn.businessId}`,
-});
-}
-return connections.length;
-}
-void DAY_MS;
+// Note (Step 8): the overnight 2h-sweep companion (2h staleness variant
+// of enqueueSyncs) was removed as dead code — the master cron schedule
+// (*/30 5-21 * * *) never fires 22:00–04:59 UTC, so the branch that
+// called it was unreachable. If the schedule is EVER extended to
+// overnight hours, enqueueSyncs' 25-min staleness guard already keeps
+// the 30-min cadence safe; reintroduce a 2h-staleness variant only if a
+// sparser overnight cadence is explicitly wanted.

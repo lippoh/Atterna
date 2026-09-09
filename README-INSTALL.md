@@ -376,3 +376,133 @@ are built from it. Monitor bounces and complaints in the Resend
 Dashboard (Emails → Bounced/Complained). Do not send live marketing
 email from this transactional sender — the weekly report's RFC 2369
 `List-Unsubscribe` header covers it as a transactional report.
+
+# Cron jobs & scheduled work (Step 8 fix pack)
+
+All background work — review syncs, alerts, intelligence refresh, the
+weekly report and prune — is driven by Vercel Cron hitting a single
+endpoint: **`/api/cron`**. The schedules live in `vercel.json`, the
+entrypoint is `src/app/api/cron/route.ts`, and execution rides the Job
+queue (`src/jobs/runner.ts`: SKIP LOCKED claiming, exponential backoff,
+DEAD after 5 attempts, stale-RUNNING recovery).
+
+## The four schedules (vercel.json)
+
+| Path | Schedule (UTC) | Athens summer (UTC+3) | Athens winter (UTC+2) | What runs |
+|------|----------------|-----------------------|------------------------|-----------|
+| `/api/cron` | `*/30 5-21 * * *` | 08:00–00:30 | 07:00–23:30 | sync + analysis + alerts queue |
+| `/api/cron?type=intel` | `30 3 * * *` | 06:30 | 05:30 | daily reputation-intelligence refresh |
+| `/api/cron?type=weekly-report` | `0 5 * * 1` | Mon 08:00 | Mon 07:00 | weekly reputation report email |
+| `/api/cron?type=prune` | `0 2 * * *` | 05:00 | 04:00 | retention prune |
+
+All schedules are **UTC — Vercel Cron evaluates every expression in
+UTC**. That UTC anchor is intentional and DST-proof: the schedule never
+shifts when Greece switches between EEST (UTC+3) and EET (UTC+2).
+Conversions for Athens above are exact: the sync window runs 08:00 to
+00:30 Athens time in summer and 07:00 to 23:30 in winter. The weekly
+report therefore runs **08:00 Athens in summer and 07:00 Athens in
+winter** — it is *not* always 08:00; check the DST period before
+promising a fixed local time.
+
+The `?type=intel` entry (daily 03:30 UTC) is an intentional fourth
+scheduled job — the reputation-intelligence refresh (issues →
+recommendations → deterministic health snapshot per active business).
+It is not a stray entry: keep it.
+
+Unknown `?type=` values are rejected with `400 invalid_cron_type` and
+execute nothing (a typo in `vercel.json` fails loudly instead of
+silently running the sync pipeline; `tests/unit/cron-parity.test.ts`
+enforces that every declared cron path maps to a supported type).
+
+## Authentication — fail-closed
+
+1. **`CRON_SECRET` must be configured in Vercel** (Settings →
+   Environment Variables). Minimum 12 characters; generate with
+   `openssl rand -hex 24`.
+2. Vercel Cron sends it automatically on every invocation as:
+   `Authorization: Bearer <CRON_SECRET>`
+3. The endpoint is `/api/cron` (plus the `?type=` variants above).
+4. Anything else — wrong secret, no secret, no header — is **401, no
+   work executed**. If `CRON_SECRET` is not set at all, the route fails
+   closed too (the env validator throws → 500): a missing secret can
+   never become an open endpoint, but it DOES silently kill all
+   scheduled work, so verify it right after the first deploy.
+
+**Manual verification** (expect `{"ok":true,"type":"sync",...}`):
+
+```bash
+curl -H "Authorization: Bearer $CRON_SECRET" \
+  https://YOUR_DOMAIN/api/cron
+```
+
+For the full battery (401s, every type, bogus-type 400, no locale
+rewrites) against a running build:
+
+```bash
+CRON_SECRET=$CRON_SECRET node scripts/verify-cron-routing.mjs \
+  --url https://YOUR_DOMAIN
+```
+
+(Use a staging/disposable database — a successful run really executes
+queued work and the prune pass.)
+
+## Plan requirement
+
+The `maxDuration = 300` setting, the fourth cron entry and ~34
+invocations/day need the **Vercel Pro** plan. On Hobby the schedules
+may not all register and function duration is capped at 60 s — the
+30-minute sync batch can be cut mid-execution (which the stale-RUNNING
+recovery below then absorbs, but 5 evictions in a row park the job
+DEAD).
+
+## Diagnosing cron problems
+
+- **Cron never fires** → Vercel dashboard → your project → Cron Jobs:
+  all four entries should be listed with their schedules. If missing:
+  `vercel.json` not committed/deployed, or plan limits (see above).
+  Also check Observability → logs for the invocation attempts.
+- **401 on every invocation** → the `Authorization` header Vercel sends
+  doesn't match the server's `CRON_SECRET`. Re-set it in Vercel →
+  Settings → Environment Variables (no quotes, no `Bearer ` prefix in
+  the value — the route adds the prefix), redeploy, verify with the
+  curl above.
+- **500 on every invocation** → almost always a missing/wrong server
+  env var (the lazy validator names the exact variable in the logs) or
+  an unreachable `DATABASE_URL`. Read the function logs; the error
+  message says which variable failed.
+- **Jobs stuck RUNNING** → the invocation died mid-execution (timeout,
+  eviction, deploy). The next cron pass automatically requeues any
+  RUNNING row older than **10 minutes** (2× the 300 s maxDuration, so a
+  genuinely active job is never requeued while its invocation is still
+  alive). Attempts are preserved — a job that keeps getting evicted
+  still reaches DEAD at 5 attempts rather than looping forever.
+- **Jobs repeatedly retrying / DEAD** → read the Job row's `lastError`
+  column. Failures back off 4^n minutes capped at 1 h; after 5 attempts
+  the job parks DEAD (visible in the DB, `state: 'DEAD'`). Common
+  causes: GBP token expired (business must reconnect — see
+  TOKEN_ENC_KEY), AI provider errors, Resend rejections.
+
+## What the fix pack changed
+
+- **Stale-RUNNING recovery** (`src/jobs/runner.ts`): RUNNING jobs older
+  than 10 minutes are atomically requeued (id, type, dedupeKey,
+  attempts, payload and lastError preserved; `startedAt` cleared) right
+  before each batch is claimed — concurrent invocations can't
+  double-recover. Exponential backoff and DEAD-at-5 are unchanged.
+- **Unknown cron types rejected** (`src/app/api/cron/route.ts`):
+  supported values are exactly `sync`, `weekly-report`, `prune`,
+  `intel` (absent `?type=` means `sync`); anything else → `400
+  invalid_cron_type` after the 401 gate, executing nothing.
+- **Timing-safe secret comparison**: the Bearer check now uses
+  `crypto.timingSafeEqual` (length-checked first).
+- **Prune response**: `?type=prune` now also reports `submissions`
+  (FeedbackSubmission rows deleted) next to `jobs` and `ipHashes`.
+  Retention is unchanged: DONE jobs 90 d, ipHash 30 d (GDPR), anonymous
+  submissions 400 d. Business/reputation data is never deleted.
+- **Dead code removed**: the overnight-sync branch (unreachable — the
+  master cron never fires 22:00–04:59 UTC) and the
+  `?type=` fall-through to sync described above.
+- **`.env.example`** now documents `CRON_SECRET` plus the previously
+  undocumented server vars: `OPENAI_API_KEY`, `GOOGLE_CLIENT_ID`,
+  `GOOGLE_CLIENT_SECRET`, `TOKEN_ENC_KEY` (and optional
+  `AI_MODEL_*` / `AI_MONTHLY_TOKEN_BUDGET` / `SENTRY_DSN`).
