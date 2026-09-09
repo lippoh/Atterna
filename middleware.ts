@@ -3,6 +3,19 @@
 // /login itself → an infinite redirect loop. Public pages (landing,
 // auth pages, QR, webhooks, cron, health, GBP callback) are excluded
 // explicitly; everything else requires the JWT session.
+//
+// Stripe fix pack (2026-09): the matcher now excludes /api/* paths.
+// Previously next-intl rewrote every /api request into the [locale]
+// segment (default locale: internal rewrite to /el/api/...; detected
+// non-default locale: 307 redirect to /en/api/...), and since the API
+// routes live OUTSIDE src/app/[locale], the entire API surface 404'd —
+// including /api/webhooks/stripe (Stripe deliveries all failed), the
+// auth endpoints, /api/cron and /api/health. API routes authorize
+// themselves (CRON_SECRET, Stripe signatures, NextAuth internals) and
+// must never be locale-routed. The PUBLIC_PATH /api allowances below
+// stay as documentation of that contract; they are unreachable now by
+// design. Locale routing, the auth guard and the security headers are
+// unchanged for all page routes.
 import NextAuth from "next-auth";
 import authConfig from "@/lib/auth.config";
 import createIntlMiddleware from "next-intl/middleware";
@@ -43,4 +56,7 @@ return NextResponse.redirect(url);
 securityHeaders.forEach((h) => res.headers.set(h.key, h.value));
 return res;
 });
-export const config = { matcher: ["/((?!_next|.*\\..*).*)"] };
+// `api` excludes every /api/* path from this middleware (Stripe webhooks,
+// cron, health, auth). The other alternatives exclude Next internals and
+// any path containing a dot (static files). See the header comment.
+export const config = { matcher: ["/((?!api|_next|.*\\..*).*)"] };

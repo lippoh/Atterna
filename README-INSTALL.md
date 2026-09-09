@@ -76,7 +76,7 @@ This zip contains **45 new/changed files** — the complete, verified delta.
    05:00 UTC weekly report, 02:00 UTC prune. If you configure crons in the
    Vercel dashboard instead, add `GET /api/cron?type=intel` daily.
 
-## Running the test suite (all 6 files, 55 tests)
+## Running the test suite (all 8 files, 63 tests)
 
 The five pure suites need nothing. The tenant-isolation suite is a REAL
 integration test: `resetTestDb()` **truncates every table** in the
@@ -101,12 +101,13 @@ production):
 createdb atterna_test
 # .env:
 #   TEST_DATABASE_URL=postgresql://postgres@localhost:5432/atterna_test
-# The repo's only migration is additive-only (it assumes base tables
-# exist), so provision a FRESH test database with the full schema:
+# A FRESH test database can now be provisioned by the migration chain
+# itself (init → intelligence → billing constraints — fully replayable):
 TEST_DATABASE_URL=postgresql://postgres@localhost:5432/atterna_test \
-  pnpm exec prisma db push
+  pnpm exec prisma migrate deploy
+# (or `prisma db push` — same schema, no migration history)
 
-pnpm test   # Test Files 6 passed (6) · Tests 55 passed (55)
+pnpm test   # Test Files 8 passed (8) · Tests 63 passed (63)
 ```
 
 CI (`.github/workflows/ci.yml` → `test` job) does the same automatically:
@@ -141,9 +142,10 @@ tests — the LLM only narrates what app code already computed.
 ## Verified before packing
 
 - `tsc --noEmit` → **0 errors**
-- `vitest run` → **55/55 passed** across all 6 suites (tenant-isolation
-  included — it now runs against a disposable Postgres, locally via
-  `TEST_DATABASE_URL`, in CI via the `postgres:17` service container)
+- `vitest run` → **63/63 passed** across all 8 suites (tenant-isolation
+  included — it runs against a disposable Postgres, locally via
+  `TEST_DATABASE_URL`, in CI via the `postgres:17` service container; the
+  Stripe fix pack added middleware-routing and billing-trial suites)
 - `next build` → **full pass**, new route `/{locale}/settings/sources`
   included
 - Migration SQL generated from `prisma migrate diff` (zero drift) and
@@ -162,3 +164,128 @@ tests — the LLM only narrates what app code already computed.
   removed respectively per spec; nothing else on the marketing site moved.
 - Existing Google sync/reply flow is wrapped, not rewritten — the GBP
   module's internals are byte-identical to master.
+
+---
+
+# Stripe fix pack (2026-09) — setup & operations
+
+Read `docs/ARCHITECTURE-BILLING.md` for the architecture contract
+(Stripe is the source of truth; the webhook is the only writer of
+subscription state). This section is the operational how-to.
+
+## What the fix pack changed
+
+- **`middleware.ts`**: `/api/*` is excluded from next-intl locale routing.
+  Before, every API request was rewritten into the `[locale]` segment and
+  404'd — Stripe webhooks, auth, cron and health included.
+- **`src/lib/stripe.ts`**: Checkout Sessions now send
+  `automatic_tax: { enabled: true }` — Stripe Tax computes Greek/EU VAT.
+- **`src/lib/billing/handlers.ts`**: plan resolution reads the LIVE Stripe
+  subscription (price → plan, metadata fallback, loud failure instead of
+  silent STARTER); trial/period dates come from Stripe, never hardcoded;
+  `invoice.paid` never writes `organizationId "unknown"` — an
+  unattributable invoice defers to Stripe's retry schedule.
+- **Billing page**: the 30-day Stripe trial is granted on the FIRST
+  subscription only, enforced server-side (client input cannot influence
+  eligibility).
+- **Database**: `Invoice.organizationId` foreign key + index
+  (`20260910000000_billing_constraints`), plus a complete, replayable
+  migration chain (`20260901000000_init` baseline).
+- **Tests**: middleware-routing + billing-trial suites; the production-style
+  HTTP regression below.
+
+## Stripe Dashboard setup (test mode FIRST)
+
+Work entirely in **test mode** (the "Test mode" toggle in the Dashboard)
+until the smoke test passes end-to-end. Never let live keys touch your
+development environment.
+
+1. **Register for Stripe Tax** — Settings → Stripe Tax → activate and add
+   your Greek business details (default rate: 24% VAT). Registration can
+   start in test mode.
+2. **Create one Product** (e.g. "Atterna") and **three recurring Prices**,
+   monthly interval, EUR, and — crucially — an **explicit
+   `tax_behavior: inclusive`** on each (the UI shows VAT-included pricing):
+
+   | Price | Amount | Tax behavior |
+   |---|---|---|
+   | STARTER | €19 / month | inclusive |
+   | GROWTH | €39 / month | inclusive |
+   | PRO | €79 / month | inclusive |
+
+   Copy each `price_…` id.
+3. **Webhook endpoint**: Developers → Webhooks → Add endpoint.
+   - URL: `https://<your-deployment-domain>/api/webhooks/stripe`
+     (locally: a tunnel URL, e.g. `https://…trycloudflare.com/api/…`)
+   - Events (exactly these five):
+     `checkout.session.completed`, `customer.subscription.updated`,
+     `invoice.paid`, `invoice.payment_failed`,
+     `customer.subscription.deleted`
+   - Copy the signing secret `whsec_…`.
+4. **Environment** (Vercel → Settings → Environment Variables, and `.env`
+   locally; see `.env.example`): `APP_URL`, `STRIPE_SECRET_KEY`
+   (`sk_test_…`), `STRIPE_WEBHOOK_SECRET` (`whsec_…`),
+   `STRIPE_PRICE_STARTER` / `STRIPE_PRICE_GROWTH` / `STRIPE_PRICE_PRO`
+   (the three `price_…` ids). Redeploy after setting them.
+
+## Test/live credential separation
+
+- Test-mode values only ever pair with test-mode values: `sk_test_…` with
+  `whsec_…` from a test-mode endpoint and test-mode `price_…` ids. Live
+  equivalents exist only in the live-mode Dashboard view.
+- Keep live values ONLY in the production Vercel environment — never in
+  your local `.env`, never in CI.
+- The smoke test below is designed for TEST mode.
+  **Warning: do not use live keys during smoke testing** — a live
+  webhook/checkout exercised by tests creates real customers and may
+  charge real cards.
+
+## Smoke test (idempotency / replay)
+
+With the server running (locally or on a preview deployment) and its env
+set, run the built-in regression — it posts validly signed, ignored-type
+events and proves route reachability, signature enforcement, idempotent
+processing and duplicate-event safety:
+
+```bash
+STRIPE_WEBHOOK_SECRET=<the same whsec_ the server uses> \
+  node scripts/verify-webhook-routing.mjs --url http://localhost:3000
+```
+
+Expected: every check `[PASS]`, including `duplicate event.id is ignored`.
+For a full replay test, use the Dashboard's "Send test webhook" on
+`checkout.session.completed` twice — the second delivery must log
+`{"received":true,"duplicate":true}` (server logs) and never double-apply.
+Then complete one test-mode Checkout (Stripe test card 4242 4242 4242
+4242) and watch the five events land.
+
+## Database migration (existing deployments — READ THIS)
+
+`prisma/migrations` now contains a complete chain:
+
+```
+20260901000000_init                      ← base schema (baseline)
+20260909000000_reputation_intelligence   ← (pre-existing)
+20260910000000_billing_constraints       ← Invoice FK + index
+```
+
+Databases provisioned earlier via `db push` (including **production**)
+already contain the first two states. Baseline them ONCE, then deploy —
+only the billing constraints actually run (additive: one index + one
+foreign key; no data is touched, nothing is reset):
+
+```bash
+# 1. Inspect state first (read-only):
+pnpm exec prisma migrate status
+# 2. Baseline the states that already exist (skip any row already applied):
+pnpm exec prisma migrate resolve --applied 20260901000000_init
+pnpm exec prisma migrate resolve --applied 20260909000000_reputation_intelligence
+# 3. Apply the billing constraints:
+pnpm exec prisma migrate deploy
+```
+
+NEVER run `prisma migrate reset` against production — it drops the
+database. Fresh environments (CI, new branches) can simply
+`prisma migrate deploy` from empty. The legacy columns `Subscription.plan`
+and `Invoice.amount` are deprecated in the schema but deliberately
+retained; retiring them is a separate, additive-only step.

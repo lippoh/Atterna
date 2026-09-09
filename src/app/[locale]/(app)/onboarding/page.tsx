@@ -54,6 +54,13 @@ export default async function OnboardingPage({
         name: orgName,
         businesses: { create: { name: businessName, category, city } },
         memberships: { create: { userId: currentUser.id, role: "OWNER" } },
+        // Pre-Stripe INITIAL state — the documented single exception to
+        // "the webhook is the only writer of subscription state" (see
+        // docs/ARCHITECTURE-BILLING.md § Onboarding trial). This is the
+        // local 30-day product trial, created atomically with the
+        // organization, BEFORE any Stripe customer exists; every
+        // subsequent billing-state transition belongs to the Stripe
+        // webhook. Do not add other writers here.
         subscription: { create: { planKey: "STARTER", status: "TRIALING", currentPeriodEnd: trialEndsAt(30) } },
       },
     });

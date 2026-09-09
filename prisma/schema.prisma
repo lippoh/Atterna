@@ -38,6 +38,7 @@ model Organization {
   subscription     Subscription?
   memberships      Membership[]
   businesses       Business[]
+  invoices         Invoice[]
   auditLogs        AuditLog[]
   reportLogs       ReportLog[]
 }
@@ -166,7 +167,7 @@ model Subscription {
   organizationId       String       @unique
   organization         Organization @relation(fields: [organizationId], references: [id])
   status               String       @default("TRIALING")
-  plan                 String @default("STARTER")
+  plan                 String       @default("STARTER") // DEPRECATED: legacy column superseded by planKey; unwritten since V2. Retained deliberately — retiring it is a separate additive migration (see docs/ARCHITECTURE-BILLING.md).
   planKey              String       @default("STARTER")
   currentPeriodEnd     DateTime?
   stripeSubscriptionId String? @unique
@@ -267,16 +268,23 @@ model WebhookEvent {
 }
 
 model Invoice {
-  id             String   @id @default(cuid())
-  organizationId String
+  id              String       @id @default(cuid())
+  organizationId  String
+  // Financial records reference a real organization (RESTRICT: an org
+  // with invoices is never silently cascade-deleted). Written only by
+  // the Stripe webhook; unresolvable attribution fails loudly instead
+  // of storing a placeholder — see docs/ARCHITECTURE-BILLING.md.
+  organization    Organization  @relation(fields: [organizationId], references: [id])
   stripeInvoiceId String  @unique
-  amount         Int @default(0)
-  totalCents     Int?
-  currency       String?
-  vatCents       Int?
-  hostedUrl      String?
-  status         String @default("PAID")
-  createdAt      DateTime @default(now())
+  amount          Int @default(0) // DEPRECATED: legacy column superseded by totalCents; unwritten since V2. Retained deliberately — retiring it is a separate additive migration (see docs/ARCHITECTURE-BILLING.md).
+  totalCents      Int?
+  currency        String?
+  vatCents        Int?
+  hostedUrl       String?
+  status          String @default("PAID")
+  createdAt       DateTime @default(now())
+
+  @@index([organizationId])
 }
 
 model ImpersonationSession {

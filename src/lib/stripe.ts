@@ -44,6 +44,13 @@ export async function createCheckoutSession(input: {
     line_items: [{ price, quantity: 1 }],
     client_reference_id: input.orgId,
     customer_email: input.customerEmail,
+    // Stripe Tax computes Greek/EU VAT on every Checkout Session. The
+    // account must be registered for Stripe Tax (Greece) and the three
+    // recurring Prices must carry an explicit tax_behavior — inclusive,
+    // matching the VAT-included display pricing (see README-INSTALL.md).
+    // No VAT math exists in application code; invoice.paid only READS
+    // Stripe's total / total_excluding_tax fields.
+    automatic_tax: { enabled: true },
     metadata: {
       orgId: input.orgId,
       priceKey: input.planKey,
@@ -56,8 +63,6 @@ export async function createCheckoutSession(input: {
     allow_promotion_codes: true,
     success_url: `${env.APP_URL}/${input.locale}/billing?success=1`,
     cancel_url: `${env.APP_URL}/${input.locale}/billing?canceled=1`,
-    // Stripe Tax + Greek VAT are enabled in the Stripe dashboard
-    // (automatic_tax on the account); the session inherits them.
   });
   return { url: session.url ?? "" };
 }

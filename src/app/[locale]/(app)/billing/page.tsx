@@ -11,6 +11,7 @@ import { prisma } from "@/lib/db";
 import { monthlyUsage } from "@/ai/usage";
 import { createCheckoutSession, createPortalSession } from "@/lib/stripe";
 import { PLAN_LIMITS, type PlanKey } from "@/lib/billing/price-map";
+import { stripeTrialEligible } from "@/lib/billing/trial";
 import { Button } from "@/components/ui/button";
 import { IconCheckCircle, IconAlertTriangle, IconCheck } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
@@ -42,11 +43,22 @@ export default async function BillingPage({
     }
     const { orgId: currentOrg, user } = await requireOrg();
     const planKey = String(formData.get("plan") ?? "STARTER") as PlanKey;
+    // First-subscription-only trial, enforced server-side: a 30-day
+    // Stripe trial is granted only while the organization has never held
+    // a Stripe subscription (stripeSubscriptionId is written exclusively
+    // by the webhook). Plan changes start billing immediately — the
+    // Billing Portal handles plan switches with proration. The form
+    // (client input) cannot influence eligibility.
+    const existing = await prisma.subscription.findUnique({
+      where: { organizationId: currentOrg },
+      select: { stripeSubscriptionId: true },
+    });
+    const trialDays = stripeTrialEligible(existing) ? 30 : undefined;
     const { url } = await createCheckoutSession({
       orgId: currentOrg,
       planKey,
       customerEmail: org?.stripeCustomerId ? undefined : user.email,
-      trialDays: 30, // 30-day trial, no card charge up front
+      trialDays,
       locale,
     });
     redirect(url);
