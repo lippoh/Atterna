@@ -3,13 +3,13 @@
 // circles on a hairline that draws itself across when the section enters)
 // → four feature sections (alternating 6/6, check bullets, terracotta
 // underline CTA links, each proof mockup on a pointer-tilt card) → stats
-// band (ink-900, tilt cards) → testimonials as an infinite CSS marquee.
+// band (ink-900, tilt cards) → testimonials as ONE centered row of the
+// three unique comments (no marquee duplication — each quote shows once).
 // All copy from messages; arrays via t.raw().
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Reveal } from "@/components/ui/reveal";
 import { Tilt } from "@/components/ui/tilt";
-import { Marquee } from "@/components/ui/marquee";
 import {
   IconCheck,
   IconStarFilled,
@@ -336,51 +336,47 @@ export async function Testimonials() {
   const t = await getTranslations("landing.testimonials");
   const items = t.raw("items") as TestimonialItem[];
   return (
-    <section className="overflow-hidden py-16 md:py-24">
+    <section className="py-16 md:py-24">
       <div className="mx-auto max-w-[1120px] px-6">
         <Reveal>
           <h2 className="text-center font-display text-[clamp(2.1rem,1.5rem+2vw,3.25rem)] font-semibold leading-[1.12] text-ink-900">
             {t("title")}
           </h2>
         </Reveal>
-      </div>
-      {/* Infinite marquee — hover pauses it; edges fade out.
-       * Contained to the centered 1120px page rhythm: one card group
-       * (3 × 360px + gaps = 1152px) is wider than the 1120px marquee
-       * region, so the two-group loop stays seamless at EVERY viewport —
-       * full-bleed broke above 1092px (a growing gap swept the right side). */}
-      <Reveal delay={100} className="mt-12">
-        <div className="mx-auto max-w-[1120px]">
-          <Marquee duration={38} itemClassName="gap-6 pr-6">
-            {items.map((item) => (
-              <figure
-                key={item.name}
-                className="flex w-[300px] shrink-0 flex-col rounded-xl border border-line bg-surface p-6 shadow-xs transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-md sm:w-[360px]"
-              >
-              <div className="flex text-star-400" aria-label="5/5">
-                {Array.from({ length: 5 }).map((_, s) => (
-                  <IconStarFilled key={s} className="size-3.5" />
-                ))}
-              </div>
-              <blockquote className="lh-body mt-4 flex-1 text-[15px] leading-relaxed text-ink-700">
-                «{item.quote}»
-              </blockquote>
-              <figcaption className="mt-6 flex items-center gap-3 border-t border-line pt-5">
-                <span className="flex size-9 items-center justify-center rounded-full bg-aegean-100 text-[13px] font-semibold text-aegean-600">
-                  {item.name.slice(0, 1)}
-                </span>
-                <div>
-                  <p className="text-sm font-semibold text-ink-900">{item.name}</p>
-                  <p className="text-[13px] text-ink-500">
-                    {item.role} · {item.city}
-                  </p>
+        {/* One row, three unique comments — each quote is on screen exactly
+         * once. (The old infinite marquee duplicated the card group for the
+         * loop, so the same comments were visible twice at once.) The grid
+         * keeps the three cards the same height and centers the row in the
+         * 1120px page rhythm; quotes flex so the author lines of all three
+         * cards align along one baseline. */}
+        <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
+          {items.map((item, i) => (
+            <Reveal key={item.name} delay={100 + i * 80}>
+              <figure className="flex h-full flex-col rounded-xl border border-line bg-surface p-6 shadow-xs transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-md">
+                <div className="flex text-star-400" aria-label="5/5">
+                  {Array.from({ length: 5 }).map((_, s) => (
+                    <IconStarFilled key={s} className="size-3.5" />
+                  ))}
                 </div>
-              </figcaption>
-            </figure>
+                <blockquote className="lh-body mt-4 flex-1 text-[15px] leading-relaxed text-ink-700">
+                  «{item.quote}»
+                </blockquote>
+                <figcaption className="mt-6 flex items-center gap-3 border-t border-line pt-5">
+                  <span className="flex size-9 items-center justify-center rounded-full bg-aegean-100 text-[13px] font-semibold text-aegean-600">
+                    {item.name.slice(0, 1)}
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold text-ink-900">{item.name}</p>
+                    <p className="text-[13px] text-ink-500">
+                      {item.role} · {item.city}
+                    </p>
+                  </div>
+                </figcaption>
+              </figure>
+            </Reveal>
           ))}
-          </Marquee>
         </div>
-      </Reveal>
+      </div>
     </section>
   );
 }
