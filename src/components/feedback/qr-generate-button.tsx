@@ -43,7 +43,7 @@ export function QrGenerateButton() {
         >
           {pending ? (
             <span
-              className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white"
+              className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white motion-reduce:animate-none"
               aria-hidden="true"
             />
           ) : (

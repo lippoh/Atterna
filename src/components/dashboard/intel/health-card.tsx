@@ -4,6 +4,7 @@
 // every number was computed by app code.
 import { getTranslations } from "next-intl/server";
 import { cn } from "@/lib/utils";
+import { ScoreCountUp } from "@/components/dashboard/intel/score-count-up";
 import type { ScoreResult } from "@/lib/reputation/score";
 import type { ScoreChange } from "@/lib/reputation/score";
 
@@ -46,7 +47,7 @@ export async function HealthCard({
           <div>
             <p className="text-[13px] font-medium text-ink-500">{t("label")}</p>
             <p className={cn("font-display text-[64px] leading-none font-semibold tabular-nums", toneClass)}>
-              {score.score}
+              <ScoreCountUp score={score.score} />
               <span className="text-2xl font-medium text-ink-300">/100</span>
             </p>
           </div>

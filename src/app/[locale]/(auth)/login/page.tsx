@@ -92,6 +92,9 @@ export default function LoginPage() {
               +
             </span>
           </summary>
+          {/* Expanding panel (Stage H, spec item 6): grid-rows expand. */}
+          <div className="faq-panel">
+            <div>
           <form action={resetAction} className="space-y-3 border-t border-line p-4">
             <input type="hidden" name="locale" value={locale} />
             <Input
@@ -121,6 +124,8 @@ export default function LoginPage() {
               </p>
             )}
           </form>
+            </div>
+          </div>
         </details>
       </main>
     </AuthShell>

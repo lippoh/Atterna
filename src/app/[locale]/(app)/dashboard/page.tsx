@@ -18,6 +18,7 @@ import { requireOrg } from "@/lib/session";
 import { prisma } from "@/lib/db";
 import { Link } from "@/i18n/navigation";
 import { IconQr, IconArrowRight, IconUpload } from "@/components/ui/icons";
+import { Reveal } from "@/components/ui/reveal";
 import { MetricCard } from "@/components/dashboard/metric-card";
 import { HealthCard } from "@/components/dashboard/intel/health-card";
 import { TrajectoryCard } from "@/components/dashboard/intel/trajectory-card";
@@ -254,17 +255,17 @@ export default async function DashboardPage() {
       </div>
 
       {/* ── Reputation Health (deterministic score + cached AI line) ──── */}
-      <div className="mt-8">
+      <Reveal className="mt-8">
         <HealthCard
           score={score}
           change={scoreChange}
           narrative={narrative?.text ?? null}
           locale={locale}
         />
-      </div>
+      </Reveal>
 
       {/* ── Trajectory (Stage D): 30d / 90d / 12m range toggle ────────── */}
-      <div className="mt-6">
+      <Reveal delay={60} className="mt-6">
         {/* Suspense: the toggle reads ?range= via useSearchParams. */}
         <Suspense>
           <TrajectoryCard
@@ -274,12 +275,13 @@ export default async function DashboardPage() {
             ariaLabel={t("trend")}
           />
         </Suspense>
-      </div>
+      </Reveal>
 
       {/* ── What changed (90-day comparisons; honest when young) ───────── */}
       <section className="mt-6">
         <h2 className="text-lg font-semibold text-ink-900">{t("intel.changed.title")}</h2>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Reveal delay={0}>
           <MetricCard
             tone={
               score.inputsSummary.ratingDelta90d === null
@@ -297,6 +299,8 @@ export default async function DashboardPage() {
             hint={`${w90.avgRating?.toFixed(1) ?? "—"} → ${score.inputsSummary.avgRating90d?.toFixed(1) ?? "—"}`}
             locale={locale}
           />
+          </Reveal>
+          <Reveal delay={60}>
           <MetricCard
             tone={responseRate === null ? "warn" : responseRate >= 0.8 ? "good" : "warn"}
             label={t("intel.changed.response")}
@@ -304,6 +308,8 @@ export default async function DashboardPage() {
             hint={t("intel.changed.responseHint", { count: w90.answered })}
             locale={locale}
           />
+          </Reveal>
+          <Reveal delay={120}>
           <MetricCard
             tone={negativeShare === null ? "warn" : negativeShare <= 0.15 ? "good" : "warn"}
             label={t("intel.changed.negative")}
@@ -311,6 +317,8 @@ export default async function DashboardPage() {
             hint={t("intel.changed.negativeHint", { count: w90.sentiment.negative })}
             locale={locale}
           />
+          </Reveal>
+          <Reveal delay={180}>
           <MetricCard
             tone="good"
             label={t("intel.changed.velocity")}
@@ -318,13 +326,17 @@ export default async function DashboardPage() {
             hint={t("intel.changed.velocityHint", { count: monthCount })}
             locale={locale}
           />
+          </Reveal>
         </div>
       </section>
 
       {/* ── Intelligence grid: signals+voice+issues | context column ──── */}
       <div className="mt-6 grid grid-cols-1 items-start gap-6 lg:grid-cols-[7fr_5fr]">
         <div className="space-y-6">
+          <Reveal>
           <SignalsFeed items={signals} locale={locale} />
+          </Reveal>
+          <Reveal delay={60}>
           <VoiceCard
             w30={w30}
             w90={w90}
@@ -337,20 +349,29 @@ export default async function DashboardPage() {
             risks={summary?.risks ?? []}
             locale={locale}
           />
+          </Reveal>
+          <Reveal delay={120}>
           <IssuesPanel
             issues={issues}
             recommendations={recommendations}
             locale={locale}
           />
+          </Reveal>
         </div>
         <div className="space-y-6">
+          <Reveal>
           <CompetitorCard
             benchmark={benchmark}
             competitors={competitors}
             locale={locale}
           />
+          </Reveal>
+          <Reveal delay={60}>
           <SourceCard breakdown={sourceBreakdown} locale={locale} />
+          </Reveal>
+          <Reveal delay={120}>
           <SeasonalCard comparison={seasonal} locale={locale} />
+          </Reveal>
         </div>
       </div>
     </main>
