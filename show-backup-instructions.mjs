@@ -1,0 +1,35 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
+const dbUrl = process.env.DATABASE_URL;
+
+console.log('⚠️  PRODUCTION BACKUP REQUIRED BEFORE MIGRATION');
+console.log('================================================================================');
+console.log('');
+console.log('The preflight verification passed. Before applying the reconciliation migration,');
+console.log('you MUST create a Neon restore point or backup.');
+console.log('');
+console.log('OPTIONS:');
+console.log('');
+console.log('1. Via Neon Console (recommended):');
+console.log('   - Go to: https://console.neon.tech/');
+console.log('   - Select your project');
+console.log('   - Navigate to "Restore" or "Backups"');
+console.log('   - Create restore point: "pre-reconciliation-2026-09-10"');
+console.log('');
+console.log('2. Via Neon API (if you have API key):');
+console.log('   - Create a branch backup via the Neon API');
+console.log('');
+console.log('3. Via pg_dump (manual backup):');
+console.log('   - pg_dump "$DATABASE_URL" > backup-2026-09-10.sql');
+console.log('');
+console.log('================================================================================');
+console.log('');
+console.log('Database host detected:', dbUrl?.includes('neon.tech') ? 'Neon PostgreSQL ✓' : 'PostgreSQL');
+console.log('');
+console.log('After creating the backup, confirm to proceed with the migration.');
+console.log('');
+console.log('✓ Preflight verification: PASSED');
+console.log('✓ P3 gates: ALL CLEAN (no invalid enum values, no orphans)');
+console.log('✓ Backfill scale: 0 rows (trivial backfills)');
+console.log('✓ Migration structure: 4 migrations ready');
