@@ -44,15 +44,18 @@ export async function monthlyUsage(organizationId: string): Promise<{
   const since = new Date();
   since.setDate(1);
   since.setHours(0, 0, 0, 0);
-  const logs = await prisma.aiUsageLog.findMany({
+  // Stage B: single DB aggregate instead of fetching every log row and
+  // summing in JS (unbounded row transfer on high-usage orgs).
+  const agg = await prisma.aiUsageLog.aggregate({
     where: { organizationId, createdAt: { gte: since } },
-    select: { tokensIn: true, tokensOut: true, costMicros: true },
+    _sum: { tokensIn: true, tokensOut: true, costMicros: true },
+    _count: { _all: true },
   });
   return {
-    tokensIn: logs.reduce((sum, log) => sum + log.tokensIn, 0),
-    tokensOut: logs.reduce((sum, log) => sum + log.tokensOut, 0),
-    costEur: logs.reduce((sum, log) => sum + log.costMicros, 0) / 1_000_000,
-    calls: logs.length,
+    tokensIn: agg._sum.tokensIn ?? 0,
+    tokensOut: agg._sum.tokensOut ?? 0,
+    costEur: (agg._sum.costMicros ?? 0) / 1_000_000,
+    calls: agg._count._all,
   };
 }
 /** Budget gate (AI_MONTHLY_TOKEN_BUDGET, soft alert at 80%). */

@@ -4,14 +4,13 @@
 // service). Left: explainer with the funnel diagram; right: QR cards +
 // recent submissions. QR modules are ink on white (§7.14 — never
 // inverted).
-import { randomBytes } from "node:crypto";
 import QRCode from "qrcode";
 import { getLocale, getTranslations } from "next-intl/server";
 import { requireOrg } from "@/lib/session";
 import { prisma } from "@/lib/db";
 import { env } from "@/lib/env";
-import { audit } from "@/lib/audit";
-import { IconPlus, IconArrowRight, IconQr } from "@/components/ui/icons";
+import { QrGenerateButton } from "@/components/feedback/qr-generate-button";
+import { IconArrowRight, IconQr } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 
 export default async function FeedbackPage() {
@@ -19,45 +18,26 @@ export default async function FeedbackPage() {
   const locale = await getLocale();
   const t = await getTranslations({ namespace: "feedback", locale });
 
-  async function generateTokenAction() {
-    "use server";
-    const { orgId: currentOrg } = await requireOrg();
-    const business = await prisma.business.findFirst({
-      where: { organizationId: currentOrg, deletedAt: null },
-      orderBy: { createdAt: "asc" },
-    });
-    if (!business) return;
-    const token = randomBytes(24).toString("base64url");
-    await prisma.feedbackRequest.create({
-      data: { businessId: business.id, token },
-    });
-    await audit("feedback.token_created", {
-      organizationId: currentOrg,
-      entity: "business",
-      entityId: business.id,
-    });
-  }
-
   const business = await prisma.business.findFirst({
     where: { organizationId: orgId, deletedAt: null },
     orderBy: { createdAt: "asc" },
   });
 
-  const tokens = business
-    ? await prisma.feedbackRequest.findMany({
-        where: { businessId: business.id, active: true },
-        orderBy: { createdAt: "desc" },
-        take: 10,
-      })
-    : [];
-
-  const submissions = business
-    ? await prisma.feedbackSubmission.findMany({
-        where: { businessId: business.id },
-        orderBy: { createdAt: "desc" },
-        take: 20,
-      })
-    : [];
+  // Stage B: tokens + submissions in parallel (were sequential).
+  const [tokens, submissions] = business
+    ? await Promise.all([
+        prisma.feedbackRequest.findMany({
+          where: { businessId: business.id, active: true },
+          orderBy: { createdAt: "desc" },
+          take: 10,
+        }),
+        prisma.feedbackSubmission.findMany({
+          where: { businessId: business.id },
+          orderBy: { createdAt: "desc" },
+          take: 20,
+        }),
+      ])
+    : [[], []];
 
   const tokenUrls = await Promise.all(
     tokens.map(async (request) => ({
@@ -85,15 +65,7 @@ export default async function FeedbackPage() {
           </h1>
           <p className="mt-1.5 max-w-[56ch] text-sm text-ink-500">{t("subtitle")}</p>
         </div>
-        <form action={generateTokenAction}>
-          <button
-            type="submit"
-            className="inline-flex h-10 items-center gap-2 rounded-md bg-aegean-600 px-4 text-sm font-semibold text-white shadow-xs transition-[background-color,transform,box-shadow] duration-150 hover:-translate-y-px hover:bg-aegean-700 hover:shadow-sm active:translate-y-0"
-          >
-            <IconPlus className="size-4" />
-            {t("generate")}
-          </button>
-        </form>
+        <QrGenerateButton />
       </div>
 
       <div className="mt-8 grid grid-cols-1 items-start gap-6 lg:grid-cols-[5fr_7fr]">

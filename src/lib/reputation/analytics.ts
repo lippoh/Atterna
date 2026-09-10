@@ -50,13 +50,15 @@ export async function getWindowStats(
     deletedAt: null,
     ...(since ? { receivedAt: { gte: since } } : {}),
   };
-  const [agg, answered, analyzed] = await Promise.all([
+  const [agg, answered, analyzed, negative] = await Promise.all([
     prisma.review.aggregate({ where, _avg: { rating: true }, _count: { _all: true } }),
     prisma.review.count({ where: { ...where, repliedAt: { not: null } } }),
     prisma.reviewAnalysis.findMany({
       where: { review: where },
       select: { sentiment: true },
     }),
+    // Stage B: was a sequential await AFTER the block above (N+1 pattern).
+    prisma.review.count({ where: { ...where, rating: { lte: 3 } } }),
   ]);
   const count = agg._count._all;
   const sentiment = { positive: 0, neutral: 0, negative: 0 };
@@ -71,7 +73,7 @@ export async function getWindowStats(
     avgRating: agg._avg.rating === null ? null : Math.round(agg._avg.rating * 10) / 10,
     answered,
     responseRate: count === 0 ? null : answered / count,
-    negative: await prisma.review.count({ where: { ...where, rating: { lte: 3 } } }),
+    negative,
     analyzed: analyzed.length,
     sentiment,
   };

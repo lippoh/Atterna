@@ -43,6 +43,7 @@ import { getCompetitors, getBenchmark } from "@/lib/reputation/competitors";
 import {
   getCachedQuarterlySummary,
   getCachedHealthNarrative,
+  dataFingerprint,
 } from "@/ai/insights";
 
 function greetingKey(d: Date): "morning" | "afternoon" | "evening" {
@@ -121,19 +122,21 @@ export default async function DashboardPage() {
   }
 
   // ── Intelligence pipeline (deterministic + cached AI) ─────────────────
+  // Stage B: the four display windows are passed into collectScoreInput so
+  // the score layer does not re-run the same aggregates a second time.
+  // One shared data fingerprint feeds both AI-cache reads (was 2 identical
+  // aggregate runs per page view).
   const [
     scoreChange,
-    scoreInput,
     issues,
     recommendations,
     competitors,
     benchmark,
     themeStats,
     monthly,
-    summary,
+    baseFingerprint,
   ] = await Promise.all([
     getScoreWithChange(business.id),
-    collectScoreInput(orgId, business.id),
     prisma.issue.findMany({
       where: { businessId: business.id, status: { in: ["OPEN", "IN_PROGRESS"] } },
       orderBy: [{ severity: "desc" }, { mentionsCurrent: "desc" }],
@@ -147,10 +150,19 @@ export default async function DashboardPage() {
     getBenchmark(orgId, business.id),
     getThemeStats(orgId, business.id),
     getMonthlyBuckets(orgId, business.id, 12),
-    getCachedQuarterlySummary(business.id),
+    dataFingerprint(business.id),
+  ]);
+  const [summary, scoreInput] = await Promise.all([
+    getCachedQuarterlySummary(business.id, baseFingerprint),
+    collectScoreInput(orgId, business.id, now, { w30, w90, w365, wAll }),
   ]);
   const score = computeReputationScore(scoreInput);
-  const narrative = await getCachedHealthNarrative(business.id, score.score, scoreChange.delta);
+  const narrative = await getCachedHealthNarrative(
+    business.id,
+    score.score,
+    scoreChange.delta,
+    baseFingerprint
+  );
   const seasonal = buildSeasonalComparison(monthly, themeStats);
 
   const negativeShare = score.inputsSummary.negativeShare90d;

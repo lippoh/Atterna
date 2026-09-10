@@ -41,15 +41,24 @@ export default async function ReviewsPage({
     ...sourceFilter,
   };
 
-  const reviews = await prisma.review.findMany({
-    where,
-    orderBy: { receivedAt: "desc" },
-    take: 50,
-    include: {
-      analysis: { select: { sentiment: true } },
-      drafts: { select: { status: true }, orderBy: { createdAt: "desc" }, take: 1 },
-    },
-  });
+  // Stage B: reviews list + source chips run in parallel (were sequential).
+  const [reviews, sourceGroups] = await Promise.all([
+    prisma.review.findMany({
+      where,
+      orderBy: { receivedAt: "desc" },
+      take: 50,
+      include: {
+        analysis: { select: { sentiment: true } },
+        drafts: { select: { status: true }, orderBy: { createdAt: "desc" }, take: 1 },
+      },
+    }),
+    // Per-source filter chips — only shown when more than one source exists.
+    prisma.review.groupBy({
+      by: ["source"],
+      where: { organizationId: orgId, deletedAt: null },
+      _count: { _all: true },
+    }),
+  ]);
 
   const rows: ReviewListRow[] = reviews.map((r) => {
     const draft = r.drafts[0]?.status;
@@ -76,11 +85,6 @@ export default async function ReviewsPage({
   });
 
   // Per-source filter chips — only when more than one source is present.
-  const sourceGroups = await prisma.review.groupBy({
-    by: ["source"],
-    where: { organizationId: orgId, deletedAt: null },
-    _count: { _all: true },
-  });
   const showSourceChips = sourceGroups.length > 1;
 
   return (

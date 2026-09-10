@@ -21,9 +21,6 @@
 import { prisma } from "@/lib/db";
 import {
   getWindowStats,
-  getMonthlyBuckets,
-  getSourceBreakdown,
-  getResponseTimeHours,
 } from "./analytics";
 import { computeBenchmark, type Benchmark } from "./competitors";
 
@@ -240,25 +237,35 @@ async function avgRatingBetween(
   return agg._avg.rating === null ? null : Math.round(agg._avg.rating * 10) / 10;
 }
 
-/** Collect every input the deterministic score needs (bounded queries). */
+/** Collect every input the deterministic score needs (bounded queries).
+ *
+ * Stage B: pass already-fetched windows via `prefetched` (the dashboard
+ * page fetches 30d/90d/365d/all for display anyway) to avoid re-running
+ * the same aggregates twice per page view.
+ */
 export async function collectScoreInput(
   orgId: string,
   businessId: string,
-  now = new Date()
+  now = new Date(),
+  prefetched?: {
+    w30?: Awaited<ReturnType<typeof getWindowStats>>;
+    w90?: Awaited<ReturnType<typeof getWindowStats>>;
+    w365?: Awaited<ReturnType<typeof getWindowStats>>;
+    wAll?: Awaited<ReturnType<typeof getWindowStats>>;
+  }
 ): Promise<ScoreInput> {
   const DAY = 86_400_000;
-  const since30 = new Date(now.getTime() - 30 * DAY);
   const since90 = new Date(now.getTime() - 90 * DAY);
   const since180 = new Date(now.getTime() - 180 * DAY);
   const since365 = new Date(now.getTime() - 365 * DAY);
 
-  const [w30, w90, w180, w365, wAll, s12m, sAll, s90d, sPrev90, openIssues, firstReview, monthly, breakdown] =
+  const [w30, w90, w180, w365, wAll, s12m, sAll, s90d, sPrev90, openIssues, firstReview, competitors] =
     await Promise.all([
-      getWindowStats(orgId, businessId, "30d", now),
-      getWindowStats(orgId, businessId, "90d", now),
+      prefetched?.w30 ?? getWindowStats(orgId, businessId, "30d", now),
+      prefetched?.w90 ?? getWindowStats(orgId, businessId, "90d", now),
       getWindowStats(orgId, businessId, "180d", now),
-      getWindowStats(orgId, businessId, "365d", now),
-      getWindowStats(orgId, businessId, "all", now),
+      prefetched?.w365 ?? getWindowStats(orgId, businessId, "365d", now),
+      prefetched?.wAll ?? getWindowStats(orgId, businessId, "all", now),
       avgRatingBetween(orgId, businessId, since365, null),
       avgRatingBetween(orgId, businessId, null, null),
       avgRatingBetween(orgId, businessId, since90, null),
@@ -272,8 +279,12 @@ export async function collectScoreInput(
         orderBy: { receivedAt: "asc" },
         select: { receivedAt: true },
       }),
-      getMonthlyBuckets(orgId, businessId, 12, now),
-      getSourceBreakdown(orgId, businessId),
+      // Stage B: was a SECOND sequential await block (competitors fetched
+      // after all windows resolved). Now inside the same Promise.all.
+      prisma.competitor.findMany({
+        where: { businessId, status: "CONFIRMED" },
+        select: { rating: true },
+      }),
     ]);
 
   // 12-month rating with all-time fallback when the year has < 5 reviews.
@@ -288,13 +299,6 @@ export async function collectScoreInput(
     : 1;
   const avgMonthlyAllTime = Math.round((totalReviews / monthsActive) * 10) / 10;
 
-  void monthly; // kept for future velocity-seasonality refinement
-  void breakdown;
-
-  const competitors = await prisma.competitor.findMany({
-    where: { businessId, status: "CONFIRMED" },
-    select: { rating: true },
-  });
   const rated = competitors.filter((c) => c.rating !== null) as { rating: number }[];
   const competitorAvgRating = rated.length
     ? Math.round((rated.reduce((s, c) => s + c.rating, 0) / rated.length) * 10) / 10

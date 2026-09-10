@@ -181,13 +181,17 @@ export async function getQuarterlySummary(
  * Cache-ONLY read for page rendering (never generates — page views never
  * pay for tokens; the daily intel job warms the cache via warmInsightCache).
  * Returns null when no fresh (fingerprint-matching) summary exists.
+ * Stage B: accepts a precomputed fingerprint to avoid re-running the
+ * aggregate queries when the caller already has one (the dashboard needs
+ * both the summary and the health narrative per page view).
  */
 export async function getCachedQuarterlySummary(
-  businessId: string
+  businessId: string,
+  fingerprint?: string
 ): Promise<QuarterlySummary | null> {
-  const fingerprint = await dataFingerprint(businessId);
+  const fp = fingerprint ?? (await dataFingerprint(businessId));
   const cached = await prisma.businessInsight.findFirst({
-    where: { businessId, kind: "QUARTERLY_SUMMARY", fingerprint },
+    where: { businessId, kind: "QUARTERLY_SUMMARY", fingerprint: fp },
     orderBy: { createdAt: "desc" },
   });
   if (!cached) return null;
@@ -198,13 +202,16 @@ export async function getCachedQuarterlySummary(
 /**
  * Cache-only health narrative read. The fingerprint embeds score + delta,
  * so a changed score invalidates the old explanation automatically.
+ * Stage B: accepts a precomputed base fingerprint (see above).
  */
 export async function getCachedHealthNarrative(
   businessId: string,
   score: number,
-  delta: number | null
+  delta: number | null,
+  baseFingerprint?: string
 ): Promise<HealthNarrative | null> {
-  const fingerprint = `${await dataFingerprint(businessId)}:${score}:${delta ?? 0}`;
+  const base = baseFingerprint ?? (await dataFingerprint(businessId));
+  const fingerprint = `${base}:${score}:${delta ?? 0}`;
   const cached = await prisma.businessInsight.findFirst({
     where: { businessId, kind: "HEALTH_EXPLAIN", fingerprint },
     orderBy: { createdAt: "desc" },

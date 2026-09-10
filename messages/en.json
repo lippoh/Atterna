@@ -612,7 +612,12 @@
     "copied": "Copied!",
     "submissions": "Recent submissions",
     "empty": "No submissions yet.",
-    "invalid": "The code was not found or is no longer active."
+    "invalid": "The code was not found or is no longer active.",
+    "generating": "Generating…",
+    "generateError": {
+      "noBusiness": "Create your business first.",
+      "server": "Could not create the code. Try again."
+    }
   },
   "settings": {
     "title": "Settings",
