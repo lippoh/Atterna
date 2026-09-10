@@ -11,6 +11,7 @@ import {
   IconChartLine,
   IconStar,
   IconQr,
+  IconGlobe,
   IconSettings,
 } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
@@ -18,6 +19,7 @@ import { cn } from "@/lib/utils";
 const TABS = [
   { href: "/dashboard", labelKey: "dashboard", Icon: IconChartLine },
   { href: "/reviews", labelKey: "reviews", Icon: IconStar },
+  { href: "/settings/sources", labelKey: "sources", Icon: IconGlobe },
   { href: "/feedback", labelKey: "feedback", Icon: IconQr },
   { href: "/settings", labelKey: "settings", Icon: IconSettings },
 ] as const;
@@ -29,7 +31,9 @@ export function DesktopNavTabs() {
   return (
     <nav className="hidden items-center gap-1 md:flex" aria-label="App">
       {TABS.map(({ href, labelKey }) => {
-        const active = pathname.startsWith(href);
+        // Stage E: exact match for /settings — /settings/sources is its own
+        // primary tab and must not light up Settings too.
+        const active = href === "/settings" ? pathname === href : pathname.startsWith(href);
         return (
           <Link
             key={href}
@@ -60,7 +64,7 @@ export function MobileNavTabs() {
       aria-label="App"
     >
       {TABS.map(({ href, labelKey, Icon }) => {
-        const active = pathname.startsWith(href);
+        const active = href === "/settings" ? pathname === href : pathname.startsWith(href);
         return (
           <Link
             key={href}

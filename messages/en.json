@@ -5,7 +5,8 @@
     "feedback": "Feedback",
     "settings": "Settings",
     "billing": "Billing",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "sources": "Sources"
   },
   "landing": {
     "nav": {
@@ -797,6 +798,34 @@
         "BAD_DATE": "Line {line}: invalid date",
         "EMPTY_ROW": "Line {line}: empty row",
         "PRIVATE_SOURCE": "Line {line}: QR/direct feedback cannot be imported"
+      }
+    },
+    "needsReauth": "Needs reconnection",
+    "syncError": "Last sync failed: {error}",
+    "connectedBadge": "{count} reviews",
+    "importedBadge": "{count} reviews",
+    "activeBadge": "{count} submissions",
+    "notUsedYet": "Not used yet",
+    "manualImported": "{count} manual",
+    "csvCoverage": "{count} reviews already imported via CSV",
+    "competitors": {
+      "title": "Competitors you track",
+      "subtitle": "Names you add appear on the dashboard. Ratings are optional — leave empty when unknown.",
+      "count": "{count}",
+      "noRating": "rating unknown",
+      "remove": "Remove",
+      "name": "Name",
+      "city": "City (optional)",
+      "rating": "Rating 1–5 (optional)",
+      "ratingHint": "Leave empty if you don’t know it — Atterna never invents competitor data.",
+      "countLabel": "Review count (optional)",
+      "add": "Add competitor",
+      "adding": "Adding…",
+      "added": "Competitor added.",
+      "error": {
+        "exists": "This competitor is already tracked.",
+        "invalid": "Check the name (min 2 chars) and rating (1–5).",
+        "server": "Could not save — try again."
       }
     }
   }
