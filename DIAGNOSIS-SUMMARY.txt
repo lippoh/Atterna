@@ -1,0 +1,267 @@
+================================================================================
+PRODUCTION SIGNUP EMAIL DIAGNOSIS - SUMMARY FOR USER
+================================================================================
+Date: 2026-09-10T15:20:00Z
+Status: Awaiting manual Vercel access for production test
+
+================================================================================
+SITUATION
+================================================================================
+
+I cannot access Vercel production environment from this local machine because:
+
+1. Local .env only contains DATABASE_URL (production secrets in Vercel)
+2. Vercel CLI is not installed
+3. No .vercel/ directory (not linked to project)
+4. Production function logs require Vercel Dashboard access
+
+However, I have analyzed the code and can guide you through the diagnosis.
+
+================================================================================
+WHAT I FOUND IN CODE ANALYSIS
+================================================================================
+
+✅ Code is correct:
+- Mailer properly logs success: console.log("[mailer] delivered", { id })
+- Mailer properly logs errors: console.error("resend error", error)
+- registerAction properly catches email failures
+- Email recipient is correctly set to submitted address
+- Token generation and URL construction are correct
+
+⚠️ Most Likely Root Causes (in order of probability):
+
+1. EMAIL_FROM domain not verified in Resend
+   - If using custom domain (e.g., noreply@atterna.gr)
+   - Domain must be verified in Resend Dashboard with DNS records
+   
+2. EMAIL_FROM is onboarding@resend.dev
+   - This ONLY delivers to Resend account owner
+   - Will fail for any other recipient
+   
+3. RESEND_API_KEY invalid or expired
+   - Would show "resend error" in logs
+   
+4. EMAIL_FROM environment variable not set in Vercel Production
+   - Would cause env validation error before reaching mailer
+
+================================================================================
+WHAT YOU NEED TO DO
+================================================================================
+
+STEP 1: Check Vercel Environment Variables
+──────────────────────────────────────────────────────────────────────────────
+
+Go to: Vercel Dashboard → Your Project → Settings → Environment Variables
+
+Check these are set for "Production" environment:
+
+  RESEND_API_KEY       = re_... (present? starts with "re_"?)
+  EMAIL_FROM           = ? (what is the DOMAIN? e.g., @atterna.gr or @resend.dev)
+  APP_URL              = https://... (correct production URL?)
+  AUTH_SECRET          = ... (present? 32+ chars?)
+
+**CRITICAL:** What is the domain in EMAIL_FROM?
+- If @resend.dev → ONLY works for account owner email
+- If custom domain → MUST be verified in Resend Dashboard → Domains
+
+
+STEP 2: Verify Resend Domain (if using custom domain)
+──────────────────────────────────────────────────────────────────────────────
+
+Go to: Resend Dashboard → Domains (https://resend.com/domains)
+
+Check:
+- Is your domain (e.g., atterna.gr) listed?
+- Status: Verified (green) or Pending (red)?
+- DNS records configured: SPF, DKIM, verification TXT?
+
+If NOT verified:
+- Emails will be rejected by Resend API (403 or 422 error)
+- This matches your "HTTP 403" symptom
+
+
+STEP 3: Perform Production Signup Test
+──────────────────────────────────────────────────────────────────────────────
+
+1. Open: https://[your-production-url]/register
+2. Use: Resend account owner's email address
+3. Submit form
+4. IMMEDIATELY go to: Vercel Dashboard → Deployments → [Latest] → Logs
+5. Search for: "[mailer]" or "resend error" or "registerAction"
+
+
+STEP 4: Check Logs for One of These Three Cases
+──────────────────────────────────────────────────────────────────────────────
+
+CASE A: Email Accepted by Resend
+─────────────────────────────────
+Log shows:
+  [mailer] delivered { id: 're_abc123...' }
+
+Next steps:
+  → Go to Resend Dashboard → Emails
+  → Search for message ID: re_abc123...
+  → Check status: sent / delivered / bounced / failed
+
+
+CASE B: Email Rejected by Resend
+─────────────────────────────────
+Log shows:
+  resend error { message: '...', name: '...' }
+  registerAction: verification email failed: ...
+
+Common errors:
+  - "Domain not verified" → Fix: Verify domain in Resend
+  - "Invalid API key" → Fix: Check RESEND_API_KEY in Vercel
+  - "Forbidden" (403) → Fix: Verify domain OR use account owner email
+
+
+CASE C: No Mailer Log Appears
+──────────────────────────────
+No [mailer] or resend error logs found
+
+Possible causes:
+  - Rate limiting (3 signups/hour/IP)
+  - Validation failed before email send
+  - EMAIL_FROM env var not set or invalid format
+  - Server action error before reaching mailer
+
+Check for:
+  - "rateLimited" in logs
+  - Environment variable validation error
+  - Any other registerAction error
+
+
+STEP 5: Check Resend Dashboard
+──────────────────────────────────────────────────────────────────────────────
+
+Go to: Resend Dashboard → Emails (https://resend.com/emails)
+
+Search for: The test email address you used
+
+Check:
+  - Is message present? (yes/no)
+  - Message ID? (if present)
+  - Status? (sent/delivered/bounced/failed/rejected/absent)
+  - Error message? (if failed/rejected)
+
+================================================================================
+MOST LIKELY DIAGNOSIS (Based on Symptoms)
+================================================================================
+
+You mentioned:
+  ✓ "Resend previously returned HTTP 403 when using onboarding@resend.dev"
+  ✓ "Then tested with Resend account owner's email, still no email received"
+
+This suggests TWO issues:
+
+ISSUE 1: onboarding@resend.dev limitation
+  - onboarding@resend.dev can ONLY send to Resend account owner
+  - If you used a different email → Resend accepts but doesn't deliver
+  - HTTP 403 for non-owner means EMAIL_FROM might be onboarding@resend.dev
+
+ISSUE 2: Custom domain not verified (if switched from onboarding@)
+  - If you changed EMAIL_FROM to custom domain after seeing 403
+  - But didn't verify the domain in Resend Dashboard
+  - Result: Resend rejects with domain verification error
+
+================================================================================
+RECOMMENDED FIX (Most Likely Solution)
+================================================================================
+
+OPTION A: If EMAIL_FROM is onboarding@resend.dev
+─────────────────────────────────────────────────
+
+TEMPORARY FIX (testing only):
+  → Test signup using EXACT Resend account owner's email
+  → Email should arrive
+  → Confirms code works, just sender restriction
+
+PERMANENT FIX:
+  → Add custom domain in Resend Dashboard
+  → Verify DNS records (SPF, DKIM, TXT)
+  → Update EMAIL_FROM to: Atterna <noreply@your-domain.gr>
+  → Redeploy from Vercel Dashboard
+
+
+OPTION B: If EMAIL_FROM is custom domain but not verified
+──────────────────────────────────────────────────────────
+
+FIX:
+  → Go to Resend Dashboard → Domains
+  → Add your domain (e.g., atterna.gr)
+  → Copy DNS records (SPF, DKIM, verification TXT)
+  → Add records to your DNS provider
+  → Wait for verification (usually 5-30 minutes)
+  → Once status shows "Verified" (green), retry signup
+  → No code changes needed, no redeploy needed
+
+
+OPTION C: If EMAIL_FROM not set in Vercel Production
+─────────────────────────────────────────────────────
+
+FIX:
+  → Go to Vercel → Settings → Environment Variables
+  → Add: EMAIL_FROM = Atterna <noreply@your-verified-domain.gr>
+  → Make sure "Production" environment is selected
+  → Click "Save"
+  → Go to Deployments → Redeploy latest
+  → Retry signup after redeploy completes
+
+================================================================================
+WHAT TO REPORT BACK
+================================================================================
+
+After performing the production signup test, please report:
+
+1. EMAIL_FROM value from Vercel env vars (redact local part):
+   Example: "***@atterna.gr" or "***@resend.dev"
+
+2. Vercel function log excerpt (remove tokens/secrets):
+   Copy the relevant log lines showing [mailer] or resend error
+
+3. Resend Dashboard findings:
+   - Domain verified? (if using custom domain)
+   - Message found in Emails? (yes/no)
+   - Message status? (if found)
+
+4. Email received by test user? (yes/no)
+
+5. Test email address used:
+   - Was it the Resend account owner's email? (yes/no)
+
+With this information, I can provide the exact fix.
+
+================================================================================
+CRITICAL: If You Change Environment Variables
+================================================================================
+
+After changing ANY Vercel environment variable:
+
+1. Go to: Vercel Dashboard → Deployments
+2. Click: "..." menu on latest deployment
+3. Select: "Redeploy"
+4. Wait: For redeployment to complete
+5. Then: Retry signup test
+
+Environment variables are NOT hot-reloaded. They only take effect after redeploy.
+
+================================================================================
+DOCUMENTATION PROVIDED
+================================================================================
+
+Full diagnostic guide: SIGNUP-EMAIL-DIAGNOSIS.md
+Code trace: verify-email-flow-trace.md (668 lines)
+
+Both files contain detailed instructions, common scenarios, and troubleshooting.
+
+================================================================================
+END OF DIAGNOSIS PREPARATION
+================================================================================
+
+I cannot proceed further without:
+- Vercel Dashboard access to check environment variables
+- Vercel function logs after a signup test
+- Resend Dashboard access to verify domain status
+
+Please perform the signup test and provide the information requested above.
