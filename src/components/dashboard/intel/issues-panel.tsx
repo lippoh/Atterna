@@ -2,6 +2,7 @@
 // issues + Recommended actions with the owner's status workflow (spec §18–20).
 // Status changes are plain <form> server actions — no client JS needed.
 import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { categoryLabel } from "@/lib/metrics";
 import { sourceLabel } from "@/lib/sources/registry";
@@ -111,6 +112,17 @@ export async function IssuesPanel({
                     {ti("mentions", { count: issue.mentionsCurrent })}
                   </span>
                 </div>
+                {/* Stage D drill-down: the evidence link lands on the reviews
+                    list pre-filtered to this issue's category. */}
+                <Link
+                  href={{
+                    pathname: "/reviews",
+                    query: { topic: issue.category, filter: "negative" },
+                  }}
+                  className="link-grow mt-1 inline-block text-[12px] font-semibold text-aegean-600"
+                >
+                  {ti("viewEvidence")}
+                </Link>
                 <p className="mt-1.5 text-[12px] text-ink-500">
                   {issue.trend === "UP" ? "↑ " : issue.trend === "DOWN" ? "↓ " : "→ "}
                   {locale === "en"

@@ -1,7 +1,8 @@
 // src/app/[locale]/(app)/dashboard/page.tsx — the Reputation Intelligence
-// dashboard (spec §37 IA): Health → What changed → Customer Voice →
-// Recurring/Emerging Issues → Recommendations → Competitor position →
-// Source breakdown → Seasonal + Historical trend.
+// dashboard (spec §37 IA): Health → Trajectory → What changed → Recent
+// signals + Customer Voice → Recurring/Emerging Issues (drill-down to
+// filtered reviews) → Recommendations → Competitor position → Source
+// breakdown → Seasonal intelligence.
 //
 // Two structural changes vs the old page:
 // 1. NO Google gate — the dashboard runs on ANY mix of sources (CSV,
@@ -11,14 +12,16 @@
 // Every number is deterministic (lib/reputation); the AI layer only adds
 // cached narrative when available.
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { requireOrg } from "@/lib/session";
 import { prisma } from "@/lib/db";
 import { Link } from "@/i18n/navigation";
 import { IconQr, IconArrowRight, IconUpload } from "@/components/ui/icons";
 import { MetricCard } from "@/components/dashboard/metric-card";
-import { TrendChart } from "@/components/dashboard/trend-chart";
 import { HealthCard } from "@/components/dashboard/intel/health-card";
+import { TrajectoryCard } from "@/components/dashboard/intel/trajectory-card";
+import { SignalsFeed, type SignalItem } from "@/components/dashboard/intel/signals-feed";
 import { VoiceCard } from "@/components/dashboard/intel/voice-card";
 import { IssuesPanel } from "@/components/dashboard/intel/issues-panel";
 import {
@@ -29,6 +32,7 @@ import {
 import {
   getWindowStats,
   getMonthlyBuckets,
+  getRatingTrend,
   monthlyTrendPoints,
   getSourceBreakdown,
 } from "@/lib/reputation/analytics";
@@ -135,6 +139,10 @@ export default async function DashboardPage() {
     themeStats,
     monthly,
     baseFingerprint,
+    trend30,
+    trend90,
+    latestReviews,
+    latestFeedback,
   ] = await Promise.all([
     getScoreWithChange(business.id),
     prisma.issue.findMany({
@@ -151,6 +159,31 @@ export default async function DashboardPage() {
     getThemeStats(orgId, business.id),
     getMonthlyBuckets(orgId, business.id, 12),
     dataFingerprint(business.id),
+    // Stage D trajectory ranges: both daily series share one bounded
+    // query each (take 5000); 12m reuses the monthly buckets above.
+    getRatingTrend(orgId, business.id, 30),
+    getRatingTrend(orgId, business.id, 90),
+    prisma.review.findMany({
+      where: { organizationId: orgId, businessId: business.id, deletedAt: null },
+      orderBy: { receivedAt: "desc" },
+      take: 6,
+      select: {
+        id: true,
+        rating: true,
+        text: true,
+        reviewerName: true,
+        source: true,
+        receivedAt: true,
+        repliedAt: true,
+        analysis: { select: { sentiment: true } },
+      },
+    }),
+    prisma.feedbackSubmission.findMany({
+      where: { organizationId: orgId, businessId: business.id },
+      orderBy: { createdAt: "desc" },
+      take: 6,
+      select: { id: true, rating: true, comment: true, createdAt: true },
+    }),
   ]);
   const [summary, scoreInput] = await Promise.all([
     getCachedQuarterlySummary(business.id, baseFingerprint),
@@ -167,6 +200,39 @@ export default async function DashboardPage() {
 
   const negativeShare = score.inputsSummary.negativeShare90d;
   const responseRate = w90.responseRate ?? wAll.responseRate;
+
+  // Stage D signals: newest reviews + newest direct feedback merged into
+  // one time-ordered feed, capped at 6 items.
+  const signals: SignalItem[] = [
+    ...latestReviews.map(
+      (r): SignalItem => ({
+        kind: "review",
+        id: r.id,
+        rating: r.rating,
+        text: r.text,
+        reviewerName: r.reviewerName,
+        source: r.source,
+        receivedAt: r.receivedAt,
+        replied: r.repliedAt !== null,
+        sentiment: r.analysis?.sentiment ?? null,
+      })
+    ),
+    ...latestFeedback.map(
+      (f): SignalItem => ({
+        kind: "feedback",
+        id: f.id,
+        rating: f.rating,
+        comment: f.comment,
+        createdAt: f.createdAt,
+      })
+    ),
+  ]
+    .sort(
+      (a, b) =>
+        (b.kind === "review" ? b.receivedAt : b.createdAt).getTime() -
+        (a.kind === "review" ? a.receivedAt : a.createdAt).getTime()
+    )
+    .slice(0, 6);
 
   return (
     <main id="main-content" className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6">
@@ -195,6 +261,19 @@ export default async function DashboardPage() {
           narrative={narrative?.text ?? null}
           locale={locale}
         />
+      </div>
+
+      {/* ── Trajectory (Stage D): 30d / 90d / 12m range toggle ────────── */}
+      <div className="mt-6">
+        {/* Suspense: the toggle reads ?range= via useSearchParams. */}
+        <Suspense>
+          <TrajectoryCard
+            series30={trend30}
+            series90={trend90}
+            series12m={monthlyTrendPoints(monthly)}
+            ariaLabel={t("trend")}
+          />
+        </Suspense>
       </div>
 
       {/* ── What changed (90-day comparisons; honest when young) ───────── */}
@@ -242,9 +321,10 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      {/* ── Intelligence grid: voice + issues/actions | context column ── */}
+      {/* ── Intelligence grid: signals+voice+issues | context column ──── */}
       <div className="mt-6 grid grid-cols-1 items-start gap-6 lg:grid-cols-[7fr_5fr]">
         <div className="space-y-6">
+          <SignalsFeed items={signals} locale={locale} />
           <VoiceCard
             w30={w30}
             w90={w90}
@@ -273,14 +353,6 @@ export default async function DashboardPage() {
           <SeasonalCard comparison={seasonal} locale={locale} />
         </div>
       </div>
-
-      {/* ── Historical trend: 12-month rating line (§12, all-source) ──── */}
-      <section className="mt-6">
-        <h2 className="text-lg font-semibold text-ink-900">{t("intel.trend")}</h2>
-        <div className="mt-4">
-          <TrendChart series={monthlyTrendPoints(monthly)} aria-label={t("trend")} />
-        </div>
-      </section>
     </main>
   );
 }

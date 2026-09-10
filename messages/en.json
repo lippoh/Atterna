@@ -510,7 +510,8 @@
         "firstDetected": "first detected {date}",
         "start": "Start",
         "resolve": "Resolve",
-        "dismiss": "Dismiss"
+        "dismiss": "Dismiss",
+        "viewEvidence": "View matching reviews"
       },
       "recommendations": {
         "title": "Recommended actions",
@@ -557,6 +558,28 @@
         "body": "Import your historical reviews from any platform (CSV) or connect Google — Atterna builds your reputation profile from every source, and stays useful even in quiet months.",
         "import": "Import reviews (CSV)",
         "connect": "Connect Google"
+      },
+      "trajectory": {
+        "title": "Trajectory",
+        "overRange": "over range",
+        "rangeLabel": "Trend range",
+        "ranges": {
+          "30d": "30d",
+          "90d": "90d",
+          "12m": "12m"
+        },
+        "windows": {
+          "30d": "Daily average rating · last 30 days",
+          "90d": "Daily average rating · last 90 days",
+          "12m": "Monthly average rating · last 12 months"
+        }
+      },
+      "signals": {
+        "title": "Recent signals",
+        "viewAll": "All reviews",
+        "empty": "New reviews and direct feedback will appear here.",
+        "needsReply": "Needs reply",
+        "direct": "Direct"
       }
     }
   },
@@ -594,7 +617,9 @@
       "ariaLabel": "Filter by source",
       "all": "All sources"
     },
-    "emptySources": "Add a data source"
+    "emptySources": "Add a data source",
+    "topicFilter": "Topic: {topic}",
+    "topicClear": "Clear topic filter"
   },
   "feedback": {
     "title": "Private feedback",

@@ -4,6 +4,10 @@
 // x/y labels. The line draws in over 700ms (chart-line class, honors
 // prefers-reduced-motion). No charting library — the SVG serializes into
 // the weekly email exactly as it renders here.
+//
+// Stage D: the pure TrendSvg renderer is shared with the client
+// TrajectoryCard (range toggle). `gradientId` must be unique per chart
+// instance on the page.
 import type { TrendPoint } from "@/lib/metrics";
 
 export interface TrendChartProps {
@@ -15,7 +19,15 @@ const W = 560;
 const H = 220;
 const PAD = { top: 16, right: 12, bottom: 26, left: 34 };
 
-export function TrendChart({ series, "aria-label": ariaLabel }: TrendChartProps) {
+export function TrendSvg({
+  series,
+  ariaLabel,
+  gradientId,
+}: {
+  series: TrendPoint[];
+  ariaLabel: string;
+  gradientId: string;
+}) {
   const values = series.map((p) => p.value).filter((v): v is number => v !== null);
   const min = values.length ? Math.max(0, Math.min(...values) - 0.5) : 0;
   const max = values.length ? Math.min(5, Math.max(...values) + 0.5) : 5;
@@ -41,70 +53,76 @@ export function TrendChart({ series, "aria-label": ariaLabel }: TrendChartProps)
   const gridlines = [min, min + span / 3, min + (2 * span) / 3, max];
 
   return (
-    <figure className="rounded-lg border border-line bg-surface p-4 shadow-xs sm:p-5">
-      <svg
-        viewBox={`0 0 ${W} ${H}`}
-        preserveAspectRatio="none"
-        role="img"
-        aria-label={ariaLabel}
-        className="block h-[220px] w-full"
-      >
-        <defs>
-          <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--aegean-600)" stopOpacity="0.18" />
-            <stop offset="100%" stopColor="var(--aegean-600)" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        {gridlines.map((v, i) => (
-          <g key={i}>
-            <line
-              x1={PAD.left}
-              x2={W - PAD.right}
-              y1={y(v)}
-              y2={y(v)}
-              stroke="var(--line)"
-              strokeWidth="1"
-            />
-            <text
-              x={PAD.left - 8}
-              y={y(v) + 4}
-              textAnchor="end"
-              fontSize="13"
-              fill="var(--ink-300)"
-              className="font-mono"
-            >
-              {v.toFixed(1)}
-            </text>
-          </g>
-        ))}
-        {areaPath && <path d={areaPath} fill="url(#trendFill)" />}
-        {linePath && (
-          <path
-            d={linePath}
-            fill="none"
-            stroke="var(--aegean-600)"
-            strokeWidth="2"
-            strokeLinejoin="round"
-            strokeLinecap="round"
-            vectorEffect="non-scaling-stroke"
-            pathLength={1}
-            className="chart-line"
+    <svg
+      viewBox={`0 0 ${W} ${H}`}
+      preserveAspectRatio="none"
+      role="img"
+      aria-label={ariaLabel}
+      className="block h-[220px] w-full"
+    >
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="var(--aegean-600)" stopOpacity="0.18" />
+          <stop offset="100%" stopColor="var(--aegean-600)" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      {gridlines.map((v, i) => (
+        <g key={i}>
+          <line
+            x1={PAD.left}
+            x2={W - PAD.right}
+            y1={y(v)}
+            y2={y(v)}
+            stroke="var(--line)"
+            strokeWidth="1"
           />
-        )}
-        <text x={PAD.left} y={H - 6} fontSize="13" fill="var(--ink-300)" className="font-mono">
-          {first}
-        </text>
-        <text
-          x={W - PAD.right}
-          y={H - 6}
-          textAnchor="end"
-          fontSize="13"
-          fill="var(--ink-300)"
-          className="font-mono"
-        >
-          {last}
-        </text>
-      </svg>
+          <text
+            x={PAD.left - 8}
+            y={y(v) + 4}
+            textAnchor="end"
+            fontSize="13"
+            fill="var(--ink-300)"
+            className="font-mono"
+          >
+            {v.toFixed(1)}
+          </text>
+        </g>
+      ))}
+      {areaPath && <path d={areaPath} fill={`url(#${gradientId})`} />}
+      {linePath && (
+        <path
+          d={linePath}
+          fill="none"
+          stroke="var(--aegean-600)"
+          strokeWidth="2"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          vectorEffect="non-scaling-stroke"
+          pathLength={1}
+          className="chart-line"
+        />
+      )}
+      <text x={PAD.left} y={H - 6} fontSize="13" fill="var(--ink-300)" className="font-mono">
+        {first}
+      </text>
+      <text
+        x={W - PAD.right}
+        y={H - 6}
+        textAnchor="end"
+        fontSize="13"
+        fill="var(--ink-300)"
+        className="font-mono"
+      >
+        {last}
+      </text>
+    </svg>
+  );
+}
+
+export function TrendChart({ series, "aria-label": ariaLabel }: TrendChartProps) {
+  return (
+    <figure className="rounded-lg border border-line bg-surface p-4 shadow-xs sm:p-5">
+      <TrendSvg series={series} ariaLabel={ariaLabel} gradientId="trendFill" />
     </figure>
   );
 }

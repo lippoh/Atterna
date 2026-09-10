@@ -7,24 +7,31 @@ import { requireOrg } from "@/lib/session";
 import { ReviewList, type ReviewListRow } from "@/components/reviews/review-list";
 import { prisma } from "@/lib/db";
 import { Link } from "@/i18n/navigation";
-import { IconInbox } from "@/components/ui/icons";
+import { IconInbox, IconX } from "@/components/ui/icons";
 import { normalizeSourceKey, sourceLabel } from "@/lib/sources/registry";
+import { CATEGORY_VOCAB } from "@/ai/schemas";
+import { categoryLabel } from "@/lib/metrics";
 import { cn } from "@/lib/utils";
 
 type Filter = "all" | "unanswered" | "negative" | "published";
 
 const FILTERS: Filter[] = ["all", "unanswered", "negative", "published"];
 
+const TOPICS = new Set<string>(CATEGORY_VOCAB);
+
 export default async function ReviewsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ filter?: string; source?: string }>;
+  searchParams: Promise<{ filter?: string; source?: string; topic?: string }>;
 }) {
   const { orgId } = await requireOrg();
   const locale = await getLocale();
-  const { filter, source } = await searchParams;
+  const { filter, source, topic } = await searchParams;
   const active = (FILTERS.includes(filter as Filter) ? filter : "all") as Filter;
   const activeSource = normalizeSourceKey(source ?? ""); // null when "all"/unknown
+  // Stage D (issue drill-down): topic is validated against the closed
+  // analysis vocabulary — unknown values are ignored, never error.
+  const activeTopic = topic && TOPICS.has(topic) ? topic : null;
   const t = await getTranslations({ namespace: "reviews", locale });
 
   // Legacy rows (e.g. sync writes "GOOGLE") and new normalized keys both match.
@@ -39,6 +46,7 @@ export default async function ReviewsPage({
     ...(active === "negative" ? { rating: { lte: 3 } } : {}),
     ...(active === "published" ? { repliedAt: { not: null } } : {}),
     ...sourceFilter,
+    ...(activeTopic ? { analysis: { topics: { has: activeTopic } } } : {}),
   };
 
   // Stage B: reviews list + source chips run in parallel (were sequential).
@@ -92,6 +100,27 @@ export default async function ReviewsPage({
       <h1 className="font-display text-3xl font-semibold text-ink-900">
         {t("title")}
       </h1>
+
+      {/* Stage D: issue drill-down landing banner — shows which topic the
+          dashboard linked from, with a one-click clear preserving filters. */}
+      {activeTopic && (
+        <p className="mt-4 inline-flex flex-wrap items-center gap-2 rounded-full border border-aegean-600/30 bg-aegean-100 px-3.5 py-1.5 text-[13px] font-medium text-ink-700">
+          {t("topicFilter", { topic: categoryLabel(activeTopic, locale) })}
+          <Link
+            href={{
+              pathname: "/reviews",
+              query: {
+                ...(active === "all" ? {} : { filter: active }),
+                ...(activeSource ? { source: activeSource } : {}),
+              },
+            }}
+            aria-label={t("topicClear")}
+            className="inline-flex size-5 items-center justify-center rounded-full text-aegean-600 transition-colors hover:bg-aegean-600 hover:text-white"
+          >
+            <IconX className="size-3" />
+          </Link>
+        </p>
+      )}
 
       {/* segmented filter chips */}
       <nav className="mt-6 flex flex-wrap gap-2" aria-label={t("filter.ariaLabel")}>
