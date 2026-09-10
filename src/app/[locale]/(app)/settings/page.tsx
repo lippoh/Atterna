@@ -1,11 +1,15 @@
-// src/app/[locale]/(app)/settings/page.tsx — profile, locale, business tone
-// (settings surface): sectioned cards with labels above inputs (§7.2),
-// select fields styled to match inputs, and the GBP connection card
-// with a status chip. Inline server actions preserved verbatim.
+// src/app/[locale]/(app)/settings/page.tsx — General settings (Stage F)
+// Profile (email + language) · Reply style (AI tone/signature/forbidden)
+// · Weekly report (last-sent from ReportLog, recipient = owner email) ·
+// Security (reset email via requestResetAction, 60-min token) · Data
+// sources summary (deep cards live on /settings/sources). Inline server
+// actions preserved verbatim; only Grouped/real sections, no fake
+// Notifications/Team/Danger Zone (no backing exists).
 import { getLocale, getTranslations } from "next-intl/server";
 import { requireOrg, requireUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
 import { updateLocaleAction } from "../../(auth)/actions";
+import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +18,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { SectionCard } from "@/components/ui/section-card";
 import { StatusChip } from "@/components/ui/status-chip";
 import { SettingsSubnav } from "@/components/settings/settings-subnav";
+import { ResetPasswordButton } from "@/components/settings/reset-password-button";
 import { IconCheckCircle } from "@/components/ui/icons";
 
 export default async function SettingsPage() {
@@ -22,11 +27,18 @@ export default async function SettingsPage() {
   const locale = await getLocale();
   const t = await getTranslations({ namespace: "settings", locale });
 
-  const business = await prisma.business.findFirst({
-    where: { organizationId: orgId, deletedAt: null },
-    orderBy: { createdAt: "asc" },
-    include: { gbpConnection: { select: { status: true, locationName: true } } },
-  });
+  const [business, lastReport] = await Promise.all([
+    prisma.business.findFirst({
+      where: { organizationId: orgId, deletedAt: null },
+      orderBy: { createdAt: "asc" },
+      include: { gbpConnection: { select: { status: true, locationName: true } } },
+    }),
+    prisma.reportLog.findFirst({
+      where: { organizationId: orgId, kind: "WEEKLY" },
+      orderBy: { createdAt: "desc" },
+      select: { createdAt: true },
+    }),
+  ]);
 
   async function saveProfile(formData: FormData) {
     "use server";
@@ -65,10 +77,16 @@ export default async function SettingsPage() {
     signature?: string;
     forbiddenPhrases?: string[];
   };
+  const dateFmt = new Intl.DateTimeFormat(locale === "en" ? "en-GB" : "el-GR", {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
   return (
     <main id="main-content" className="mx-auto max-w-[840px] px-4 py-8 sm:px-6">
-      <PageHeader title={t("title")} />
+      <PageHeader title={t("title")} description={t("profileDesc")} />
       <div className="mt-6">
         <SettingsSubnav />
       </div>
@@ -94,9 +112,13 @@ export default async function SettingsPage() {
           </form>
         </SectionCard>
 
-        {/* Business + AI tone */}
+        {/* Reply style — AI tone */}
         {business && (
-          <SectionCard title={t("business")} labelledBy="settings-business">
+          <SectionCard
+            title={t("replyStyle")}
+            description={t("replyStyleDesc")}
+            labelledBy="settings-reply"
+          >
             <form action={saveBusiness} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="tone">{t("tone")}</Label>
@@ -130,10 +152,39 @@ export default async function SettingsPage() {
           </SectionCard>
         )}
 
-        {/* Google Business Profile connection */}
+        {/* Weekly report — real last-sent state */}
         <SectionCard
-          title={t("gbp")}
-          labelledBy="settings-gbp"
+          title={t("report")}
+          description={t("reportDesc")}
+          labelledBy="settings-report"
+          trailing={
+            lastReport ? (
+              <StatusChip tone="ok">
+                <IconCheckCircle className="size-4" />
+                {t("reportLast", { date: dateFmt.format(lastReport.createdAt) })}
+              </StatusChip>
+            ) : (
+              <StatusChip tone="neutral">{t("reportNever")}</StatusChip>
+            )
+          }
+        >
+          <p className="text-sm text-ink-500">{t("reportDesc")}</p>
+        </SectionCard>
+
+        {/* Security — reset email (real flow, 60-min token) */}
+        <SectionCard
+          title={t("security")}
+          description={t("securityDesc")}
+          labelledBy="settings-security"
+        >
+          <ResetPasswordButton email={user.email} locale={locale} />
+        </SectionCard>
+
+        {/* Data sources — summary + deep link */}
+        <SectionCard
+          title={t("sourcesCard")}
+          description={t("sourcesCardDesc")}
+          labelledBy="settings-sources"
           trailing={
             business?.gbpConnection ? (
               <StatusChip tone="ok">
@@ -145,21 +196,13 @@ export default async function SettingsPage() {
             )
           }
         >
-          {business?.gbpConnection ? (
-            <p className="text-sm text-ink-500">
-              {business.gbpConnection.locationName} · {business.gbpConnection.status}
-            </p>
-          ) : (
-            <>
-              <p className="text-sm text-ink-500">{t("gbpNotConnectedDetail")}</p>
-              <a
-                href="/api/gbp/callback"
-                className="link-grow mt-4 inline-block text-sm font-semibold text-aegean-600"
-              >
-                {t("connect")}
-              </a>
-            </>
-          )}
+          <p className="text-sm text-ink-500">{t("gbpHint")}</p>
+          <Link
+            href="/settings/sources"
+            className="link-grow mt-3 inline-block text-sm font-semibold text-aegean-600"
+          >
+            {t("gbpManage")}
+          </Link>
         </SectionCard>
       </div>
     </main>
