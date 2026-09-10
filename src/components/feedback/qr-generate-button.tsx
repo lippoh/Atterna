@@ -5,12 +5,15 @@
 "use client";
 
 import { useActionState, useEffect, useRef } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { IconPlus } from "@/components/ui/icons";
 import { generateQrToken } from "@/app/[locale]/(app)/feedback/actions";
 
 export interface QrGenerateState {
   ok?: boolean;
+  /** The minted token — lets the button render the new QR card with a
+   * success state immediately, instead of waiting for revalidation. */
+  token?: string;
   error?: string;
 }
 
@@ -18,6 +21,7 @@ const initial: QrGenerateState = {};
 
 export function QrGenerateButton() {
   const t = useTranslations("feedback");
+  const locale = useLocale();
   const [state, action, pending] = useActionState(generateQrToken, initial);
   const announced = useRef<HTMLParagraphElement>(null);
 
@@ -30,6 +34,7 @@ export function QrGenerateButton() {
   return (
     <div>
       <form action={action}>
+        <input type="hidden" name="locale" value={locale} />
         <button
           type="submit"
           disabled={pending}

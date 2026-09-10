@@ -643,7 +643,15 @@
     "generateError": {
       "noBusiness": "Create your business first.",
       "server": "Could not create the code. Try again."
-    }
+    },
+    "download": "Download",
+    "share": "Share",
+    "print": "Print",
+    "created": "Created — scan to test it now.",
+    "noTokensTitle": "No QR codes yet",
+    "noTokensBody": "Create your first code above — it takes a second, and customers can start rating immediately.",
+    "emptyTitle": "No feedback yet",
+    "emptyBody": "Share a QR code at the counter or on receipts — submissions land here the moment customers respond."
   },
   "settings": {
     "title": "Settings",

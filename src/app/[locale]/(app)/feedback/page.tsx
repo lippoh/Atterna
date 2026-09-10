@@ -1,8 +1,9 @@
 // src/app/[locale]/(app)/feedback/page.tsx — QR inbox + token management
-// (§9.6). Server component; the inline server action generates/rotates
-// tokens and QR PNGs render server-side (qrcode npm — no external
-// service). Left: explainer with the funnel diagram; right: QR cards +
-// recent submissions. QR modules are ink on white (§7.14 — never
+// (Stage G: QR UX): generte → success card with the new QR rendered
+// immediately from the returned token (no waiting on revalidation) →
+// per-card copy/download/share/print → EmptyState when no codes, honest
+// empty submissions. QR PNGs render server-side (qrcode npm — no
+// external service). QR modules are ink on white (§7.14 — never
 // inverted).
 import QRCode from "qrcode";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -10,13 +11,31 @@ import { requireOrg } from "@/lib/session";
 import { prisma } from "@/lib/db";
 import { env } from "@/lib/env";
 import { QrGenerateButton } from "@/components/feedback/qr-generate-button";
-import { IconArrowRight, IconQr } from "@/components/ui/icons";
+import { QrCardActions } from "@/components/feedback/qr-card-actions";
+import { PageHeader } from "@/components/ui/page-header";
+import { EmptyState } from "@/components/ui/empty-state";
+import { IconArrowRight, IconQr, IconCheckCircle } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 
-export default async function FeedbackPage() {
+async function qrFor(token: string) {
+  const url = `${env.APP_URL}/f/${token}`;
+  const qr = await QRCode.toDataURL(url, {
+    width: 280,
+    margin: 1,
+    color: { dark: "#12283f", light: "#ffffff" }, // ink on white — §7.14
+  });
+  return { url, qr };
+}
+
+export default async function FeedbackPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ created?: string }>;
+}) {
   const { orgId } = await requireOrg();
   const locale = await getLocale();
   const t = await getTranslations({ namespace: "feedback", locale });
+  const { created } = await searchParams;
 
   const business = await prisma.business.findFirst({
     where: { organizationId: orgId, deletedAt: null },
@@ -40,15 +59,7 @@ export default async function FeedbackPage() {
     : [[], []];
 
   const tokenUrls = await Promise.all(
-    tokens.map(async (request) => ({
-      request,
-      url: `${env.APP_URL}/f/${request.token}`,
-      qr: await QRCode.toDataURL(`${env.APP_URL}/f/${request.token}`, {
-        width: 240,
-        margin: 1,
-        color: { dark: "#12283f", light: "#ffffff" }, // ink on white — §7.14
-      }),
-    }))
+    tokens.map(async (request) => ({ request, ...(await qrFor(request.token)) }))
   );
 
   const dateFmt = new Intl.DateTimeFormat(locale === "en" ? "en-GB" : "el-GR", {
@@ -59,14 +70,15 @@ export default async function FeedbackPage() {
   return (
     <main id="main-content" className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="font-display text-3xl font-semibold text-ink-900">
-            {t("title")}
-          </h1>
-          <p className="mt-1.5 max-w-[56ch] text-sm text-ink-500">{t("subtitle")}</p>
-        </div>
+        <PageHeader title={t("title")} description={t("subtitle")} />
         <QrGenerateButton />
       </div>
+
+      {/* Success state: the token the action just minted is confirmed by
+          ?created= in the URL — render its real QR above the list. */}
+      {created && (
+        <SuccessCard token={created} createdMsg={t("created")} />
+      )}
 
       <div className="mt-8 grid grid-cols-1 items-start gap-6 lg:grid-cols-[5fr_7fr]">
         {/* ── Left: explainer + funnel diagram ─────────────────────────── */}
@@ -108,9 +120,9 @@ export default async function FeedbackPage() {
 
         {/* ── Right: QR cards + submissions ────────────────────────────── */}
         <div className="space-y-6">
-          {tokenUrls.length > 0 && (
-            <section className="space-y-4">
-              <h2 className="text-lg font-semibold text-ink-900">{t("tokens")}</h2>
+          {tokenUrls.length > 0 ? (
+            <section className="space-y-4" aria-labelledby="feedback-tokens">
+              <h2 id="feedback-tokens" className="text-lg font-semibold text-ink-900">{t("tokens")}</h2>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {tokenUrls.map(({ request, url, qr }) => (
                   <div
@@ -138,18 +150,29 @@ export default async function FeedbackPage() {
                       <p className="mt-2 font-mono text-[11px] tabular-nums text-ink-300">
                         {dateFmt.format(request.createdAt)}
                       </p>
+                      <QrCardActions qr={qr} url={url} label={request.label ?? ""} />
                     </div>
                   </div>
                 ))}
               </div>
             </section>
+          ) : (
+            <EmptyState
+              icon={<IconQr className="size-6" />}
+              title={t("noTokensTitle")}
+              body={t("noTokensBody")}
+            />
           )}
 
-          <section>
-            <h2 className="text-lg font-semibold text-ink-900">{t("submissions")}</h2>
+          <section aria-labelledby="feedback-submissions">
+            <h2 id="feedback-submissions" className="text-lg font-semibold text-ink-900">{t("submissions")}</h2>
             <div className="mt-3 divide-y divide-line rounded-lg border border-line bg-surface shadow-xs">
               {submissions.length === 0 ? (
-                <p className="px-5 py-8 text-center text-sm text-ink-500">{t("empty")}</p>
+                <EmptyState
+                  icon={<IconCheckCircle className="size-6" />}
+                  title={t("emptyTitle")}
+                  body={t("emptyBody")}
+                />
               ) : (
                 submissions.map((s) => (
                   <div key={s.id} className="p-4">
@@ -185,5 +208,23 @@ export default async function FeedbackPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+async function SuccessCard({ token, createdMsg }: { token: string; createdMsg: string }) {
+  const { url, qr } = await qrFor(token);
+  return (
+    <div role="status" className="mt-6 flex flex-wrap items-center gap-4 rounded-lg border border-success-600/30 bg-success-100/50 p-4">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={qr} alt="New QR code" width={96} height={96} className="size-24 rounded-md border border-line bg-white" />
+      <div className="min-w-0 flex-1">
+        <p className="flex items-center gap-2 text-sm font-semibold text-ink-900">
+          <IconCheckCircle className="size-4 shrink-0 text-success-600" />
+          {createdMsg}
+        </p>
+        <p className="mt-1 break-all font-mono text-[12px] text-aegean-600">{url}</p>
+        <QrCardActions qr={qr} url={url} label="" />
+      </div>
+    </div>
   );
 }
