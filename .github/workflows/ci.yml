@@ -54,11 +54,12 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      # Provision the full schema on the fresh service database. The repo's
-      # only migration is additive-only (it assumes base tables such as
-      # "Review" already exist), so `prisma migrate deploy` cannot build an
-      # empty database from scratch — `db push` applies the whole schema.
-      - run: pnpm exec prisma db push
+      # Provision the full schema on the fresh service database using the
+      # complete migration chain (init + reputation_intelligence +
+      # billing_constraints + reconcile_production_v1_to_current +
+      # bridge_to_current_schema). All migrations are idempotent and build
+      # from an empty database.
+      - run: pnpm exec prisma migrate deploy
       - run: pnpm exec vitest run
 
   e2e:
