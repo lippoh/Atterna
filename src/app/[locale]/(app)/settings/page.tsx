@@ -3,17 +3,18 @@
 // select fields styled to match inputs, and the GBP connection card
 // with a status chip. Inline server actions preserved verbatim.
 import { getLocale, getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
 import { requireOrg, requireUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
 import { updateLocaleAction } from "../../(auth)/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import { PageHeader } from "@/components/ui/page-header";
+import { SectionCard } from "@/components/ui/section-card";
+import { StatusChip } from "@/components/ui/status-chip";
+import { SettingsSubnav } from "@/components/settings/settings-subnav";
 import { IconCheckCircle } from "@/components/ui/icons";
-
-const SELECT_CLASS =
-  "flex h-10 w-full appearance-none rounded-md border border-line-strong bg-surface px-3 py-2 text-sm text-ink-900 transition-[border-color,box-shadow] duration-150 focus-visible:border-aegean-600 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-aegean-100";
 
 export default async function SettingsPage() {
   const user = await requireUser();
@@ -67,46 +68,46 @@ export default async function SettingsPage() {
 
   return (
     <main id="main-content" className="mx-auto max-w-[840px] px-4 py-8 sm:px-6">
-      <h1 className="font-display text-3xl font-semibold text-ink-900">{t("title")}</h1>
+      <PageHeader title={t("title")} />
+      <div className="mt-6">
+        <SettingsSubnav />
+      </div>
 
-      <div className="mt-8 space-y-6">
+      <div className="mt-6 space-y-6">
         {/* Profile */}
-        <section className="rounded-lg border border-line bg-surface p-5 shadow-xs sm:p-6">
-          <h2 className="text-lg font-semibold text-ink-900">{t("profile")}</h2>
-          <form action={saveProfile} className="mt-5 space-y-4">
+        <SectionCard title={t("profile")} labelledBy="settings-profile">
+          <form action={saveProfile} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">{t("email")}</Label>
               <Input id="email" value={user.email} disabled />
             </div>
             <div className="space-y-2">
               <Label htmlFor="locale">{t("locale")}</Label>
-              <select id="locale" name="locale" defaultValue={locale} className={SELECT_CLASS}>
+              <Select id="locale" name="locale" defaultValue={locale}>
                 <option value="el">Ελληνικά</option>
                 <option value="en">English</option>
-              </select>
+              </Select>
             </div>
             <Button type="submit" size="sm">
               {t("save")}
             </Button>
           </form>
-        </section>
+        </SectionCard>
 
         {/* Business + AI tone */}
         {business && (
-          <section className="rounded-lg border border-line bg-surface p-5 shadow-xs sm:p-6">
-            <h2 className="text-lg font-semibold text-ink-900">{t("business")}</h2>
-            <form action={saveBusiness} className="mt-5 space-y-4">
+          <SectionCard title={t("business")} labelledBy="settings-business">
+            <form action={saveBusiness} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="tone">{t("tone")}</Label>
-                <select
+                <Select
                   id="tone"
                   name="tone"
                   defaultValue={aiSettings.tone ?? "friendly"}
-                  className={SELECT_CLASS}
                 >
                   <option value="friendly">{t("toneFriendly")}</option>
                   <option value="formal">{t("toneFormal")}</option>
-                </select>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="signature">{t("signature")}</Label>
@@ -126,48 +127,40 @@ export default async function SettingsPage() {
                 {t("save")}
               </Button>
             </form>
-          </section>
+          </SectionCard>
         )}
 
-        {/* Data sources */}
-        <section className="rounded-lg border border-line bg-surface p-5 shadow-xs sm:p-6">
-          <h2 className="text-lg font-semibold text-ink-900">{t("sources")}</h2>
-          <p className="mt-2 max-w-[56ch] text-sm text-ink-500">{t("sourcesHint")}</p>
-          <Link
-            href="/settings/sources"
-            className="link-grow mt-4 inline-block text-sm font-semibold text-aegean-600"
-          >
-            {t("sourcesManage")}
-          </Link>
-        </section>
-
         {/* Google Business Profile connection */}
-        <section className="rounded-lg border border-line bg-surface p-5 shadow-xs sm:p-6">
-          <h2 className="text-lg font-semibold text-ink-900">{t("gbp")}</h2>
-          <div className="mt-4 flex items-center gap-3">
-            {business?.gbpConnection ? (
-              <>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-success-100 px-2.5 py-1 text-[13px] font-semibold text-success-600">
-                  <IconCheckCircle className="size-4" />
-                  {t("gbpConnected")}
-                </span>
-                <p className="text-sm text-ink-500">
-                  {business.gbpConnection.locationName} · {business.gbpConnection.status}
-                </p>
-              </>
+        <SectionCard
+          title={t("gbp")}
+          labelledBy="settings-gbp"
+          trailing={
+            business?.gbpConnection ? (
+              <StatusChip tone="ok">
+                <IconCheckCircle className="size-4" />
+                {t("gbpConnected")}
+              </StatusChip>
             ) : (
-              <p className="text-sm text-ink-500">{t("gbpNotConnected")}</p>
-            )}
-          </div>
-          {!business?.gbpConnection && (
-            <a
-              href="/api/gbp/callback"
-              className="link-grow mt-4 inline-block text-sm font-semibold text-aegean-600"
-            >
-              {t("connect")}
-            </a>
+              <StatusChip tone="neutral">{t("gbpNotConnected")}</StatusChip>
+            )
+          }
+        >
+          {business?.gbpConnection ? (
+            <p className="text-sm text-ink-500">
+              {business.gbpConnection.locationName} · {business.gbpConnection.status}
+            </p>
+          ) : (
+            <>
+              <p className="text-sm text-ink-500">{t("gbpNotConnectedDetail")}</p>
+              <a
+                href="/api/gbp/callback"
+                className="link-grow mt-4 inline-block text-sm font-semibold text-aegean-600"
+              >
+                {t("connect")}
+              </a>
+            </>
           )}
-        </section>
+        </SectionCard>
       </div>
     </main>
   );

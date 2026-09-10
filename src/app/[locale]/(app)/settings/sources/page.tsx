@@ -16,6 +16,9 @@ import {
 } from "@/lib/sources/registry";
 import { CsvImportForm } from "@/components/sources/csv-import-form";
 import { IconCheckCircle, IconUpload } from "@/components/ui/icons";
+import { PageHeader } from "@/components/ui/page-header";
+import { SectionCard } from "@/components/ui/section-card";
+import { SettingsSubnav } from "@/components/settings/settings-subnav";
 import { cn } from "@/lib/utils";
 
 export default async function DataSourcesPage() {
@@ -57,14 +60,15 @@ export default async function DataSourcesPage() {
 
   return (
     <main id="main-content" className="mx-auto max-w-[840px] px-4 py-8 sm:px-6">
-      <h1 className="font-display text-3xl font-semibold text-ink-900">{t("title")}</h1>
-      <p className="lh-body mt-2 max-w-[60ch] text-sm text-ink-500">{t("subtitle")}</p>
+      <PageHeader title={t("title")} description={t("subtitle")} />
+      <div className="mt-6">
+        <SettingsSubnav />
+      </div>
 
-      <div className="mt-8 space-y-6">
+      <div className="mt-6 space-y-6">
         {/* ── Connected ─────────────────────────────────────────────── */}
-        <section className="rounded-lg border border-line bg-surface p-5 shadow-xs sm:p-6">
-          <h2 className="text-lg font-semibold text-ink-900">{t("connected")}</h2>
-          <ul className="mt-4 space-y-3">
+        <SectionCard title={t("connected")} labelledBy="sources-connected">
+          <ul className="space-y-3">
             {/* Google */}
             <li className="flex flex-wrap items-center gap-3 rounded-lg border border-line bg-sunken/60 p-4">
               <span className="flex size-9 items-center justify-center rounded-md border border-line bg-surface font-mono text-[12px] font-bold text-ink-700">
@@ -161,15 +165,15 @@ export default async function DataSourcesPage() {
               </Link>
             </li>
           </ul>
-        </section>
+        </SectionCard>
 
         {/* ── Available: the CSV importer ───────────────────────────── */}
-        <section className="rounded-lg border border-line bg-surface p-5 shadow-xs sm:p-6">
-          <h2 className="text-lg font-semibold text-ink-900">{t("available")}</h2>
-          <p className="lh-body mt-2 max-w-[56ch] text-sm text-ink-700">
-            {SOURCES.csv.description[locale === "en" ? "en" : "el"]}
-          </p>
-          <div className="mt-4">
+        <SectionCard
+          title={t("available")}
+          description={SOURCES.csv.description[locale === "en" ? "en" : "el"]}
+          labelledBy="sources-available"
+        >
+          <div>
             <CsvImportForm />
           </div>
           {imports.length > 0 && (
@@ -203,12 +207,11 @@ export default async function DataSourcesPage() {
               </ul>
             </div>
           )}
-        </section>
+        </SectionCard>
 
         {/* ── Coming soon (honest availability, §38) ────────────────── */}
-        <section className="rounded-lg border border-line bg-surface p-5 shadow-xs sm:p-6">
-          <h2 className="text-lg font-semibold text-ink-900">{t("comingSoon")}</h2>
-          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <SectionCard title={t("comingSoon")} labelledBy="sources-coming">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {COMING_SOON_SOURCES.map((key) => {
               const meta = SOURCES[key];
               return (
@@ -232,7 +235,7 @@ export default async function DataSourcesPage() {
             })}
           </div>
           <p className="mt-4 text-[11px] leading-snug text-ink-300">{t("soonNote")}</p>
-        </section>
+        </SectionCard>
       </div>
     </main>
   );

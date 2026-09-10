@@ -375,3 +375,12 @@ export function IconUpload(props: IconProps) {
     </svg>
   );
 }
+
+export function IconCard(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <rect x="3" y="6" width="18" height="13" rx="2" />
+      <path d="M3 10.5h18M7 15h4" />
+    </svg>
+  );
+}

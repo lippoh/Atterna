@@ -641,7 +641,12 @@
     "connect": "Σύνδεση",
     "sources": "Πηγές δεδομένων",
     "sourcesHint": "Google, εισαγωγή CSV, QR feedback και ό,τι έρχεται μετά — μία σελίδα.",
-    "sourcesManage": "Διαχείριση πηγών δεδομένων"
+    "sourcesManage": "Διαχείριση πηγών δεδομένων",
+    "subnavLabel": "Ενότητες ρυθμίσεων",
+    "subnavGeneral": "Γενικά",
+    "subnavSources": "Πηγές δεδομένων",
+    "subnavBilling": "Χρέωση",
+    "gbpNotConnectedDetail": "Συνδέστε το Google Business Profile για συγχρονισμό κριτικών και απαντήσεις από εδώ."
   },
   "billing": {
     "title": "Συνδρομή",
@@ -661,7 +666,8 @@
     "usageCalls": "{calls} κλήσεις · {tokens} tokens",
     "success": "Η συνδρομή ενεργοποιήθηκε!",
     "canceled": "Η πληρωμή ακυρώθηκε.",
-    "impersonationBlocked": "Μη διαθέσιμο σε λειτουργία υποστήριξης."
+    "impersonationBlocked": "Μη διαθέσιμο σε λειτουργία υποστήριξης.",
+    "noPlan": "Κανένα ενεργό πλάνο"
   },
   "onboarding": {
     "title": "Καλώς ήρθατε!",

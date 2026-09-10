@@ -641,7 +641,12 @@
     "connect": "Connect",
     "sources": "Data sources",
     "sourcesHint": "Google, CSV import, QR feedback and everything coming next — one page.",
-    "sourcesManage": "Manage data sources"
+    "sourcesManage": "Manage data sources",
+    "subnavLabel": "Settings sections",
+    "subnavGeneral": "General",
+    "subnavSources": "Data Sources",
+    "subnavBilling": "Billing",
+    "gbpNotConnectedDetail": "Connect your Google Business Profile to sync reviews and reply from here."
   },
   "billing": {
     "title": "Billing",
@@ -661,7 +666,8 @@
     "usageCalls": "{calls} calls · {tokens} tokens",
     "success": "The subscription is active!",
     "canceled": "The payment was canceled.",
-    "impersonationBlocked": "Unavailable in support mode."
+    "impersonationBlocked": "Unavailable in support mode.",
+    "noPlan": "No active plan"
   },
   "onboarding": {
     "title": "Welcome!",

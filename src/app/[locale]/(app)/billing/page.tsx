@@ -14,6 +14,10 @@ import { PLAN_LIMITS, type PlanKey } from "@/lib/billing/price-map";
 import { stripeTrialEligible } from "@/lib/billing/trial";
 import { Button } from "@/components/ui/button";
 import { IconCheckCircle, IconAlertTriangle, IconCheck } from "@/components/ui/icons";
+import { PageHeader } from "@/components/ui/page-header";
+import { SectionCard } from "@/components/ui/section-card";
+import { StatusChip } from "@/components/ui/status-chip";
+import { SettingsSubnav } from "@/components/settings/settings-subnav";
 import { cn } from "@/lib/utils";
 
 export default async function BillingPage({
@@ -91,52 +95,60 @@ export default async function BillingPage({
 
   return (
     <main id="main-content" className="mx-auto max-w-[840px] px-4 py-8 sm:px-6">
-      <h1 className="font-display text-3xl font-semibold text-ink-900">{t("title")}</h1>
+      <PageHeader title={t("title")} />
+      <div className="mt-6">
+        <SettingsSubnav />
+      </div>
 
       {success && (
-        <p className="mt-5 flex items-start gap-2.5 rounded-lg bg-success-100/70 px-4 py-3 text-sm font-medium text-success-600">
+        <p className="mt-6 flex items-start gap-2.5 rounded-lg bg-success-100/70 px-4 py-3 text-sm font-medium text-success-600">
           <IconCheckCircle className="mt-0.5 size-4 shrink-0" />
           {t("success")}
         </p>
       )}
       {canceled && (
-        <p className="mt-5 flex items-start gap-2.5 rounded-lg bg-terracotta-100/70 px-4 py-3 text-sm font-medium text-terracotta-500">
+        <p className="mt-6 flex items-start gap-2.5 rounded-lg bg-terracotta-100/70 px-4 py-3 text-sm font-medium text-terracotta-500">
           <IconAlertTriangle className="mt-0.5 size-4 shrink-0" />
           {t("canceled")}
         </p>
       )}
 
       {/* Current plan + usage */}
-      <section className="mt-6 rounded-lg border border-line bg-surface p-5 shadow-xs sm:p-6">
-        <h2 className="text-lg font-semibold text-ink-900">{t("currentPlan")}</h2>
-        {sub ? (
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <span className="inline-flex items-center rounded-full bg-aegean-100 px-3 py-1 text-[13px] font-semibold text-aegean-600">
-              {sub.planKey}
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-sunken px-2.5 py-1 text-[13px] font-medium text-ink-700">
-              <span className="size-2 rounded-full bg-ink-300" aria-hidden="true" />
-              {t(`status.${sub.status}`)}
-            </span>
-            {sub.status === "TRIALING" && (
-              <p className="text-sm text-ink-500">
-                {t("trialEnds", { date: trialEnds ?? "" })}
-              </p>
-            )}
+      <div className="mt-6">
+        <SectionCard
+          title={t("currentPlan")}
+          labelledBy="billing-current"
+          trailing={
+            sub ? (
+              <StatusChip tone="info">{sub.planKey}</StatusChip>
+            ) : (
+              <StatusChip tone="neutral">{t("noPlan")}</StatusChip>
+            )
+          }
+        >
+          {sub && (
+            <div className="flex flex-wrap items-center gap-3">
+              <StatusChip tone="neutral">
+                {t(`status.${sub.status}`)}
+              </StatusChip>
+              {sub.status === "TRIALING" && (
+                <p className="text-sm text-ink-500">
+                  {t("trialEnds", { date: trialEnds ?? "" })}
+                </p>
+              )}
+            </div>
+          )}
+          <div className="rounded-md bg-sunken px-4 py-3">
+            <p className="text-[13px] font-medium text-ink-500">{t("usage")}</p>
+            <p className="mt-1 font-mono text-sm tabular-nums text-ink-900">
+              {t("usageCalls", {
+                calls: numberFmt.format(usage.calls),
+                tokens: numberFmt.format(usage.tokensIn + usage.tokensOut),
+              })}
+            </p>
           </div>
-        ) : (
-          <p className="mt-3 text-sm text-ink-500">—</p>
-        )}
-        <div className="mt-5 rounded-md bg-sunken px-4 py-3">
-          <p className="text-[13px] font-medium text-ink-500">{t("usage")}</p>
-          <p className="mt-1 font-mono text-sm tabular-nums text-ink-900">
-            {t("usageCalls", {
-              calls: numberFmt.format(usage.calls),
-              tokens: numberFmt.format(usage.tokensIn + usage.tokensOut),
-            })}
-          </p>
-        </div>
-      </section>
+        </SectionCard>
+      </div>
 
       {/* Plan selection */}
       <section className="mt-6">

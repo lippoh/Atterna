@@ -1,8 +1,8 @@
 // src/app/[locale]/(app)/layout.tsx — auth guard + app shell (§9.3)
-// Top bar: wordmark + desktop nav tabs (active state) + billing link +
-// initials avatar. Bottom mobile bar with the same four destinations.
-// The impersonation banner is danger-tinted — the one state that must
-// never be missed. App surfaces honor dark mode via the token system.
+// Top bar: wordmark + desktop nav tabs (active state) + initials avatar.
+// Billing lives under Settings (sub-nav), not as a fifth top-level tab.
+// Bottom mobile bar with the same four destinations. The impersonation
+// banner is danger-tinted — the one state that must never be missed.
 import type { ReactNode } from "react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { requireUser } from "@/lib/session";
@@ -48,12 +48,6 @@ export default async function AppLayout({
           </Link>
           <DesktopNavTabs />
           <div className="ml-auto flex items-center gap-2">
-            <Link
-              href="/billing"
-              className="hidden h-9 items-center rounded-md px-3 text-sm font-medium text-ink-500 transition-colors hover:bg-sunken hover:text-ink-700 sm:inline-flex"
-            >
-              {t("billing")}
-            </Link>
             <form action={signOutAction}>
               <button
                 type="submit"
