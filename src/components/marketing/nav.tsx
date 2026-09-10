@@ -93,7 +93,7 @@ export function MarketingNav() {
             locale={other}
             href="/"
             className="flex h-8 items-center rounded-full border border-line-strong px-3 font-mono text-[11px] font-semibold tracking-wider text-ink-700 transition-colors hover:border-ink-500"
-            aria-label={locale === "el" ? "Switch to English" : "Αλλαγή σε Ελληνικά"}
+            aria-label={locale === "el" ? t("switchToEnglish") : t("switchToGreek")}
           >
             {other.toUpperCase()}
           </Link>

@@ -17,7 +17,9 @@
       "login": "Σύνδεση",
       "cta": "Ξεκινήστε δωρεάν",
       "openMenu": "Μενού",
-      "closeMenu": "Κλείσιμο"
+      "closeMenu": "Κλείσιμο",
+      "switchToEnglish": "Switch to English",
+      "switchToGreek": "Αλλαγή σε Ελληνικά"
     },
     "hero": {
       "eyebrow": "ΓΙΑ ΕΛΛΗΝΙΚΕΣ ΤΟΠΙΚΕΣ ΕΠΙΧΕΙΡΗΣΕΙΣ",
@@ -120,7 +122,8 @@
           "analysis": "Positive · English · Warm tone",
           "reply": "Thank you so much, Sarah! The courtyard is our favourite spot too — we would be delighted to welcome you back for the moussaka, and the Sunday roast."
         }
-      ]
+      ],
+      "demoBusiness": "Ταβέρνα «Κύμα»"
     },
     "features": {
       "title": "Ό,τι χρειάζεται η φήμη σας, σε ένα ήσυχο σημείο",
@@ -329,31 +332,6 @@
             {
               "label": "Επικοινωνία",
               "href": "mailto:hello@atterna.app"
-            },
-            {
-              "label": "Σχετικά",
-              "href": "#"
-            },
-            {
-              "label": "Εργασία μαζί μας",
-              "href": "#"
-            }
-          ]
-        },
-        {
-          "title": "Νομικά",
-          "links": [
-            {
-              "label": "Όροι χρήσης",
-              "href": "#"
-            },
-            {
-              "label": "Απόρρητο",
-              "href": "#"
-            },
-            {
-              "label": "GDPR",
-              "href": "#"
             }
           ]
         },
@@ -363,14 +341,23 @@
             {
               "label": "hello@atterna.app",
               "href": "mailto:hello@atterna.app"
-            },
-            {
-              "label": "Αθήνα, Ελλάδα",
-              "href": "#"
             }
           ]
         }
       ]
+    },
+    "proofs": {
+      "draftLabel": "ΠΡΟΤΑΣΗ AI",
+      "tones": [
+        "Φιλικό",
+        "Επίσημο",
+        "Απολογητικό"
+      ],
+      "qrTitle": "Σκανάρετε και πείτε μας",
+      "qrHint": "→ Google / εσάς",
+      "mailDay": "Κάθε Δευτέρα 09:00",
+      "mailRating": "4,8",
+      "mailAnswered": "92% απαντήθηκαν"
     }
   },
   "auth": {

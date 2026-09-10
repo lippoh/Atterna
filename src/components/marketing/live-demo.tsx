@@ -168,7 +168,7 @@ export function LiveDemo() {
                 <span className="size-2.5 rounded-full bg-success-600/70" />
               </span>
               <p className="font-mono text-[11px] text-ink-500">
-                atterna.app · <span className="text-ink-700">Ταβέρνα «Κύμα»</span>
+                atterna.app · <span className="text-ink-700">{t("demoBusiness")}</span>
               </p>
             </div>
 

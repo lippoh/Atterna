@@ -58,7 +58,7 @@ export async function MarketingFooter() {
     <footer className="bg-background">
       <div className="meander-strip" aria-hidden="true" />
       <div className="mx-auto max-w-[1120px] px-6 pb-10 pt-14">
-        <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-10 md:grid-cols-3">
           {columns.map((col) => (
             <div key={col.title}>
               <p className="text-[13px] font-semibold text-ink-900">{col.title}</p>

@@ -29,6 +29,15 @@ type FeatureItem = {
   bullets: string[];
   cta: string;
 };
+type ProofLabels = {
+  draftLabel: string;
+  tones: string[];
+  qrTitle: string;
+  qrHint: string;
+  mailDay: string;
+  mailRating: string;
+  mailAnswered: string;
+};
 type TestimonialItem = { quote: string; name: string; role: string; city: string };
 
 export async function TrustStrip() {
@@ -148,11 +157,11 @@ function InboxProof() {
   );
 }
 
-function DraftProof() {
+function DraftProof({ labels }: { labels: ProofLabels }) {
   return (
     <div className="rounded-xl border border-line bg-surface p-4 shadow-sm">
       <p className="text-[10px] font-semibold tracking-[0.08em] text-aegean-600">
-        Πρόταση AI
+        {labels.draftLabel}
       </p>
       <div className="mt-2 space-y-1.5">
         <div className="h-2 rounded-full bg-sunken" style={{ width: "94%" }} />
@@ -160,7 +169,7 @@ function DraftProof() {
         <div className="h-2 rounded-full bg-sunken" style={{ width: "52%" }} />
       </div>
       <div className="mt-3 flex gap-2">
-        {["Φιλικό", "Επίσημο", "Απολογητικό"].map((tone) => (
+        {labels.tones.map((tone) => (
           <span
             key={tone}
             className="rounded-full border border-line-strong px-2.5 py-1 text-[10px] font-medium text-ink-700"
@@ -173,7 +182,7 @@ function DraftProof() {
   );
 }
 
-function QrProof() {
+function QrProof({ labels }: { labels: ProofLabels }) {
   return (
     <div className="flex items-center gap-4 rounded-xl border border-line bg-surface p-4 shadow-sm">
       <div className="flex size-16 shrink-0 items-center justify-center rounded-md border border-line bg-sunken">
@@ -181,7 +190,7 @@ function QrProof() {
       </div>
       <div className="min-w-0 flex-1">
         <p className="font-display text-sm font-semibold text-ink-900">
-          Σκανάρετε και πείτε μας
+          {labels.qrTitle}
         </p>
         <div className="mt-2 flex items-center gap-1.5">
           {[5, 4, 3].map((n) => (
@@ -196,26 +205,26 @@ function QrProof() {
               {n}★
             </span>
           ))}
-          <span className="ml-1 text-[10px] text-ink-500">→ Google / εσάς</span>
+          <span className="ml-1 text-[10px] text-ink-500">{labels.qrHint}</span>
         </div>
       </div>
     </div>
   );
 }
 
-function MailProof() {
+function MailProof({ labels }: { labels: ProofLabels }) {
   return (
     <div className="rounded-xl border border-line bg-surface p-4 shadow-sm">
       <div className="flex items-center gap-2 border-b border-line pb-3">
         <IconMail className="size-4 text-ink-500" />
-        <span className="text-[11px] font-medium text-ink-500">Κάθε Δευτέρα 09:00</span>
+        <span className="text-[11px] font-medium text-ink-500">{labels.mailDay}</span>
       </div>
       <div className="mt-3 flex items-end justify-between gap-4">
         <div>
           <p className="font-display text-2xl font-semibold tabular-nums text-ink-900">
-            4,8<span className="text-sm text-ink-500">★</span>
+            {labels.mailRating}<span className="text-sm text-ink-500">★</span>
           </p>
-          <p className="mt-1 text-[10px] text-ink-500">92% απαντήθηκαν</p>
+          <p className="mt-1 text-[10px] text-ink-500">{labels.mailAnswered}</p>
         </div>
         <div className="flex h-12 items-end gap-1" aria-hidden="true">
           {[8, 12, 10, 16, 14, 18, 20].map((h, i) => (
@@ -236,7 +245,17 @@ const PROOF_ICONS = [IconInbox, IconLanguages, IconQr, IconMail];
 
 export async function Features() {
   const t = await getTranslations("landing.features");
+  const tp = await getTranslations("landing.proofs");
   const items = t.raw("items") as FeatureItem[];
+  const proofLabels = {
+    draftLabel: tp("draftLabel"),
+    tones: tp.raw("tones") as string[],
+    qrTitle: tp("qrTitle"),
+    qrHint: tp("qrHint"),
+    mailDay: tp("mailDay"),
+    mailRating: tp("mailRating"),
+    mailAnswered: tp("mailAnswered"),
+  };
   return (
     <section id="features" className="border-t border-line">
       <div className="mx-auto max-w-[1120px] px-6 py-16 md:py-24">
@@ -295,7 +314,7 @@ export async function Features() {
                       >
                         <Icon className="size-5" />
                       </div>
-                      <Proof />
+                      <Proof labels={proofLabels} />
                     </div>
                   </Tilt>
                 </Reveal>

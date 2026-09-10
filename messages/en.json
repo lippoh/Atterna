@@ -17,7 +17,9 @@
       "login": "Log in",
       "cta": "Start free",
       "openMenu": "Menu",
-      "closeMenu": "Close"
+      "closeMenu": "Close",
+      "switchToEnglish": "Switch to English",
+      "switchToGreek": "Αλλαγή σε Ελληνικά"
     },
     "hero": {
       "eyebrow": "FOR GREEK LOCAL BUSINESSES",
@@ -120,7 +122,8 @@
           "analysis": "Positive · English · Warm tone",
           "reply": "Thank you so much, Sarah! The courtyard is our favourite spot too — we would be delighted to welcome you back for the moussaka, and the Sunday roast."
         }
-      ]
+      ],
+      "demoBusiness": "Taverna «Kyma»"
     },
     "features": {
       "title": "Everything your reputation needs, in one calm place",
@@ -329,31 +332,6 @@
             {
               "label": "Contact",
               "href": "mailto:hello@atterna.app"
-            },
-            {
-              "label": "About",
-              "href": "#"
-            },
-            {
-              "label": "Work with us",
-              "href": "#"
-            }
-          ]
-        },
-        {
-          "title": "Legal",
-          "links": [
-            {
-              "label": "Terms",
-              "href": "#"
-            },
-            {
-              "label": "Privacy",
-              "href": "#"
-            },
-            {
-              "label": "GDPR",
-              "href": "#"
             }
           ]
         },
@@ -363,14 +341,23 @@
             {
               "label": "hello@atterna.app",
               "href": "mailto:hello@atterna.app"
-            },
-            {
-              "label": "Athens, Greece",
-              "href": "#"
             }
           ]
         }
       ]
+    },
+    "proofs": {
+      "draftLabel": "AI SUGGESTION",
+      "tones": [
+        "Friendly",
+        "Formal",
+        "Apologetic"
+      ],
+      "qrTitle": "Scan and tell us",
+      "qrHint": "→ Google / you",
+      "mailDay": "Every Monday 09:00",
+      "mailRating": "4.8",
+      "mailAnswered": "92% answered"
     }
   },
   "auth": {
